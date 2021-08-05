@@ -7,6 +7,7 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt 
 from model import AGE_PREDICTION
+from PreProccessing import PreProcessing
 
 def create_batch_input(path,batch_size=1,overlap=0,sampling_rate=512):
     '''
@@ -45,22 +46,47 @@ def main():
 
     model = AGE_PREDICTION()
     model.create_model()
-
+    batch = []
+    label = []
+    BASE_PATH = '/home/ronak/projects/rpp-doesburg/databases/eeg_fha/release_001'
     
-    batch = create_batch_input('../q1.EDF_folder/raw_good_afterPhotic.edf')
+    csv_file_path = BASE_PATH + '/age_ScanID.csv'
+    edf_file_path = BASE_PATH + '/release_001/edf/Burnaby'
+
+    edf_files = os.listdir(edf_file_path)
+    csv_df = pd.read_csv(csv_file_path)
+
+    patients = 100
+    for edf_file in edf_files:
+        if(patients==0): break
+        name, _ = edf_file.split('.')
+        df = csv_df[(csv_df['Hospital']=='Burnaby' and csv_df['ScanID']==name)]
+        age = df['AgeYears'].values[0]
+
+        p = PreProcessing(edf_file_path + '/' + edf_file)
+        p.extract_good()
+        batch.append(p.one_min.get_data())
+        label.append(age)
+        del p
+        patients -= 1
+
+
+
+
+    # batch = create_batch_input('../q1.EDF_folder/raw_good_afterPhotic.edf')
     # batch = data[:,:512][:,:,np.newaxis]
 
     # batch = [data[:,:512]]
-    print(batch.shape)
-    label = []
-    for i in range(batch.shape[0]): label.append(32)
+    # print(batch.shape)
+    # label = []
+    # for i in range(batch.shape[0]): label.append(32)
     # a = []
     # a.append(batch)
     # a = mx.nd.array(a)
-    a = mx.nd.array(batch)
+    batch = mx.nd.array(batch)
+    labels = mx.nd.array(label)
     
-    
-    model.train(100,a,a,mx.nd.array(label))
+    model.train(epochs=100,train_data=batch,test_data=batch,label=labels)
     # print(a)
 
 if __name__ == '__main__':
