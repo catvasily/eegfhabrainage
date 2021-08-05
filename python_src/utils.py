@@ -18,6 +18,7 @@ def print_header(msg):
     print("--- {}".format(msg),"-"*80)
 
 def plot_raw(raw):
+    plt.figure()
     channels = raw.ch_names
     print_header("annotaiton")
     for i in raw.annotations.description:
@@ -32,16 +33,22 @@ def plot_raw(raw):
     # raw.plot_psd(average=True, dB=False)
 
     # print(dir(raw))
-    # data = raw.get_data()
+    data = raw.get_data()
     # data = np.asarray(data)
     # print("data:",data.shape)
     # # # print(raw.pick('C3').get_data().shape)
-    # plt.plot(data[2])
+    plt.plot(data[8])
     # plt.show()
     
+def plot_data(data):
+    plt.figure()
+    plt.plot(data[8])
 
 def main():
-    raw = read_files('q1.EDF_folder/raw_good_afterPhotic.edf')
+    # raw = read_files('q1.EDF_folder/raw_zeros.edf')
+    raw = read_files('q1.EDF')
+    plot_raw(raw)
+    raw = read_files('q1.EDF_folder/raw_good_beforePhotic.edf')
     plot_raw(raw)
     # raw = read_files('q1.EDF')
     # plot_raw(raw)

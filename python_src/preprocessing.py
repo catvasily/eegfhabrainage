@@ -26,6 +26,7 @@ def read_files(filename):
 # cut out 0s
 def cut_zeros(raw):
     annot_bad_seg, flat_chan = annotate_flat(raw, bad_percent=50.0, min_duration=10,picks=None, verbose=None)
+    print(annot_bad_seg)
     raw_zeros = raw.copy()
     raw_zeros.crop(tmax=annot_bad_seg.onset[-1] + annot_bad_seg.duration[-1])
     write_mne_edf(raw_zeros,fname=os.path.join(os.getcwd(), filename + "_folder", 'raw_zeros.edf'),overwrite=True)
