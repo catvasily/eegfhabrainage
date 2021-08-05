@@ -5,6 +5,7 @@ import os
 import os.path as op
 import glob
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt 
 from model import AGE_PREDICTION
 from PreProccessing import PreProcessing
