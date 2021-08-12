@@ -1,6 +1,0 @@
-numpy==1.19.4
-mxnet==1.8.0.post0
-pandas==1.1.4
-mne==0.21.2
-pyEDFlib==0.1.22
-matplotlib==3.3.3

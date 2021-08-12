@@ -49,26 +49,28 @@ def main():
     model.create_model()
     batch = []
     label = []
-    BASE_PATH = '/home/ronak/projects/rpp-doesburg/databases/eeg_fha/release_001'
+    BASE_PATH = '../../../databases/eeg_fha/release_001'
     
     csv_file_path = BASE_PATH + '/age_ScanID.csv'
-    edf_file_path = BASE_PATH + '/release_001/edf/Burnaby'
+    edf_file_path = BASE_PATH + '/edf/Burnaby'
 
     edf_files = os.listdir(edf_file_path)
     csv_df = pd.read_csv(csv_file_path)
 
-    patients = 100
+    patients = 1
     for edf_file in edf_files:
         if(patients==0): break
         name, _ = edf_file.split('.')
-        df = csv_df[(csv_df['Hospital']=='Burnaby' and csv_df['ScanID']==name)]
+        df = csv_df[(csv_df['Hospital']=='Burnaby') & (csv_df['ScanID']==name)]
         age = df['AgeYears'].values[0]
-
+        #try:
         p = PreProcessing(edf_file_path + '/' + edf_file)
         p.extract_good()
         batch.append(p.one_min.get_data())
         label.append(age)
         del p
+        #except:
+         #   pass
         patients -= 1
 
 
