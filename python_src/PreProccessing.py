@@ -162,6 +162,11 @@ class PreProcessing:
                     self.one_min.crop(s,e, include_tmax=True)
                     break
     
+        if(bad_intervals == [] and tmax>=60):
+            s = (tmax - 60)/2
+            e = s + 60
+            self.one_min.crop(s,e,include_tmax=True)
+
         print("One minute segment (start,end) == ","({},{})".format(s,e))          
         print(self.one_min.get_data().shape)
         print(disjoint_bad_intervals)
