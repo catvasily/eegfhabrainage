@@ -193,8 +193,8 @@ for x_file, y_file in zip(x_file_list_test, y_file_list_test):
 train_data, test_data = train_test(x, y)
 
 
-def evaluate_accuracy(data_iterator, net):
-    """Evaluate accuracy of a model for a specific metric.
+def evaluate_error(data_iterator, net):
+    """Evaluate error of a model for a specific metric.
 
     Parameters:
     ----------
@@ -203,16 +203,16 @@ def evaluate_accuracy(data_iterator, net):
     net : mxnet neural network
           Model to be assessed
     metric: mx object, optional
-          The metric with respect to which accuracy is computed
+          The metric with respect to which error is computed
     """
-    acc = mx.metric.MAE()
+    err = mx.metric.MAE()
 
     for i, (data, label) in enumerate(data_iterator):
         data = data.as_in_context(ctx)
         label = label.as_in_context(ctx)
         output = net(data)
-        acc.update(preds=output, labels=label)
-    return acc.get()[1]
+        err.update(preds=output, labels=label)
+    return err.get()[1]
 
 
 def f1():
@@ -629,8 +629,8 @@ def f10():
 
 
 l = []
-tr_acc = []
-te_acc = []
+tr_err = []
+te_err = []
 
 def my_loss(y_pred, y_test):
     return (((y_pred - y_test)**2).sum() + (nd.abs(y_pred - y_test)).sum())/len(y_test)
@@ -673,16 +673,16 @@ for u in [0.01]:
             del label
             l.append(moving_loss)
 
-        val_accuracy = evaluate_accuracy(test_data, net)
-        train_accuracy = evaluate_accuracy(train_data, net)
-        tr_acc.append(train_accuracy)
-        te_acc.append(val_accuracy)
+        val_error = evaluate_error(test_data, net)
+        train_error = evaluate_error(train_data, net)
+        tr_err.append(train_error)
+        te_err.append(val_error)
 
         #end = time()
         #print(f"Time epoch {e+1} : {(end - start)/60}")
 
-        print("Epoch %s. Loss: %s, Train_acc %s, Test_acc %s" % (e+1, moving_loss, train_accuracy, 
-                                                             val_accuracy))
+        print("Epoch %s. Loss: %s, Train_acc %s, Test_acc %s" % (e+1, moving_loss, train_error,
+                                                             val_error))
         print("---------------------------------------------------------------------------------------------------------")
 
     #print(prediction(test_data))
