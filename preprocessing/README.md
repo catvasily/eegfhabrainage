@@ -27,8 +27,10 @@ You need both modules edf_preprocessing.py and individual_func.py. The later con
 from edf_preprocessing import PreProcessing
 
 file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
+path = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/" + file_name
 
-p = PreProcessing(file_name)
+# Initiate the preprocessing object, resample and filter the data
+p = PreProcessing(path)
 
 # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
 p.extract_good(target_length=60, target_slices=5)
