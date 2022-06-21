@@ -44,7 +44,7 @@ df = p.intervals_df
 
 ```
 
-** NOTE **
+**NOTE**
 When extracting to Numpy, saving this dataframe to a csv file will damage your data. 
 It converts Numpy arrays to string and truncate it, leaving few values in the beginning and the end.
     
