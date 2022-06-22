@@ -28,6 +28,7 @@ from edf_preprocessing import PreProcessing
 
 file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
 path = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/" + file_name
+output_path = "your_folder"
 
 # Initiate the preprocessing object, resample and filter the data
 p = PreProcessing(path)
@@ -36,7 +37,7 @@ p = PreProcessing(path)
 p.extract_good(target_length=60, target_slices=5)
 
 # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
-p.save_clean_part(folder='output_folder', filename=file_name)
+p.save_clean_part(folder=output_path, filename=file_name)
 
 # Extract and convert data to Numpy arrays
 p.create_intervals_data()
