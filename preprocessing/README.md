@@ -31,7 +31,7 @@ path = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/B
 output_path = "your_folder"
 
 # Initiate the preprocessing object, resample and filter the data
-p = PreProcessing(path, 200)
+p = PreProcessing(path, frequency=200)
 
 # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
 p.extract_good(target_length=60, target_slices=5)
