@@ -25,8 +25,8 @@ class PreProcessing:
         self.raw = read_edf(filepath)
         self.raw.filter(l_freq=0.5, h_freq=55)
         self.sfreq = dict(self.raw.info)['sfreq']
-        if(self.sfreq != 500):
-            self.raw.resample(500)
+        if(self.sfreq != 200):
+            self.raw.resample(200)
         
         self.clean_intervals = []
         self.intervals_df = pd.DataFrame()
