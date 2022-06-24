@@ -20,13 +20,13 @@ def read_edf(filepath):
 
 class PreProcessing:
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, frequency):
         self.filename = filepath
         self.raw = read_edf(filepath)
         self.raw.filter(l_freq=0.5, h_freq=55)
         self.sfreq = dict(self.raw.info)['sfreq']
-        if(self.sfreq != 200):
-            self.raw.resample(200)
+        if(self.sfreq != frequency):
+            self.raw.resample(frequency)
         
         self.clean_intervals = []
         self.intervals_df = pd.DataFrame()
