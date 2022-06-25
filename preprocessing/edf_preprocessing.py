@@ -20,13 +20,14 @@ def read_edf(filepath):
 
 class PreProcessing:
 
-    def __init__(self, filepath, frequency):
+    def __init__(self, filepath, target_frequency):
         self.filename = filepath
+        self.target_frequency = target_frequency
         self.raw = read_edf(filepath)
         self.raw.filter(l_freq=0.5, h_freq=55)
         self.sfreq = dict(self.raw.info)['sfreq']
-        if(self.sfreq != frequency):
-            self.raw.resample(frequency)
+        if(self.sfreq != self.target_frequency):
+            self.raw.resample(self.target_frequency)
         
         self.clean_intervals = []
         self.intervals_df = pd.DataFrame()
@@ -127,7 +128,7 @@ class PreProcessing:
         #print(bad_intervals)
         
         self.clean_part = self.raw.copy()
-        tmax = len(self.raw)/500
+        tmax = len(self.raw)/self.target_frequency
                 
         # Add 'empty' bad intervals in the begging and in the end for furhter consistency
         self.bad_intervals.insert(0,[0, 60]) # <--- TAKE FIRST MINUTE AS BAD BY DEFAULT
@@ -200,8 +201,8 @@ class PreProcessing:
             
             for i in range(len(self.clean_intervals)):
                    
-                interval_start = self.clean_intervals[i][0] * 500
-                interval_end = self.clean_intervals[i][1] * 500
+                interval_start = self.clean_intervals[i][0] * self.target_frequency
+                interval_end = self.clean_intervals[i][1] * self.target_frequency
                 
                 interval_data = self.clean_part.get_data(start=interval_start, stop=interval_end)
                 interval_data = zscore(interval_data, axis=1)
