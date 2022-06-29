@@ -105,6 +105,7 @@ for i in range(len(edf_names)):
 
 edf_npdata = np.stack(df['data'])
 
+#saving files with suffixes like 'np_data_1', 'np_data_2', etc
 np.save('eeg_slices_1min/np_data_' + str(int(i/chunk_size) + 1), edf_npdata)
 df.to_csv('eeg_slices_1min/scan_ids_' + str(int(i/chunk_size) + 1) + '.csv')
 ```
