@@ -62,7 +62,7 @@ You should also save inital df to csv to keep track of scan IDs for later match 
 
 ## Multiple files pipeline
 
-Here is jsut an example of loop that you can use to slice multiple files. The output of these routine will be multiple NumPy array and csv files: 
+Here is just an example of a loop that you can use to slice multiple files. The output of this routine will be multiple NumPy array and csv files: 
 
 ```python
 import os
