@@ -84,7 +84,7 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
         file_type = FILETYPE_BDFPLUS if has_annotations else FILETYPE_BDF
         dmin, dmax = -8388608, 8388607
     
-    print('saving to {}, filetype {}'.format(fname, file_type))
+    #print('saving to {}, filetype {}'.format(fname, file_type))
     sfreq = mne_raw.info['sfreq']
     date = _stamp_to_dt(mne_raw.info['meas_date'])
     # no conversion necessary, as pyedflib can handle datetime.
