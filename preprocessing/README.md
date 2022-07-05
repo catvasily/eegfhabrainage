@@ -62,4 +62,40 @@ You should also save inital df to csv to keep track of scan IDs for later match 
 
 ## Multiple files pipeline
 
-TBD
+Preprocessing and saving new data to multiple EDF files into target folder
+
+```python
+from edf_preprocessing import slice_edfs
+
+import os
+import pandas as pd
+import numpy as np
+import mne
+import warnings
+warnings.filterwarnings('ignore')
+mne.set_log_level('warning')
+
+source_folder = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby"
+target_folder = "eeg_fragments_10sec"
+
+labels = pd.read_csv('age_ScanID.csv')
+scan_ids = labels['ScanID']
+
+# takes scan ids from the list, look for them in surce folder, and apply the preprocessing if found to 100 files in total
+# filter the data between 1 Hz and 55 Hz, resample to 200 Hz, extract 1 segment of 10 seconds from each EDF file
+slice_edfs(source_scan_ids=scan_ids, source_folder=source_folder, target_folder=target_folder, 
+           target_frequency=200, lfreq=1, hfreq=55, target_length=10, target_segments=1, nfiles=100)
+
+```
+
+## Loading data
+
+```python
+from edf_preprocessing import load_edf_data
+
+folder = 'eeg_fragments_10sec'
+label_file = 'age_ScanID.csv'
+
+# X - np_array of shape (n_samples, 20, length is seconds * frequency), labels - pd.DataFrame with scan_ids and age, same length as X
+X, labels = load_edf_data(folder, label_file)
+```
