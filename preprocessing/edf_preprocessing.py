@@ -10,21 +10,29 @@ import pandas as pd
 from scipy.stats import zscore
 
 def read_edf(filepath):
-    data = mne.io.read_raw_edf(filepath, exclude = ["Trigger Event", 
-    "Patient Event", "ECG1", "ECG2", "AUX1", "AUX4", "AUX5", "AUX6", "AUX7",
-    "AUX8", "AUX3", "PG1", "PG2", "A1", "A2", "EOG1", "EOG2", "EKG1", "EKG2", "AUX2", 
-    "Photic", "phoic", "photic", "aux1"], verbose='warning', preload=True)
-
-    return data
+    data = mne.io.read_raw_edf(filepath, exclude = ['A1', 'A2', 'AUX1', 
+        'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8', 'Cz', 
+        'DC1', 'DC2', 'DC3', 'DC4', 'DIF1', 'DIF2', 'DIF3', 'DIF4', 
+        'ECG1', 'ECG2', 'EKG1', 'EKG2', 'EOG 1', 'EOG 2', 'EOG1', 'EOG2', 
+        'Fp1', 'Fp2', 'Fpz', 'Fz', 'PG1', 'PG2', 'Patient Event', 'Photic', 
+        'Pz', 'Trigger Event', 'X1', 'X2', 'aux1', 'phoic', 'photic'], verbose='warning', preload=True)
+    
+    target_channels = set(["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4", "T5", "T6", "C3", "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"])
+    current_channels = set(data.ch_names)
+    
+    if target_channels == current_channels:
+        return data
+    else:
+        print(filepath, "File doesn't have all needed channels")
 
 
 class PreProcessing:
 
-    def __init__(self, filepath, target_frequency):
+    def __init__(self, filepath, target_frequency, lfreq, hfreq):
         self.filename = filepath
         self.target_frequency = target_frequency
         self.raw = read_edf(filepath)
-        self.raw.filter(l_freq=0.5, h_freq=55)
+        self.raw.filter(l_freq=lfreq, h_freq=hfreq)
         self.sfreq = dict(self.raw.info)['sfreq']
         if(self.sfreq != self.target_frequency):
             self.raw.resample(self.target_frequency)
@@ -119,7 +127,7 @@ class PreProcessing:
         return None
 
 
-    def extract_good(self, target_length, target_slices):
+    def extract_good(self, target_length, target_segments):
         self.bad_intervals = []
         self.bad_intervals.extend(self.flat_intervals())
         self.bad_intervals.extend(self.hyperventilation())
@@ -161,21 +169,21 @@ class PreProcessing:
         else:    
             self.resolution = True
     
-            total_available_slices = (tmp_df[tmp_df['clean_periods'] > 0]['clean_periods'] // target_length).sum()
+            total_available_segments = (tmp_df[tmp_df['clean_periods'] > 0]['clean_periods'] // target_length).sum()
         
-            if target_slices < total_available_slices:
-                n_samples = target_slices
+            if target_segments < total_available_segments:
+                n_samples = target_segments
             else:
-                n_samples = total_available_slices
+                n_samples = total_available_segments
                 
             starts = list(tmp_df[tmp_df['clean_periods'] > 0]['cumulative_end'])
-            n_available_slices = list(tmp_df[tmp_df['clean_periods'] > 0]['clean_periods'] // target_length)
-            #print('n_available_slices', n_available_slices)
+            n_available_segments = list(tmp_df[tmp_df['clean_periods'] > 0]['clean_periods'] // target_length)
+            #print('n_available_segments', n_available_segments)
                 
-            for i in range(len(n_available_slices)):
+            for i in range(len(n_available_segments)):
                 current_start = int(starts[i])
                 #print(i, current_start)
-                for s in range(int(n_available_slices[i])):
+                for s in range(int(n_available_segments[i])):
                     #print(s, current_start)
                     self.clean_intervals.append(
                     (
@@ -218,7 +226,7 @@ class PreProcessing:
         else:
             print('No clean intervals of needed length')
             
-    def save_clean_part(self, folder, filename):
+    def save_edf(self, folder, filename):
         if self.resolution:
             for n in range(len(self.clean_intervals)):
                 interval_start = self.clean_intervals[n][0]
@@ -229,8 +237,78 @@ class PreProcessing:
                 tmp_raw_edf.crop(interval_start, interval_end, include_tmax=True)
                 
                 if n > 0:
-                    write_mne_edf(tmp_raw_edf, fname=folder+'/'+str(n)+'_'+filename, overwrite=True)
+                    scan_id = filename.split('.')[0]
+                    write_mne_edf(tmp_raw_edf, fname=folder+'/'+scan_id + '_' + str(n)+'.edf', overwrite=True)
                 else:
                     write_mne_edf(tmp_raw_edf, fname=folder+'/'+filename, overwrite=True)
         else:
             print('No clean intervals of needed length')
+            
+            
+def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency, target_length, lfreq=1, hfreq=55, target_segments=1, nfiles=None):
+    
+    scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
+    existing_edf_names = os.listdir(source_folder)
+
+    i = 0
+    
+    for file in scan_files:
+
+        if file in existing_edf_names:
+
+            path = source_folder + '/' + file
+
+            try:
+                # Initiate the preprocessing object, resample and filter the data
+                p = PreProcessing(path, target_frequency=target_frequency, lfreq=lfreq, hfreq=hfreq)
+
+                # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
+                p.extract_good(target_length=target_length, target_segments=target_segments)
+
+                # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
+                p.save_edf(folder=target_folder, filename=file)
+            
+                i += 1
+                
+            except:
+                print('Extraction failed')
+            
+            if i % 100 == 0 and i != 0:
+                print(i, 'EDF saved')
+                
+            if i == nfiles:
+                break
+
+            
+def load_edf_data(source_folder, labels_csv_path):
+
+    files = os.listdir(source_folder)
+
+    df = pd.DataFrame()
+
+    for file in files:
+        if file.endswith('.edf'):
+            rawedf = read_edf(source_folder + '/' + file)
+            sfreq = int(dict(rawedf.info)['sfreq'])
+            data = zscore(rawedf.get_data()[:,:-sfreq], axis=1)
+
+            tmp_df = pd.DataFrame()
+
+            tmp_df['scan_id'] = [file.split('.')[0].split('_')[0]]
+            tmp_df['data'] = [data]
+
+            df = pd.concat([df, tmp_df], axis=0, ignore_index=True)
+
+    labels_file = pd.read_csv(labels_csv_path)
+    labels_file = labels_file[['ScanID', 'AgeYears']]
+    labels_file.columns = ['scan_id', 'age']
+
+    df = df.merge(labels_file, on = 'scan_id', suffixes=('',''))
+    
+    X = np.stack(df['data'])
+    labels = df[['scan_id', 'age']]
+    
+    print('X shape:', X.shape)
+    print('y shape:', labels.shape)
+    
+    return X, labels
