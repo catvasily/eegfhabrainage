@@ -34,7 +34,7 @@ output_path = "your_folder"
 p = PreProcessing(path, target_frequency=200, lfreq=1, hfreq=55)
 
 # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
-p.extract_good(target_length=60, target_slices=5)
+p.extract_good(target_length=60, target_segments=5)
 
 # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
 p.save_edf(folder=output_path, filename=file_name)
