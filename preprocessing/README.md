@@ -87,6 +87,8 @@ scan_ids = labels['ScanID']
 
 slice_edfs(source_scan_ids=scan_ids, source_folder=source_folder, target_folder=target_folder, 
            target_frequency=200, lfreq=1, hfreq=55, target_length=10, target_segments=1, nfiles=100)
+           
+# if you don't need files limit - don't specify the parameter "nfiles", default is None
 
 ```
 
