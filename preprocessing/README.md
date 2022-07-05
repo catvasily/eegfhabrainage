@@ -67,9 +67,7 @@ Preprocessing and saving new data to multiple EDF files into target folder
 ```python
 from edf_preprocessing import slice_edfs
 
-import os
 import pandas as pd
-import numpy as np
 import mne
 import warnings
 warnings.filterwarnings('ignore')
