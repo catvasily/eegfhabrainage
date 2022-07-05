@@ -30,14 +30,14 @@ file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
 path = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/" + file_name
 output_path = "your_folder"
 
-# Initiate the preprocessing object, resample to 200 Hz and filter the data between 1 Hz and 55 Hz
+# Initiate the preprocessing object, filter the data between 1 Hz and 55 Hz and resample to 200 Hz.
 p = PreProcessing(path, target_frequency=200, lfreq=1, hfreq=55)
 
 # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
 p.extract_good(target_length=60, target_slices=5)
 
 # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
-p.save_clean_part(folder=output_path, filename=file_name)
+p.save_edf(folder=output_path, filename=file_name)
 
 # Extract and convert data to Numpy arrays
 p.create_intervals_data()
