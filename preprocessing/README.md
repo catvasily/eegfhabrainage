@@ -60,7 +60,7 @@ As the result, you will get numpy array of shape (number_of_slices, 20, lengths_
 You should also save inital df to csv to keep track of scan IDs for later match with target label, like age.
 
 
-## Multiple files pipeline
+## Pipeline for extraction from multiple files
 
 Preprocessing and saving new data to multiple EDF files into target folder
 
