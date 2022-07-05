@@ -30,8 +30,8 @@ file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
 path = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/" + file_name
 output_path = "your_folder"
 
-# Initiate the preprocessing object, resample and filter the data
-p = PreProcessing(path, target_frequency=200)
+# Initiate the preprocessing object, resample to 200 Hz and filter the data between 1 Hz and 55 Hz
+p = PreProcessing(path, target_frequency=200, lfreq=1, hfreq=55)
 
 # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
 p.extract_good(target_length=60, target_slices=5)
@@ -62,50 +62,4 @@ You should also save inital df to csv to keep track of scan IDs for later match 
 
 ## Multiple files pipeline
 
-Here is just an example of a loop that you can use to slice multiple files. The output of this routine will be multiple NumPy array and csv files: 
-
-```python
-import os
-import pandas as pd
-import numpy as np
-from edf_preprocessing import PreProcessing
-
-# list of EDF files names, here you need to specify your folder
-edf_names = os.listdir('/home/[your_folder]/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby')
-
-# number of EDF files which slices will saved in a single .npy file
-chunk_size = 500
-
-df = pd.DataFrame()
-
-# iterating through files
-for i in range(len(edf_names)):   
-    
-    file_name = edf_names[i]
-    path = f"/home/[your_folder]/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/" + file_name
-
-    p = PreProcessing(path, target_frequency=200)
-    try:
-        p.extract_good(target_length=60, target_slices=5)
-        p.create_intervals_data()
-        df = pd.concat([df, p.intervals_df], axis=0, ignore_index=True)
-    except:
-        print('Cleaning failed')
-               
-    if i % 100 == 0:
-        print(i, 'EDF extracted')
-        
-    if i % chunk_size == 0 and i != 0:
-        edf_npdata = np.stack(df['data'])
-        np.save('eeg_slices_1min/np_data_' + str(int(i/chunk_size)), edf_npdata)
-        
-        df.to_csv('eeg_slices_1min/scan_ids_' + str(int(i/chunk_size)) + '.csv')
-        
-        df = pd.DataFrame()
-
-edf_npdata = np.stack(df['data'])
-
-#saving files with suffixes like 'np_data_1', 'np_data_2', etc
-np.save('eeg_slices_1min/np_data_' + str(int(i/chunk_size) + 1), edf_npdata)
-df.to_csv('eeg_slices_1min/scan_ids_' + str(int(i/chunk_size) + 1) + '.csv')
-```
+TBD
