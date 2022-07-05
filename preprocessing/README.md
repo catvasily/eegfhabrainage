@@ -14,7 +14,7 @@ The code is aimed to preprocess clinical EEG recordings and make them a suitable
 
 ## Performed operations
 1) resample each recording's signal to 500 Hz frequency, since some recordings might have different sampling frequencies. 
-2) applied frequency filtering that keeps only signal with frequencies between 0.5 and 55 Hz, to exclude unwanted noise such as electricity grid frequency (60 Hz in Canada) or sudden patients` moves (<1 Hz)
+2) applied frequency filtering that keeps only signal with frequencies between 1 and 55 Hz (by default), to exclude unwanted noise such as electricity grid frequency (60 Hz in Canada) or sudden patients` moves (<1 Hz)
 3) identify and remove intervals of special procedures performed on patients during recordings, such as hyperventilation (deep breathing) and photic stimulation (flashing light). Physicians apply these tests to patients in order to detect brain abnormal activity for epilepsy diagnosis. Since these procedures burst abnormal activity, and weren't performed for all subjects, we exclude them from the analysis. Also the recordings contain intervals with no signal. It is the results of turned off equipment or disconnected electrode. So we also have to avoid these flat intervals with zero signal. Thus traget slices acquired only from clean intervals from each EEG, without flat intervals, hyperventilation and photic stimulation. Slices taken from the beginning, first minute taken as "bad" by default. The algoritm also handles cases when "bad intervals" overlap
 4) **In case of extracting to Numpy arrays** signal values are also ZScore noramilized. Doesn't apply in case of saving output to EDF file(s).
 
