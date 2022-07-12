@@ -290,7 +290,7 @@ def load_edf_data(source_folder, labels_csv_path):
         if file.endswith('.edf'):
             rawedf = read_edf(source_folder + '/' + file)
             sfreq = int(dict(rawedf.info)['sfreq'])
-            data = zscore(rawedf.get_data()[:,:-sfreq], axis=1)
+            data = rawedf.get_data()[:,:-sfreq]
 
             tmp_df = pd.DataFrame()
 
