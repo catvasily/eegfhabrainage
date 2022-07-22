@@ -10,6 +10,18 @@ import pandas as pd
 from scipy.stats import zscore
 
 def read_edf(filepath):
+    '''
+    Read an EDF file with MNE package, creates the Raw EDF object. 
+    Excludes some channels to keep only 20 target ones.
+    Prints warning in case the file doesn't have all 20 
+    neeeded channels, doesn't return object in this case.
+    
+    Args:
+      filepath: str with path to EDF file
+    Returns:
+      Raw EDF object
+    '''
+    # read EDF file while excluding some channels
     data = mne.io.read_raw_edf(filepath, exclude = ['A1', 'A2', 'AUX1', 
         'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8', 'Cz', 
         'DC1', 'DC2', 'DC3', 'DC4', 'DIF1', 'DIF2', 'DIF3', 'DIF4', 
@@ -17,9 +29,11 @@ def read_edf(filepath):
         'Fp1', 'Fp2', 'Fpz', 'Fz', 'PG1', 'PG2', 'Patient Event', 'Photic', 
         'Pz', 'Trigger Event', 'X1', 'X2', 'aux1', 'phoic', 'photic'], verbose='warning', preload=True)
     
+    # the list of target channels to keep
     target_channels = set(["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4", "T5", "T6", "C3", "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"])
     current_channels = set(data.ch_names)
     
+    # checking whether we have all needed channels
     if target_channels == current_channels:
         return data
     else:
@@ -27,8 +41,47 @@ def read_edf(filepath):
 
 
 class PreProcessing:
+    """The class' aim is preprocessing clinical EEG recordings (in EDF format)
+    and make them a suitable input for later analysis and ML applications.
 
+    The class instantiates a preprocessing object which 
+    carries a Raw EDF file through a sequence of operations: 
+    (1) resample each recording's signal to traget frequency
+    (2) keeps only signal with frequencies in selected range
+    (3) identifies timestamps of hyperventilation (HV), photic stimulation (PhS)
+    and flat (zero) signal (together - "bad" intervals)
+    (4) extract EEG segment(s) of needed length from "good" intervals
+    Then the object can save extracted segment(s) into new EDF files 
+    OR return a Pandas DataFrame with data
+
+    Attributes:
+        filename: string with EDF file path
+        target_frequency: interger indicating the final EEG frequency after resampling
+        raw: MNE Raw EDF object
+        sfreq: initial sampling frequency of EEG
+        bad_intervals: list of lists of the form [start, end] with timemstamps in seconds,
+            indicating starts and ends of bad interval (HV, PhS, flat signal)
+        clean_intervals: list of lists of the form [start, end] with timemstamps in seconds,
+            indicating starts and ends of segments to be extracted
+            
+    Methods:
+        flat_intervals: returns list of [start, end] timestamps in seconds of zero signal
+        hyperventilation: returns list of [start, end] timestamps in seconds of HV
+        photic_stimulation: returns list of [start, end] timestamps in seconds of PhS
+        extract_good: calling this method defines clean_intervals; 
+            it doens't manipulate data itsef, just returns the intervals' timestamps
+        create_intervals_data: returns DataFrame with the EEG data based on clean_intervals
+        save_edf: write new EDF files based on clean_intervals timestamps
+    """
+    
     def __init__(self, filepath, target_frequency, lfreq, hfreq):
+        """
+        Args:
+            filepath: str with path to EDF file
+            target_frequency: interger indicating the final EEG frequency after resampling
+            lfreq: lower frequency boundary of the signal to keep
+            hfreq: higher frequency boundary of the signal to keep
+        """
         self.filename = filepath
         self.target_frequency = target_frequency
         self.raw = read_edf(filepath)
@@ -44,9 +97,9 @@ class PreProcessing:
 
     def flat_intervals(self):
         '''Identify beginning and end times of flat signal
-        Output
-        ----------
-        list of floats, contains start and end times
+        
+        Returns:
+            list of floats, contains start and end times
         '''
         annot_bad_seg, flat_chan = annotate_flat(self.raw, bad_percent=50.0, min_duration=10,picks=None, verbose=None)
         intervals = []
@@ -59,7 +112,11 @@ class PreProcessing:
 
 
     def hyperventilation(self):
-        """Identify beginning and end of hyperventilation from EEG data"""
+        """Identify beginning and end of hyperventilation from EEG data
+        
+        Returns:
+            list of floats, contains start and end times
+        """
         
         # labels to look for
         start_labels = ["HV Begin", "Hyperventilation begins", "Begin HV"]
@@ -94,14 +151,9 @@ class PreProcessing:
 
     def photic_stimulation(self):
         """Identify beginning and end times of photic stimulation.
-            
-        Parameters
-        ----------
-        self.raw : RawEDF instance
-        
-        Output
-        ----------
-        list of floats, contains start and end times
+
+        Returns:
+            list of floats, contains start and end times
         """
         
         # store times when stimulation occurs
@@ -128,12 +180,23 @@ class PreProcessing:
 
 
     def extract_good(self, target_length, target_segments):
+        """ The function calls above functions to identify "bad" intervals and
+        updates the attribute clean_intervals with timesptamps to extract
+        
+        Args:
+            target_length: length in seconds of the each 
+                segments to extract from this EEG recording
+            target_segments: number of segments to extract 
+                from this EEG recording
+                
+        """
+        
         self.bad_intervals = []
+        # calling functions to identify different kinds of "bad" intervals
         self.bad_intervals.extend(self.flat_intervals())
         self.bad_intervals.extend(self.hyperventilation())
         self.bad_intervals.extend(self.photic_stimulation())
         self.bad_intervals.sort()
-        #print(bad_intervals)
         
         self.clean_part = self.raw.copy()
         tmax = len(self.raw)/self.target_frequency
@@ -148,7 +211,7 @@ class PreProcessing:
         tmp_df['next_start'] = tmp_df['start'].shift(periods=-1)
         tmp_df.iloc[-1,-1] = tmax # <= Assign end of edf file as the end of last clean interval
         
-        # Handle cases when earlier bad interval overlap next intervals
+        # Handle cases when two bad intervals overlap
         prev_value = 0
         new_ends = []
         for value in tmp_df['end']:
