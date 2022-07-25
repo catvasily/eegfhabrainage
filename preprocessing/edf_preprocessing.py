@@ -180,7 +180,7 @@ class PreProcessing:
 
 
     def extract_good(self, target_length, target_segments):
-        """ The function calls above functions to identify "bad" intervals and
+        """ The function calls the functions above to identify "bad" intervals and
         updates the attribute clean_intervals with timesptamps to extract
         
         Args:
@@ -211,7 +211,7 @@ class PreProcessing:
         tmp_df['next_start'] = tmp_df['start'].shift(periods=-1)
         tmp_df.iloc[-1,-1] = tmax # <= Assign end of edf file as the end of last clean interval
         
-        # Handle cases when two bad intervals overlap
+        # Handle cases when bad intervals overlaps
         prev_value = 0
         new_ends = []
         for value in tmp_df['end']:
@@ -230,10 +230,14 @@ class PreProcessing:
             self.resolution = False
             pass
         else:    
+            # if there is at least one clean segment of needed length, it updates clean_intervals list
             self.resolution = True
-    
+            
+            # check how many availabe segments of needed length the whole recording has
             total_available_segments = (tmp_df[tmp_df['clean_periods'] > 0]['clean_periods'] // target_length).sum()
-        
+            
+            # if we need 5 segments, and the recording has more, it extracts 5; 
+            # if the recording has less than 5, let's say only 3 segments, it extracts 3
             if target_segments < total_available_segments:
                 n_samples = target_segments
             else:
@@ -241,13 +245,12 @@ class PreProcessing:
                 
             starts = list(tmp_df[tmp_df['clean_periods'] > 0]['cumulative_end'])
             n_available_segments = list(tmp_df[tmp_df['clean_periods'] > 0]['clean_periods'] // target_length)
-            #print('n_available_segments', n_available_segments)
-                
+            
+            # updates clean_intervals attribute with timestamps
+            # starting from the first available intervals
             for i in range(len(n_available_segments)):
                 current_start = int(starts[i])
-                #print(i, current_start)
                 for s in range(int(n_available_segments[i])):
-                    #print(s, current_start)
                     self.clean_intervals.append(
                     (
                         int(current_start), 
@@ -262,6 +265,16 @@ class PreProcessing:
                     break
 
     def create_intervals_data(self):
+        """ The function updates intervals_df - a DataFrame 
+        with the EEG data based on timestamps from clean_intervals.
+        
+        Args: (self)
+        
+        Returns:
+            
+            
+        """
+        
         if self.resolution:
 
             ids = np.repeat(self.filename.split('/')[-1].split('.')[0], len(self.clean_intervals))
