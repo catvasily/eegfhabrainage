@@ -265,23 +265,34 @@ class PreProcessing:
                     break
 
     def create_intervals_data(self):
-        """ The function updates intervals_df - a DataFrame 
+        """ The function updates and returns intervals_df - a DataFrame 
         with the EEG data based on timestamps from clean_intervals.
+        Print warning if no clean segments available.
         
-        Args: (self)
-        
+        The DataFrame has the following columns:
+        - scan_id - ID of the EEG recording
+        - interval_start - timestamp in datapoints of the segment start
+        - interval_length - length in datapoints of the segment
+        - data - numpy array of the EEG amplitude data, with shape
+          (20, length in seconds * sampling frequncy)
+          
         Returns:
-            
-            
+            self.interval_df - DataFrame with extracted segments
+          
+        NOTE: saving this dataframe into CSV file will truncate the content
+        of 'data' column and convert it to string, so the data will be lost.
+        Recommend to save data into *.npy file separately and keep the *.csv
+        for later matching with labels.
         """
         
+        # check if there are available clean segments
         if self.resolution:
-
+            
+            # extracting scan ID from EDF file path, and prepare DF structure
             ids = np.repeat(self.filename.split('/')[-1].split('.')[0], len(self.clean_intervals))
             intervals_data = []
             interval_starts = []
             interval_lengths = []
-            channels = []
             
             for i in range(len(self.clean_intervals)):
                    
@@ -289,6 +300,7 @@ class PreProcessing:
                 interval_end = self.clean_intervals[i][1] * self.target_frequency
                 
                 interval_data = self.clean_part.get_data(start=interval_start, stop=interval_end)
+                # apply zscore normalization to the amplitude values
                 interval_data = zscore(interval_data, axis=1)
                 
                 intervals_data.append(interval_data)
@@ -299,10 +311,22 @@ class PreProcessing:
             self.intervals_df['interval_start'] = interval_starts
             self.intervals_df['interval_length'] = interval_lengths
             self.intervals_df['data'] = intervals_data
+            
+            return self.intervals_df
         else:
             print('No clean intervals of needed length')
             
     def save_edf(self, folder, filename):
+        """ The function write out new EDF file(s) based on clean_intervals timestamps.
+        It save each segment into separate EDF file, with suffixes "[scan_id]_1",
+        "[scan_id]_2", etc. 
+        
+        Args:
+            folder - where to save new EDF files
+            filename - main name for output files (suffix will be added for more > 1 files)
+        """
+        
+        # check if there are available clean segments
         if self.resolution:
             for n in range(len(self.clean_intervals)):
                 interval_start = self.clean_intervals[n][0]
@@ -321,8 +345,28 @@ class PreProcessing:
             print('No clean intervals of needed length')
             
             
-def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency, target_length, lfreq=1, hfreq=55, target_segments=1, nfiles=None):
+def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency, 
+               target_length, lfreq=1, hfreq=55, target_segments=1, nfiles=None):
+    """ The function run a pipeline for preprocessing and extracting 
+    clean segment(s) of needed length from multiple EDF files.
+    It takes in list of EDF files names and prprocessing parameters, 
+    look up for the files in source folder, and perform preprocessing 
+    and extraction, if found.
     
+    Args:
+        source_scan_ids: list of EDF files to preprocess and extract segments from 
+        source_folder: folder path with EDF files 
+        target_folder: folder where to save extractd segments in EDF formats
+        target_frequency: interger indicating the final EEG frequency after resampling
+        target_length: length of each of the extracted segments (in seconds)
+        lfreq: lower frequency boundary of the signal to keep in Hz (default=1)
+        hfreq: higher frequency boundary of the signal to keep in Hz (default=55)
+        target_segments: number of segments to extract from each EDF file;
+            will extract less if less available (default=1)
+        nfiles: limit number of files to preprocess and extract segments (default=None, no limit)
+    
+    """
+   
     scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
     existing_edf_names = os.listdir(source_folder)
 
@@ -357,7 +401,23 @@ def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency, 
 
             
 def load_edf_data(source_folder, labels_csv_path):
-
+    """ The function load multiple EDF files and returns data 
+    with lables suitable for analysis and machine learning models.
+    
+    Args:
+        source_folder: folder with EDF files
+        labels_csv_path: CSV dile containing scan_ids and label (age)
+        
+    Returns:
+        X: NumPy array of the EEG aplitudes from EDF files, having
+           shape of ([n_samples], 20, [lengs in seconds] * [sampling frequency])
+        labels: NumPy array with age labels corresponding to each sample from X
+        
+    NOTE: this function fitted to a very specific CSV file 'age_ScanID.csv', 
+    so it's looking for columns 'ScanID' for scan ids, 'AgeYears' for age labels. 
+    So you might want to adjust column names in your file or change this function.
+    """
+    
     files = os.listdir(source_folder)
 
     df = pd.DataFrame()
