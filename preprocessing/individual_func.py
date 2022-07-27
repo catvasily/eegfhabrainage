@@ -99,7 +99,7 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
                                 stop  = last_sample)
     
     # convert to microvolts to scale up precision
-    channels *= 1e6
+    # channels *= 1e6
 
     # set conversion parameters
     n_channels = len(channels)
