@@ -90,7 +90,7 @@ The tutorial is based on:
      
    * When you have the allocation, you should see something like this:
 
-     ![terminal_notebook](./images/terminal_notebook.png)
+     ![terminal_notebook](./notebook_alloc.png)
 
 7. **SSH tunnel from your local computer into the Jupyter Notebook**
 
