@@ -346,7 +346,7 @@ class PreProcessing:
             
             
 def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency, 
-               target_length, lfreq=1, hfreq=55, target_segments=1, nfiles=None):
+               target_length, lfreq=0.5, hfreq=55, target_segments=1, nfiles=None):
     """ The function run a pipeline for preprocessing and extracting 
     clean segment(s) of needed length from multiple EDF files.
     It takes in list of EDF files names and prprocessing parameters, 
@@ -362,7 +362,7 @@ def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency,
         lfreq: lower frequency boundary of the signal to keep in Hz (default=1)
         hfreq: higher frequency boundary of the signal to keep in Hz (default=55)
         target_segments: number of segments to extract from each EDF file;
-            will extract less if less available (default=1)
+            will extract less if less available (default=0.5)
         nfiles: limit number of files to preprocess and extract segments (default=None, no limit)
     
     """
