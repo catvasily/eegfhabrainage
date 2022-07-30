@@ -202,7 +202,7 @@ class PreProcessing:
         tmax = len(self.raw)/self.target_frequency
                 
         # Add 'empty' bad intervals in the begging and in the end for furhter consistency
-        self.bad_intervals.insert(0,[0, 60]) # <--- TAKE FIRST MINUTE AS BAD BY DEFAULT
+        self.bad_intervals.insert(0,[0, 420]) # <--- TAKE FIRST SEVEN MINUTES AS BAD BY DEFAULT
         self.bad_intervals.append([tmax, tmax])
         # Construct temporary dataframe to find clean interval in EDF
         tmp_df = pd.DataFrame(self.bad_intervals, columns=['start', 'end'])
