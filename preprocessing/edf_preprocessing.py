@@ -101,7 +101,7 @@ class PreProcessing:
         Returns:
             list of floats, contains start and end times
         '''
-        annot_bad_seg, flat_chan = annotate_flat(self.raw, bad_percent=50.0, min_duration=10,picks=None, verbose=None)
+        annot_bad_seg, flat_chan = annotate_amplitude(self.raw, bad_percent=50.0, min_duration=10, flat=1e-06, picks=None, verbose=None)
         intervals = []
         for i in annot_bad_seg:
             start = list(i.items())[0][1]
