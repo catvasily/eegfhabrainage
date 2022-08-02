@@ -3,7 +3,7 @@ import os
 import os.path as op
 import glob
 from individual_func import write_mne_edf
-from mne.preprocessing import annotate_flat
+from mne.preprocessing import annotate_amplitude
 import matplotlib.pyplot as plt 
 import numpy as np
 import pandas as pd
