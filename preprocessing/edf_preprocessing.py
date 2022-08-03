@@ -334,7 +334,7 @@ class PreProcessing:
                 
                 tmp_raw_edf = self.clean_part.copy()
                 
-                tmp_raw_edf.crop(interval_start, interval_end, include_tmax=True)
+                tmp_raw_edf.crop(interval_start, interval_end, include_tmax=False)
                 
                 if n > 0:
                     scan_id = filename.split('.')[0]
@@ -425,8 +425,7 @@ def load_edf_data(source_folder, labels_csv_path):
     for file in files:
         if file.endswith('.edf'):
             rawedf = read_edf(source_folder + '/' + file)
-            sfreq = int(dict(rawedf.info)['sfreq'])
-            data = rawedf.get_data()[:,:-sfreq]
+            data = rawedf.get_data()
 
             tmp_df = pd.DataFrame()
 
