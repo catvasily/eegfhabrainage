@@ -426,6 +426,7 @@ def load_edf_data(source_folder, labels_csv_path):
         if file.endswith('.edf'):
             rawedf = read_edf(source_folder + '/' + file)
             data = rawedf.get_data()
+            data = zscore(data, axis=1)
 
             tmp_df = pd.DataFrame()
 
