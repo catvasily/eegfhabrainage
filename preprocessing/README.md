@@ -14,7 +14,7 @@ The code is aimed to preprocess clinical EEG recordings and make them a suitable
 
 ## Performed operations
 1) resample each recording's signal to 500 Hz frequency, since some recordings might have different sampling frequencies. 
-2) applied frequency filtering that keeps only signal with frequencies between 1 and 55 Hz (by default), to exclude unwanted noise such as electricity grid frequency (60 Hz in Canada) or sudden patients` moves (<1 Hz)
+2) applied frequency filtering that keeps only signal with frequencies between 0.5 and 55 Hz (by default), to exclude unwanted noise such as electricity grid frequency (60 Hz in Canada) or sudden patients` moves (<1 Hz)
 3) identify and remove intervals of special procedures performed on patients during recordings, such as hyperventilation (deep breathing) and photic stimulation (flashing light). Physicians apply these tests to patients in order to detect brain abnormal activity for epilepsy diagnosis. Since these procedures burst abnormal activity, and weren't performed for all subjects, we exclude them from the analysis. Also the recordings contain intervals with no signal. It is the results of turned off equipment or disconnected electrode. So we also have to avoid these flat intervals with zero signal. Thus traget slices acquired only from clean intervals from each EEG, without flat intervals, hyperventilation and photic stimulation. Slices taken from the beginning, first minute taken as "bad" by default. The algoritm also handles cases when "bad intervals" overlap
 4) **In case of extracting to Numpy arrays** signal values are also ZScore noramilized. Doesn't apply in case of saving output to EDF file(s).
 
@@ -30,8 +30,8 @@ file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
 path = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/" + file_name
 output_path = "your_folder"
 
-# Initiate the preprocessing object, filter the data between 1 Hz and 55 Hz and resample to 200 Hz.
-p = PreProcessing(path, target_frequency=200, lfreq=1, hfreq=55)
+# Initiate the preprocessing object, filter the data between 0.5 Hz and 55 Hz and resample to 200 Hz.
+p = PreProcessing(path, target_frequency=200, lfreq=0.5, hfreq=55)
 
 # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
 p.extract_good(target_length=60, target_segments=5)
@@ -77,14 +77,14 @@ source_folder = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_
 target_folder = "eeg_fragments_10sec"
 
 labels_file = pd.read_csv('age_ScanID.csv')
-scan_ids = labels_file[~(labels_file['AgeYears'].isnull())]['ScanID'] # <- drop records without age in years
+scan_ids = labels_file[~(labels_file['AgeYears'].isnull())]['ScanID'] # <- drop records without age
 
 # takes scan ids from the list, look for them in source folder, and apply the preprocessing to 100 files in total
-# filter the data between 1 Hz and 55 Hz, resample to 200 Hz, extract 1 segment of 10 seconds from each EDF file
+# filter the data between 0.5 Hz and 55 Hz, resample to 200 Hz, extract 1 segment of 10 seconds from each EDF file
 # saves new segments as EDF into target folder
 
 slice_edfs(source_scan_ids=scan_ids, source_folder=source_folder, target_folder=target_folder, 
-           target_frequency=200, lfreq=1, hfreq=55, target_length=10, target_segments=1, nfiles=100)
+           target_frequency=200, lfreq=0.5, hfreq=55, target_length=10, target_segments=1, nfiles=100)
            
 # if you don't need files limit - don't specify the parameter "nfiles", default is None
 
