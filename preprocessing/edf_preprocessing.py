@@ -442,7 +442,6 @@ def load_edf_data(source_folder, labels_csv_path):
     
     X = np.stack(df['data'])
     X = zscore(X, axis=2)
-    X = np.nan_to_num(X)
     labels = df[['scan_id', 'age']]
     
     print('X shape:', X.shape)
