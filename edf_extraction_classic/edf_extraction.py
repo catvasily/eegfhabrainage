@@ -22,20 +22,18 @@ def read_edf(filepath):
     data = mne.io.read_raw_edf(filepath, exclude = ['A1', 'A2', 'AUX1', 
         'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8', 'Cz', 
         'DC1', 'DC2', 'DC3', 'DC4', 'DIF1', 'DIF2', 'DIF3', 'DIF4', 
-        'EKG1', 'EKG2', 'EOG 1', 'EOG 2', 'Fp1', 'Fp2', 'Fpz', 
-        'Fz', 'PG1', 'PG2', 'Patient Event', 'Photic', 
+        'Fp1', 'Fp2', 'Fpz', 'Fz', 'PG1', 'PG2', 'Patient Event', 'Photic', 
         'Pz', 'Trigger Event', 'X1', 'X2', 'aux1', 'phoic', 'photic'], verbose='warning', preload=True)
     
-    # the list of target channels to keep
-    target_channels = set(["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4", "T5", "T6", 
-                           "C3", "C4", "CZ", "P3", "P4", "PZ", "O1", "O2", "ECG1", "ECG2", "EOG1", "EOG2"])
-    current_channels = set(data.ch_names)
-    
-    # checking whether we have all needed channels
-    if target_channels == current_channels:
+    if 'EKG1' in data.ch_names and 'EOG1' in data.ch_names:
+        data.set_channel_types({'EOG1': 'eog', 'EOG2': 'eog', 'EKG1': 'ecg', 'EKG2': 'ecg'})
+        return data
+    elif 'ECG1' in data.ch_names and 'EOG1' in data.ch_names:
+        data.set_channel_types({'EOG1': 'eog', 'EOG2': 'eog', 'ECG1': 'ecg', 'ECG2': 'ecg'})
         return data
     else:
-        print(filepath, "File doesn't have all needed channels")
+        print("Don't have needed channels")
+
 
 
 class Extractor:
@@ -288,13 +286,12 @@ class Extractor:
             print('No clean intervals of needed length')
             
             
-def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency, 
+def slice_edfs(source_folder, target_folder, target_frequency, 
                target_length, target_segments=1, nfiles=None):
-    """ The function run a pipeline for preprocessing and extracting 
+    """ The function run a pipeline for extracting 
     clean segment(s) of needed length from multiple EDF files.
-    It takes in list of EDF files names and prprocessing parameters, 
-    look up for the files in source folder, and perform preprocessing 
-    and extraction, if found.
+    It takes preprocessing parameters, look up for the files 
+    in source folder, and perform preprocessing and extraction, if found.
     
     Args:
         source_scan_ids: list of EDF files to preprocess and extract segments from 
@@ -308,34 +305,31 @@ def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency,
     
     """
    
-    scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
     existing_edf_names = os.listdir(source_folder)
 
     i = 0
-    
-    for file in scan_files:
 
-        if file in existing_edf_names:
+    for file in existing_edf_names:
 
-            path = source_folder + '/' + file
+        path = source_folder + '/' + file
 
-            try:
-                # Initiate the preprocessing object, resample and filter the data
-                p = PreProcessing(path, target_frequency=target_frequency)
+        try:
+            # Initiate the preprocessing object, resample and filter the data
+            e = Extractor(path, target_frequency=target_frequency)
 
-                # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
-                p.extract_good(target_length=target_length, target_segments=target_segments)
+            # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
+            e.extract_good(target_length=target_length, target_segments=target_segments)
 
-                # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
-                p.save_edf(folder=target_folder, filename=file)
-            
-                i += 1
-                
-            except:
-                print('Extraction failed')
-            
-            if i % 100 == 0 and i != 0:
-                print(i, 'EDF saved')
-                
-            if i == nfiles:
-                break
+            # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
+            e.save_edf(folder=target_folder, filename=file)
+
+            i += 1
+
+        except:
+            print('Extraction failed')
+
+        if i % 100 == 0 and i != 0:
+            print(i, 'EDF saved')
+
+        if i == nfiles:
+            break
