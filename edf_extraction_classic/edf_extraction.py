@@ -288,13 +288,11 @@ class Extractor:
             
 def slice_edfs(source_folder, target_folder, target_frequency, 
                target_length, target_segments=1, nfiles=None):
-    """ The function run a pipeline for extracting 
-    clean segment(s) of needed length from multiple EDF files.
-    It takes preprocessing parameters, look up for the files 
+    """ The function run a pipeline for extracting clean segment(s) of needed length 
+    from multiple EDF files. It takes preprocessing parameters, look up for the files 
     in source folder, and perform preprocessing and extraction, if found.
     
     Args:
-        source_scan_ids: list of EDF files to preprocess and extract segments from 
         source_folder: folder path with EDF files 
         target_folder: folder where to save extractd segments in EDF formats
         target_frequency: interger indicating the final EEG frequency after resampling
