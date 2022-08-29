@@ -113,41 +113,37 @@ class PreProcessing:
 
     def hyperventilation(self):
         """Identify beginning and end of hyperventilation from EEG data
-        
+
         Returns:
             list of floats, contains start and end times
         """
-        
-        # labels to look for
-        start_labels = ["HV Begin", "Hyperventilation begins", "Begin HV"]
-        end_labels = ["HV End", "End HV", "end HV here as some fragments noted"]
-        
-        # parameters to check if hyperventilation is present
-        # check for existence of start and end
-        s = 0
-        e = 0
-        
-        # identify start and end times of hyperventilation
+
+        start = np.nan
+        end = np.nan
+
         for position, item in enumerate(self.raw.annotations.description):
-            if item in start_labels:
-                start = self.raw.annotations.onset[position]
-                s += 1
-            if item in end_labels:
-                end = self.raw.annotations.onset[position] + self.raw.annotations.duration[position]
-                e += 1
-        
+            if item in ["HV 1Min", "HV 1 Min"]:
+                start = self.raw.annotations.onset[position] - 90
+            if item in ["Post HV 30 Sec", "Post HV 60 Sec", "Post HV 90 Sec"]:
+                end = self.raw.annotations.onset[position] + (90 - int(item.split(' ')[2]))
+
+        if np.isnan(start):
+            for position, item in enumerate(self.raw.annotations.description):
+                if item in ["HV Begin", "Begin HV"]:
+                    start = self.raw.annotations.onset[position] - 30
+
+        if np.isnan(end):
+            for position, item in enumerate(self.raw.annotations.description):
+                if item in ["HV End", "End HV"]:
+                    end = self.raw.annotations.onset[position] + 90
+
         # when hyperventilation is present
         # eliminate the corresponding segment
-        if s == 1 and e == 1:
+        if start != np.nan and end != np.nan:
             return [[start, end]]
         else:
             return []
         
-        if s ==2 or e ==2:
-            return "Possibly bad file; manual check needed."
-        
-        # null value when no hyperventilation is present
-        return None
 
     def photic_stimulation(self):
         """Identify beginning and end times of photic stimulation.
