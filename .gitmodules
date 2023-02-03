@@ -1,0 +1,3 @@
+[submodule "EEG_Preprocessing"]
+	path = EEG_Preprocessing
+	url = https://github.com/srirupa19/EEG_Preprocessing.git
