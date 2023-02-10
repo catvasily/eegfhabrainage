@@ -1,3 +1,18 @@
+# Logs, etc
+eegLog.txt
+
+# Virtual env and other folders
+mne/
+
+*.png
+*.ds
+*.dat
+*.fif
+*.mgz
+
+# swap files
+*.swp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
