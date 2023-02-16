@@ -1,7 +1,8 @@
 # Logs, etc
 eegLog.txt
 
-# Virtual env and other folders
+# Virtual env and/or symbolic link to it other folders
+mne
 mne/
 
 *.png
