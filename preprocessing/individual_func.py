@@ -33,6 +33,8 @@ from datetime import datetime, timezone, timedelta
 import mne
 import os
 
+import warnings
+
 def _stamp_to_dt(utc_stamp):
     """Convert timestamp to datetime object in Windows-friendly way."""
     if 'datetime' in str(type(utc_stamp)): return utc_stamp
@@ -103,54 +105,63 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
 
     # set conversion parameters
     n_channels = len(channels)
-    
-    # create channel from this   
-    try:
-        f = pyedflib.EdfWriter(fname,
-                               n_channels=n_channels, 
-                               file_type=file_type)
+
+    # Dismiss warning regarding truncating trailing decimal digits when physical_min,
+    # 'physical_max' are converted to a string longer than 8 characters. This happens
+    # when those are found as channels.min(), channels.max() - see 'except:' processing
+    # below
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', message = 'Physical min')	# Warning from edfwriter.py`
+        warnings.filterwarnings('ignore', message = 'Physical max')	# Warning from edfwriter.py`
         
-        channel_info = []
-        
-        ch_idx = range(n_channels) if picks is None else picks
-        keys = list(mne_raw._orig_units.keys())
-        for i in ch_idx:
-            try:
-                ch_dict = {'label': mne_raw.ch_names[i], 
-                           'dimension': mne_raw._orig_units[keys[i]], 
-                           'sample_rate': mne_raw._raw_extras[0]['n_samps'][i], 
-                           'physical_min': mne_raw._raw_extras[0]['physical_min'][i], 
-                           'physical_max': mne_raw._raw_extras[0]['physical_max'][i], 
-                           'digital_min':  mne_raw._raw_extras[0]['digital_min'][i], 
-                           'digital_max':  mne_raw._raw_extras[0]['digital_max'][i], 
-                           'transducer': '', 
-                           'prefilter': ''}
-            except:
-                ch_dict = {'label': mne_raw.ch_names[i], 
-                           'dimension': mne_raw._orig_units[keys[i]], 
-                           'sample_rate': sfreq, 
-                           'physical_min': channels.min(), 
-                           'physical_max': channels.max(), 
-                           'digital_min':  dmin, 
-                           'digital_max':  dmax, 
-                           'transducer': '', 
-                           'prefilter': ''}
-        
-            channel_info.append(ch_dict)
-        f.setPatientCode(mne_raw._raw_extras[0]['subject_info']['id'])
-        #f.setPatientName(mne_raw._raw_extras[0]['subject_info']['name'])
-        f.setTechnician('mne-gist-save-edf-skjerns')
-        f.setSignalHeaders(channel_info)
-        f.setStartdatetime(date)
-        f.writeSamples(channels)
-        for annotation in mne_raw.annotations:
-            onset = annotation['onset']
-            duration = annotation['duration']
-            description = annotation['description']
-            f.writeAnnotation(onset, duration, description)
-        
-    except Exception as e:
-        raise e
-    finally:
-        f.close()    
+        # create channel from this   
+        try:
+            f = pyedflib.EdfWriter(fname,
+                                   n_channels=n_channels, 
+                                   file_type=file_type)
+            
+            channel_info = []
+            
+            ch_idx = range(n_channels) if picks is None else picks
+            keys = list(mne_raw._orig_units.keys())
+            for i in ch_idx:
+                try:
+                    ch_dict = {'label': mne_raw.ch_names[i], 
+                               'dimension': mne_raw._orig_units[keys[i]], 
+                               'sample_rate': mne_raw._raw_extras[0]['n_samps'][i], 
+                               'physical_min': mne_raw._raw_extras[0]['physical_min'][i], 
+                               'physical_max': mne_raw._raw_extras[0]['physical_max'][i], 
+                               'digital_min':  mne_raw._raw_extras[0]['digital_min'][i], 
+                               'digital_max':  mne_raw._raw_extras[0]['digital_max'][i], 
+                               'transducer': '', 
+                               'prefilter': ''}
+                except:
+                    ch_dict = {'label': mne_raw.ch_names[i], 
+                               'dimension': mne_raw._orig_units[keys[i]], 
+                               'sample_rate': sfreq, 
+                               'physical_min': channels.min(), 
+                               'physical_max': channels.max(), 
+                               'digital_min':  dmin, 
+                               'digital_max':  dmax, 
+                               'transducer': '', 
+                               'prefilter': ''}
+            
+                channel_info.append(ch_dict)
+            f.setPatientCode(mne_raw._raw_extras[0]['subject_info']['id'])
+            #f.setPatientName(mne_raw._raw_extras[0]['subject_info']['name'])
+            f.setTechnician('mne-gist-save-edf-skjerns')
+            f.setSignalHeaders(channel_info)
+            f.setStartdatetime(date)
+            f.writeSamples(channels)
+            for annotation in mne_raw.annotations:
+                onset = annotation['onset']
+                duration = annotation['duration']
+                description = annotation['description']
+                f.writeAnnotation(onset, duration, description)
+            
+        except Exception as e:
+            raise e
+        finally:
+            f.close()    
+
     return True
