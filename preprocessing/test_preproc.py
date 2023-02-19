@@ -4,6 +4,10 @@
 from edf_preprocessing import PreProcessing
 
 file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
+#file_name = "81be60fc-ed17-4f91-a265-c8a9f1770517.edf"
+#file_name = "fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2.edf"
+#file_name = "ffff1021-f5ba-49a9-a588-1c4778fb38d3.edf"
+
 path = "/data/eegfhabrainage/" + file_name
 output_path = "/data/eegfhabrainage/results"
 

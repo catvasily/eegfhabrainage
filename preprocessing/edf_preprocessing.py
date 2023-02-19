@@ -139,9 +139,19 @@ class PreProcessing:
 
         # when hyperventilation is present
         # eliminate the corresponding segment
-        if start != np.nan and end != np.nan:
+	# AM: was:
+        #	if start != np.nan and end != np.nan:
+	# This is wrong, because np.nan != np.nan returns True. Thus when both
+	# start and end are NaNs the returned interval is [NaN, NaN] instead of
+	# empty []. The correct test is 
+        if (not np.isnan(start)) and (not np.isnan(end)):
             return [[start, end]]
         else:
+            # AM: ?? This will return [] if any of (start, end) is NaN. This is
+            # only ok when both starting and ending annotations are present. Is
+            # it always the case? Added a check here:
+            assert np.isnan(start) and np.isnan(end), \
+                'Only one end of a hyperventilation interval is found'	# Assert when only one of them is NaN
             return []
         
 
@@ -192,22 +202,27 @@ class PreProcessing:
         self.bad_intervals.extend(self.flat_intervals())
         self.bad_intervals.extend(self.hyperventilation())
         self.bad_intervals.extend(self.photic_stimulation())
-        self.bad_intervals.sort()
+        self.bad_intervals.sort()	# This sorts intervals in place so that they start in ascending order
+					# If the starts match, then the ends are in ascending order
         
         self.clean_part = self.raw.copy()
         tmax = len(self.raw)/self.target_frequency
                 
-        # Add 'empty' bad intervals in the begging and in the end for furhter consistency
+        # Add 'empty' bad intervals in the beginning and in the end for furhter consistency
         self.bad_intervals.insert(0,[0, 420]) # <--- TAKE FIRST SEVEN MINUTES AS BAD BY DEFAULT
         self.bad_intervals.append([tmax, tmax])
         # Construct temporary dataframe to find clean interval in EDF
         tmp_df = pd.DataFrame(self.bad_intervals, columns=['start', 'end'])
         
         # Define end of the clean interval as a start of next bad interval
-        tmp_df['next_start'] = tmp_df['start'].shift(periods=-1)
+        tmp_df['next_start'] = tmp_df['start'].shift(periods=-1)	# Shift series 'start' one step back
+	# As there always is a bad interval at the start, the first value in the 'next_start' is the end
+	# of the 1st *good* interval, and so on. Note that this operation adds NaN at the end of the column
+
         tmp_df.iloc[-1,-1] = tmax # <= Assign end of edf file as the end of last clean interval
+				  # This replaces the trailing NaN in the 'next_start'
         
-        # Handle cases when bad intervals overlaps
+        # Handle cases when bad intervals overlap
         prev_value = 0
         new_ends = []
         for value in tmp_df['end']:
@@ -217,14 +232,18 @@ class PreProcessing:
                 new_ends.append(value)
                 prev_value = value
         tmp_df['cumulative_end'] = new_ends
+	# Now the bad intervals defined as [start, cumulative_end] may have different starts
+	# but always the same ends
         
         # Calculate lengths of clean intervals
         tmp_df['clean_periods'] = tmp_df['next_start'] - tmp_df['cumulative_end']
+	# Note that when there are overlapping intervals there will be negative values
+	# in the 'clean_periods' column
         
         # Check whether there is at least 1 clean interval with needed target length
         if tmp_df[tmp_df['clean_periods'] >= target_length].shape[0] == 0:
             self.resolution = False
-            pass
+            pass	# AM: ?? does not seem that one needs 'pass' here
         else:    
             # if there is at least one clean segment of needed length, it updates clean_intervals list
             self.resolution = True
