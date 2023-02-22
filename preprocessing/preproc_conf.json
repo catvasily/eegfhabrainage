@@ -1,0 +1,27 @@
+{
+	"target_channels":  ["FP1", "FPZ",   "FP2",  "F3",   "F4",   "F7",     "F8",   "FZ",   "T3",   "T4",
+			     "T5",  "T6",    "C3",   "C4",   "CZ",   "P3",     "P4",   "PZ",   "O1",   "O2"],
+
+	"exclude_channels": ["A1",   "A2",   "AUX1", "AUX2", "AUX3", "AUX4",   "AUX5", "AUX6", "AUX7", "AUX8",
+			     "Cz",   "DC1",  "DC2",  "DC3",  "DC4",  "DIF1",   "DIF2", "DIF3", "DIF4", "ECG1",
+			     "ECG2", "EKG1", "EKG2", "EOG 1","EOG 2","EOG1",   "EOG2", "Fp1",  "Fp2",  "Fpz", 
+			     "Fz",   "PG1",  "PG2",  "Patient Event", "Photic", "Pz", "Trigger Event", "X1", "X2", "aux1",
+			     "phoic", "photic"],
+
+	"discard_at_start_seconds": 420,
+	"target_band":              [0.5, 55],
+
+	"hyperventilation":
+		{
+			"hv_1min_start_notes": ["HV 1Min", "HV 1 Min"],
+			"hv_1min_end_notes":   ["Post HV 30 Sec", "Post HV 60 Sec", "Post HV 90 Sec"],
+			"hv_start_notes":      ["HV Begin", "Begin HV"],
+			"hv_end_notes":        ["HV End", "End HV"],
+			"hv_pad_interval": 90
+		},
+
+	"photic_stim_keywords": ["Hz"]
+			
+
+}
+
