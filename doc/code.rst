@@ -9,4 +9,7 @@ test_preproc.py
 edf_preprocessing.py
 --------------------
 .. automodule:: edf_preprocessing
-   :noindex:
+
+individual_func.py
+------------------
+.. automodule:: individual_func
