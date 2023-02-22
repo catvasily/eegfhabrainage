@@ -106,7 +106,8 @@ class PreProcessing:
         '''Identify beginning and end times of flat signal
         
         Returns:
-            list of floats, contains start and end times
+            intervals (list): List of *[start, end]* time values
+                for each interval
             
         '''
         annot_bad_seg, flat_chan = annotate_amplitude(self.raw, bad_percent=50.0, min_duration=10, flat=1e-06, picks=None, verbose=None)
@@ -123,7 +124,8 @@ class PreProcessing:
         """Identify beginning and end of hyperventilation from EEG data
 
         Returns:
-            list of floats, contains start and end times
+            [[start, end]] or []: a list of start and end times of hyperventilation
+                intervals. Currently contains either a single interval, or is empty.
              
         """
 
@@ -139,7 +141,11 @@ class PreProcessing:
         if np.isnan(start):
             for position, item in enumerate(self.raw.annotations.description):
                 if item in ["HV Begin", "Begin HV"]:
-                    start = self.raw.annotations.onset[position] - 30
+                    # AM: was:
+                    # 	start = self.raw.annotations.onset[position] - 30
+                    # This prepends with 30 seconds, while in all other cases pre/post-
+                    # pending is done with 90 seconds. Corrected.
+                    start = self.raw.annotations.onset[position] - 90
 
         if np.isnan(end):
             for position, item in enumerate(self.raw.annotations.description):
@@ -168,7 +174,8 @@ class PreProcessing:
         """Identify beginning and end times of photic stimulation.
            
         Returns:
-            list of floats, contains start and end times
+            [[start, end]] or []: a list of start and end times of photic stimulation
+                intervals. Currently contains either a single interval, or is empty.
              
         """
         
@@ -190,7 +197,8 @@ class PreProcessing:
             return [[start, end]]    
         else:
             return []
-        
+       
+        # AM: this code seems unreachable 
         # null value when no stimulation is present
         return None
 
@@ -204,6 +212,9 @@ class PreProcessing:
                 segments to extract from this EEG recording
             target_segments: number of segments to extract 
                 from this EEG recording
+
+        Returns:
+            None
              
         """
         
@@ -300,15 +311,16 @@ class PreProcessing:
         - interval_start - timestamp in datapoints of the segment start.
         - interval_length - length in datapoints of the segment.
         - data - numpy array of the EEG amplitude data, with shape
-          (20, length in seconds X sampling frequency).
+          (<n_target_channels>, length in seconds x sampling frequency).
             
         Returns:
-            self.interval_df - DataFrame with extracted segments
+            self.interval_df (DataFrame): a dataframe with extracted segments
              
-        NOTE: saving this dataframe into CSV file will truncate the content
-        of 'data' column and convert it to string, so the data will be lost.
-        Recommend to save data into .npy file separately and keep the .csv
-        for later matching with labels.
+        Note:
+            Saving this dataframe into a CSV file will truncate the content
+            of the 'data' column and convert it to a string, so the data will be lost.
+            Recommend to save the data into .npy file separately and keep the .csv
+            for later matching with labels.
            
         """
         
@@ -343,12 +355,15 @@ class PreProcessing:
             
     def save_edf(self, folder, filename):
         """ The function write out new EDF file(s) based on clean_intervals timestamps.
-        It save each segment into separate EDF file, with suffixes "[scan_id]_1",
+        It saves each segment into a separate EDF file, with suffixes "[scan_id]_1",
         "[scan_id]_2", etc. 
         
         Args:
-            folder - where to save new EDF files
-            filename - main name for output files (suffix will be added for more > 1 files)
+            folder (str):    where to save the new EDF files
+            filename (str) : main name for the output files (suffix will be added for more than 1 files)
+
+        Returns:
+            None
 
         """
         
@@ -385,10 +400,10 @@ def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency,
         target_folder: folder where to save extractd segments in EDF formats
         target_frequency: interger indicating the final EEG frequency after resampling
         target_length: length of each of the extracted segments (in seconds)
-        lfreq: lower frequency boundary of the signal to keep in Hz (default=1)
+        lfreq: lower frequency boundary of the signal to keep in Hz (default=0.5)
         hfreq: higher frequency boundary of the signal to keep in Hz (default=55)
         target_segments: number of segments to extract from each EDF file;
-            will extract less if less available (default=0.5)
+            will extract less if less is available (default=1)
         nfiles: limit number of files to preprocess and extract segments (default=None, no limit)
           
     """
@@ -439,9 +454,10 @@ def load_edf_data(source_folder, labels_csv_path):
            shape of ([n_samples], 20, [length in seconds] x [sampling frequency])
         labels (NumPy array): age labels corresponding to each sample from X
         
-    NOTE: this function fitted to a very specific CSV file 'age_ScanID.csv', 
-    so it's looking for columns 'ScanID' for scan ids, 'AgeYears' for age labels. 
-    So you might want to adjust column names in your file or change this function.
+    Note:
+        This function fits a very specific CSV file 'age_ScanID.csv', 
+        so it's looking for columns 'ScanID' for scan ids, 'AgeYears' for age labels. 
+        You might want to adjust column names in your own file or change this function.
          
     """
     
