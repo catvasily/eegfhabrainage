@@ -1,6 +1,11 @@
 # Logs, etc
 eegLog.txt
 
+# Sphinx working files
+doc/Makefile
+doc/make.bat
+doc/_build/
+
 # Virtual env and/or symbolic link to it other folders
 mne
 mne/
