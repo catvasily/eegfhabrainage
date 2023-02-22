@@ -66,17 +66,19 @@ class PreProcessing:
         clean_intervals: list of lists of the form [start, end] with timemstamps in seconds,
             indicating starts and ends of segments to be extracted
             
-    Methods:
-        flat_intervals: returns list of [start, end] timestamps in seconds of zero signal
-        hyperventilation: returns list of [start, end] timestamps in seconds of HV
-        photic_stimulation: returns list of [start, end] timestamps in seconds of PhS
-        extract_good: calling this method defines clean_intervals; 
-            it doens't manipulate data itsef, just returns the intervals' timestamps
-        create_intervals_data: returns DataFrame with the EEG data based on clean_intervals
-        save_edf: write new EDF files based on clean_intervals timestamps
-         
     """
-    
+    # This part of the class description was moved out of a docstring to avoid sphinx warnings
+    # about duplicate descriptions. Now only descriptions from the methods themselves will
+    # be present in the generated documentation.
+    # Methods:
+    #     flat_intervals: returns list of [start, end] timestamps in seconds of zero signal
+    #     hyperventilation: returns list of [start, end] timestamps in seconds of HV
+    #     photic_stimulation: returns list of [start, end] timestamps in seconds of PhS
+    #     extract_good: calling this method defines clean_intervals; 
+    #         it doens't manipulate data itsef, just returns the intervals' timestamps
+    #     create_intervals_data: returns DataFrame with the EEG data based on clean_intervals
+    #     save_edf: write new EDF files based on clean_intervals timestamps
+
     def __init__(self, filepath, target_frequency, lfreq, hfreq):
         """
 

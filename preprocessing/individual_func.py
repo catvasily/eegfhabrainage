@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Dec 10 04:44:05 2020
-@author: m_bon
-"""
-
-
-
-"""
 saving the file as .edf
-"""
 
-# -*- coding: utf-8 -*-
-"""
 Created on Wed Dec  5 12:56:31 2018
 @author: skjerns
+
 Gist to save a mne.io.Raw object to an EDF file using pyEDFlib
 (https://github.com/holgern/pyedflib)
+
 Disclaimer:
-    - Saving your data this way will result in slight 
-      loss of precision (magnitude +-1e-09).
-    - It is assumed that the data is presented in Volt (V), 
-      it will be internally converted to microvolt
-    - BDF or EDF+ is selected based on the filename extension
-    - Annotations are lost in the process.
-      Let me know if you need them, should be easy to add.
+
+- Saving your data this way will result in slight 
+  loss of precision (magnitude +-1e-09).
+- It is assumed that the data is presented in Volt (V), 
+  it will be internally converted to microvolt
+- BDF or EDF+ is selected based on the filename extension
+- Annotations are lost in the process.
+
+"""
+
+"""
+Let me know if you need them, should be easy to add.
+
 """
 
 import pyedflib # pip install pyedflib
@@ -52,6 +50,7 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
     Saves the raw content of an MNE.io.Raw and its subclasses to
     a file using the EDF+/BDF filetype
     pyEDFlib is used to save the raw contents of the RawArray to disk
+
     Parameters
     ----------
     mne_raw : mne.io.Raw
@@ -71,6 +70,7 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
     overwrite : bool
         If True, the destination file (if it exists) will be overwritten.
         If False (default), an error will be raised if the file exists.
+
     """
     if not issubclass(type(mne_raw), mne.io.BaseRaw):
         raise TypeError('Must be mne.io.Raw type')
