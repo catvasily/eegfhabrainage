@@ -321,7 +321,7 @@ class PreProcessing:
 
     def extract_good(self, target_length, target_segments):
         """This function calls the functions above to identify "bad" intervals and
-        updates the attribute data: `clean_intervals` with timesptamps to extract
+        updates the attribute :data:`clean_intervals` with timesptamps to extract
         
         Args:
             target_length (float): length in seconds of the segments to be extracted
@@ -419,8 +419,8 @@ class PreProcessing:
 
     def create_intervals_data(self):
         """ The function updates and returns intervals_df - a DataFrame 
-        with the EEG data based on timestamps from clean_intervals.
-        Print warning if no clean segments were found.
+        with the EEG data based on timestamps from :data:`clean_intervals`.
+        Prints warning if no clean segments were found.
 
         The DataFrame has the following columns:
 
@@ -471,7 +471,7 @@ class PreProcessing:
             print('Found no clean intervals of the specified length')
             
     def save_edf(self, folder, filename):
-        """ The function writes out new EDF file(s) based on clean_intervals timestamps.
+        """ The function writes out new EDF file(s) based on :data:`clean_intervals` timestamps.
         It saves each segment into a separate EDF file, with suffixes "[scan_id]_1",
         "[scan_id]_2", etc. 
         
