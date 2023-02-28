@@ -9,7 +9,15 @@
 			     "phoic", "photic"],
 
 	"discard_at_start_seconds": 420,
+	"target_frequency":	    200,
 	"target_band":              [0.5, 55],
+
+	"flat_parms":
+		{
+			"flat_max_ptp": 1e-06,
+			"bad_percent": 50.0,
+			"min_duration": 10.0
+		},
 
 	"hyperventilation":
 		{

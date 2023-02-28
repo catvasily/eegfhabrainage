@@ -8,30 +8,73 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import zscore
+import json
 
-def read_edf(filepath):
+JSON_CONFIG_FILE = "preproc_conf.json"
+'''Default name (without a path) for the JSON file with preprocessing parameters. It is expected
+to reside in the same folder as the *edf_preprocessing.py* source file.
+
+'''
+
+_JSON_CONFIG_PATHNAME = os.path.dirname(__file__) + "/" + JSON_CONFIG_FILE
+'''Automatically generated fully qualified pathname to the default JSON config file
+
+'''
+
+def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, target_channels = None,
+	exclude_channels = None):
     '''
-    Read an EDF file with MNE package, creates the Raw EDF object. 
-    Excludes some channels to keep only 20 target ones.
-    Prints warning in case the file doesn't have all 20 
+    Reads an EDF file with the MNE package, creates the Raw EDF object. 
+    Excludes some channels to keep only target ones.
+    Prints warning in case the file doesn't have all 
     neeeded channels, doesn't return object in this case.
     
     Args:
-      filepath: str with path to EDF file
+      filepath (str): EDF file pathname
+      conf_json (str): pathname of a json file with configuration parameters; in
+         particular it must contain keys *"target_channels"* and *"exclude_channels"*.
+         Default configuration file name is given by :data:`JSON_CONFIG_FILE` constant
+      conf_dict (dict): a dictionary with configurartion parameters; in
+         particular it must contain keys *"target_channels"* and *"exclude_channels"*.
+         If both *conf_json* and *conf_dict* are given, the latter is used.
+      target_channels (list of str): a list of mandatory channels to read from the EDF
+         file. If supplied, *target_channels* list will be used instead of the one provided
+         by either of the *conf_...* arguments.
+      exclude_channels (list of str): a list of channels to be excluded when reading
+         the EDF file. If supplied, *exlclude_channels* list will be used instead of the one provided
+         by either of *conf_...* arguments.
     Returns:
-      Raw EDF object
+      Raw (mne.Raw): raw EDF object
+
+    Note:
+        At least one of the arguments: *conf_json* or *conf_dict* must be not None. If both *conf_json*
+        and *conf_dict* are omitted in the function call, the default settings will be read from 
+       :data:`JSON_CONFIG_FILE` which should be present in the same folder as the *edf_preprocessing.py*.
        
     '''
+    # Validate args
+    if (conf_json is None) and (conf_dict is None):
+        raise ValueError("At least one of the arguments 'conf_json' or 'conf_dict' should be specified")
+
+    if conf_dict is None:
+        # Read configuraion from a json file
+        with open(conf_json, "r") as fp:
+            conf_dict = json.loads(fp.read())
+
+    # Set channel lists from the dictionary when not specified
+    if target_channels is None:
+        target_channels = conf_dict["target_channels"]
+
+    if exclude_channels is None:
+        exclude_channels = conf_dict["exclude_channels"]
+
+    # At this point both target_channels and exclude_channels are set
+
     # read EDF file while excluding some channels
-    data = mne.io.read_raw_edf(filepath, exclude = ['A1', 'A2', 'AUX1', 
-        'AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8', 'Cz', 
-        'DC1', 'DC2', 'DC3', 'DC4', 'DIF1', 'DIF2', 'DIF3', 'DIF4', 
-        'ECG1', 'ECG2', 'EKG1', 'EKG2', 'EOG 1', 'EOG 2', 'EOG1', 'EOG2', 
-        'Fp1', 'Fp2', 'Fpz', 'Fz', 'PG1', 'PG2', 'Patient Event', 'Photic', 
-        'Pz', 'Trigger Event', 'X1', 'X2', 'aux1', 'phoic', 'photic'], verbose='warning', preload=True)
+    data = mne.io.read_raw_edf(filepath, exclude = exclude_channels, verbose='warning', preload=True)
     
     # the list of target channels to keep
-    target_channels = set(["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4", "T5", "T6", "C3", "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"])
+    target_channels = set(target_channels)
     current_channels = set(data.ch_names)
     
     # checking whether we have all needed channels
@@ -41,8 +84,8 @@ def read_edf(filepath):
         print(filepath, "File doesn't have all needed channels")
 
 class PreProcessing:
-    """The class' aim is preprocessing clinical EEG recordings (in EDF format)
-    and make them a suitable input for later analysis and ML applications.
+    """The class's aim is preprocessing clinical EEG recordings (in EDF format)
+    and make them a suitable input for a later analysis and ML applications.
      
     The class instantiates a preprocessing object which 
     carries a Raw EDF file through a sequence of operations: 
@@ -56,15 +99,54 @@ class PreProcessing:
     Then the object can save extracted segment(s) into new EDF files 
     OR return a Pandas DataFrame with data.
         
+    Args:
+        filepath (str): the EDF file pathname
+        conf_json (str): pathname of a json file with configuration parameters.
+           The default configuration file name is given by :data:`JSON_CONFIG_FILE` constant.
+        conf_dict (dict): a dictionary with configurartion parameters.
+           If both *conf_json* and *conf_dict* are given, the latter is used.
+        target_channels (list of str): a list of mandatory channels to read from the EDF
+           file. 
+        exclude_channels (list of str): a list of channels to be excluded when reading
+           the EDF file. 
+        target_frequency (int): the final EEG frequency after resampling
+        lfreq (float): lower frequency boundary of the signal to keep
+        hfreq (float): higher frequency boundary of the signal to keep
+        flat_parms (dict): parameters for flat intervals selection. Should contain the
+            following keys:
+            *'flat_max_ptp'* - the channel's amplitude max peak-to-peak value (in channel's
+            units) for this channel to be marked as flat;
+            *'bad_percent'* - min percentage of the time the channel's peak
+            to peak is below the *'flat_max_ptp'* threshold to be considered flat;
+            *'min_duration'* - minimum interval in seconds for all consecutive samples to
+            be below the *'flat_max_ptp'* to indicate a flat interval.
+
+    Note:
+        * At least one of the arguments: *conf_json* or *conf_dict* must be not None. If both *conf_json* and *conf_dict*
+          are omitted in the constructor, the default settings will be read from :data:`JSON_CONFIG_FILE` which should
+          be present in the same folder as the *edf_preprocessing.py*.
+        * When not None, the explicitly specified parameter values will be used instead of the values
+          given by corresponding keys in *conf_json* or *conf_dict*.
+
+    **Attributes**
+
     Attributes:
-        filename: string with EDF file path
-        target_frequency: interger indicating the final EEG frequency after resampling
-        raw: MNE Raw EDF object
-        sfreq: initial sampling frequency of EEG
-        bad_intervals: list of lists of the form [start, end] with timemstamps in seconds,
-            indicating starts and ends of bad interval (HV, PhS, flat signal)
-        clean_intervals: list of lists of the form [start, end] with timemstamps in seconds,
+        filename (str): EDF file path
+        conf_dict (dict): a dictionary with configuration parameters
+        target_channels (list of str): a list of mandatory channels to read from the EDF
+           file. 
+        exclude_channels (list of str): a list of channels to be excluded when reading
+           the EDF file.
+        target_frequency (int): the final EEG frequency after resampling
+        raw (mne.Raw): the raw EDF object
+        sfreq (float): initial sampling frequency of EEG
+        flat_parms (dict): parameters for flat intervals selection (see above)
+        bad_intervals (list): a list of the [start, end] pairs with timestamps in seconds,
+            indicating starts and ends of bad intervals (HV, PhS, flat signal)
+        clean_intervals (list): a list of the [start, end] pairs with timestamps in seconds,
             indicating starts and ends of segments to be extracted
+
+    **Methods**
             
     """
     # This part of the class description was moved out of a docstring to avoid sphinx warnings
@@ -79,21 +161,50 @@ class PreProcessing:
     #     create_intervals_data: returns DataFrame with the EEG data based on clean_intervals
     #     save_edf: write new EDF files based on clean_intervals timestamps
 
-    def __init__(self, filepath, target_frequency, lfreq, hfreq):
-        """
-
-        Args:
-            filepath: str with path to EDF file
-            target_frequency: interger indicating the final EEG frequency after resampling
-            lfreq: lower frequency boundary of the signal to keep
-            hfreq: higher frequency boundary of the signal to keep
+    def __init__(self, filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
+                 target_channels = None, exclude_channels = None,
+                 target_frequency = None, lfreq = None, hfreq = None, flat_parms = None):
+        """Constructor args are explained in the class description above.
             
         """
+        # Validate args
+        if (conf_json is None) and (conf_dict is None):
+            raise ValueError("At least one of the arguments 'conf_json' or 'conf_dict' should be specified")
+
+        if conf_dict is None:
+            # Read configuraion from a json file
+            with open(conf_json, "r") as fp:
+                conf_dict = json.loads(fp.read())
+
+        # Set the missing arguments from the dictionary
+        if target_channels is None:
+            target_channels = conf_dict["target_channels"]
+
+        if exclude_channels is None:
+            exclude_channels = conf_dict["exclude_channels"]
+
+        if target_frequency is None:
+            target_frequency = conf_dict["target_frequency"]
+
+        if lfreq is None:
+            lfreq = conf_dict["target_band"][0]
+
+        if hfreq is None:
+            hfreq = conf_dict["target_band"][1]
+
+        if flat_parms is None:
+            flat_parms = conf_dict["flat_parms"]
+
         self.filename = filepath
+        self.conf_dict = conf_dict
+        self.target_channels = target_channels
+        self.exclude_channels = exclude_channels
         self.target_frequency = target_frequency
-        self.raw = read_edf(filepath)
+        self.raw = read_edf(filepath, target_channels = target_channels, exclude_channels = exclude_channels)
         self.raw.filter(l_freq=lfreq, h_freq=hfreq)
         self.sfreq = dict(self.raw.info)['sfreq']
+        self.flat_parms = flat_parms
+
         if(self.sfreq != self.target_frequency):
             self.raw.resample(self.target_frequency)
         
@@ -101,7 +212,6 @@ class PreProcessing:
         self.intervals_df = pd.DataFrame()
         mne.set_log_level('warning')
         
-
     def flat_intervals(self):
         '''Identify beginning and end times of flat signal
         
@@ -110,8 +220,13 @@ class PreProcessing:
                 for each interval
             
         '''
-        annot_bad_seg, flat_chan = annotate_amplitude(self.raw, bad_percent=50.0, min_duration=10, flat=1e-06, picks=None, verbose=None)
+        annot_bad_seg, flat_chan = annotate_amplitude(self.raw, 
+                                       bad_percent = self.flat_parms["bad_percent"],
+                                       min_duration = self.flat_parms["min_duration"],
+                                       flat = self.flat_parms["flat_max_ptp"],
+                                       picks=None, verbose=None)
         intervals = []
+
         for i in annot_bad_seg:
             start = list(i.items())[0][1]
             duration = list(i.items())[1][1]
@@ -124,33 +239,35 @@ class PreProcessing:
         """Identify beginning and end of hyperventilation from EEG data
 
         Returns:
-            [[start, end]] or []: a list of start and end times of hyperventilation
-                intervals. Currently contains either a single interval, or is empty.
+            intervals (list): [[start, end]] or []: a list of start and end times of hyperventilation
+                intervals. **Currently contains either a single interval**, or is empty.
              
         """
 
         start = np.nan
         end = np.nan
+        parms = self.conf_dict["hyperventilation"]
 
         for position, item in enumerate(self.raw.annotations.description):
-            if item in ["HV 1Min", "HV 1 Min"]:
-                start = self.raw.annotations.onset[position] - 90
-            if item in ["Post HV 30 Sec", "Post HV 60 Sec", "Post HV 90 Sec"]:
-                end = self.raw.annotations.onset[position] + (90 - int(item.split(' ')[2]))
+            if item in parms["hv_1min_start_notes"]:
+                start = self.raw.annotations.onset[position] - parms["hv_pad_interval"]
+
+            if item in parms["hv_1min_end_notes"]:
+                end = self.raw.annotations.onset[position] + (parms["hv_pad_interval"] - int(item.split(' ')[2]))
 
         if np.isnan(start):
             for position, item in enumerate(self.raw.annotations.description):
-                if item in ["HV Begin", "Begin HV"]:
+                if item in parms["hv_start_notes"]:
                     # AM: was:
                     # 	start = self.raw.annotations.onset[position] - 30
                     # This prepends with 30 seconds, while in all other cases pre/post-
-                    # pending is done with 90 seconds. Corrected.
-                    start = self.raw.annotations.onset[position] - 90
+                    # pending is done with parms["hv_pad_interval"] seconds. Corrected.
+                    start = self.raw.annotations.onset[position] - parms["hv_pad_interval"]
 
         if np.isnan(end):
             for position, item in enumerate(self.raw.annotations.description):
-                if item in ["HV End", "End HV"]:
-                    end = self.raw.annotations.onset[position] + 90
+                if item in parms["hv_end_notes"]:
+                    end = self.raw.annotations.onset[position] + parms["hv_pad_interval"]
 
         # when hyperventilation is present
         # eliminate the corresponding segment
@@ -163,19 +280,18 @@ class PreProcessing:
             return [[start, end]]
         else:
             # AM: ?? This will return [] if any of (start, end) is NaN. This is
-            # only ok when both starting and ending annotations are present. Is
-            # it always the case? Added a check here:
+            # a correct behavior only provided both starting and ending annotations are 
+            # ALWAYS present. Is it indeed the case? Not sure - so added a check here:
             assert np.isnan(start) and np.isnan(end), \
                 'Only one end of a hyperventilation interval is found'	# Assert when only one of them is NaN
             return []
-        
 
     def photic_stimulation(self):
         """Identify beginning and end times of photic stimulation.
            
         Returns:
-            [[start, end]] or []: a list of start and end times of photic stimulation
-                intervals. Currently contains either a single interval, or is empty.
+            intervals (list): [[start, end]] or []: a list of start and end times of hyperventilation
+                intervals. **Currently contains either a single interval**, or is empty.
              
         """
         
@@ -184,13 +300,14 @@ class PreProcessing:
         
         # loop over descriptions and identify those that contain frequencies
         for position, annot in enumerate(self.raw.annotations.description):
-            if "Hz" in annot:
-                # record the positions of stimulations
-                stimulation.append(position)
+            for kword in self.conf_dict["photic_stim_keywords"]:
+                if kword in annot:
+                    # record the positions of stimulations
+                    stimulation.append(position)
+                    break
         
         # provided stimulation has occured
         if len(stimulation)>1:
-            
             # identify beginning and end
             start = self.raw.annotations.onset[stimulation[0]]
             end = self.raw.annotations.onset[stimulation[-1]] + self.raw.annotations.duration[stimulation[-1]]
@@ -198,19 +315,18 @@ class PreProcessing:
         else:
             return []
        
-        # AM: this code seems unreachable 
+        # AM: ?? this code is unreachable - commented out
         # null value when no stimulation is present
-        return None
-
+        # return None
 
     def extract_good(self, target_length, target_segments):
-        """The function calls the functions above to identify "bad" intervals and
-        updates the attribute clean_intervals with timesptamps to extract
+        """This function calls the functions above to identify "bad" intervals and
+        updates the attribute data: `clean_intervals` with timesptamps to extract
         
         Args:
-            target_length: length in seconds of the each 
-                segments to extract from this EEG recording
-            target_segments: number of segments to extract 
+            target_length (float): length in seconds of the segments to be extracted
+                from this EEG recording
+            target_segments (int): a total number of the segments to extract 
                 from this EEG recording
 
         Returns:
@@ -230,7 +346,8 @@ class PreProcessing:
         tmax = len(self.raw)/self.target_frequency
                 
         # Add 'empty' bad intervals in the beginning and in the end for furhter consistency
-        self.bad_intervals.insert(0,[0, 420]) # <--- TAKE FIRST SEVEN MINUTES AS BAD BY DEFAULT
+        skip_length = self.conf_dict["discard_at_start_seconds"]
+        self.bad_intervals.insert(0,[0, skip_length]) # <--- SET FIRST "discard_at_start_seconds" interval AS BAD BY DEFAULT
         self.bad_intervals.append([tmax, tmax])
         # Construct temporary dataframe to find clean interval in EDF
         tmp_df = pd.DataFrame(self.bad_intervals, columns=['start', 'end'])
@@ -303,7 +420,7 @@ class PreProcessing:
     def create_intervals_data(self):
         """ The function updates and returns intervals_df - a DataFrame 
         with the EEG data based on timestamps from clean_intervals.
-        Print warning if no clean segments available.
+        Print warning if no clean segments were found.
 
         The DataFrame has the following columns:
 
@@ -351,10 +468,10 @@ class PreProcessing:
             
             return self.intervals_df
         else:
-            print('No clean intervals of needed length')
+            print('Found no clean intervals of the specified length')
             
     def save_edf(self, folder, filename):
-        """ The function write out new EDF file(s) based on clean_intervals timestamps.
+        """ The function writes out new EDF file(s) based on clean_intervals timestamps.
         It saves each segment into a separate EDF file, with suffixes "[scan_id]_1",
         "[scan_id]_2", etc. 
         
@@ -383,41 +500,49 @@ class PreProcessing:
                 else:
                     write_mne_edf(tmp_raw_edf, fname=folder+'/'+filename, overwrite=True)
         else:
-            print('No clean intervals of needed length')
+            print('Found no clean intervals of the specified length')
             
             
-def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency, 
-               target_length, lfreq=0.5, hfreq=55, target_segments=1, nfiles=None):
-    """ The function run a pipeline for preprocessing and extracting 
-    clean segment(s) of needed length from multiple EDF files.
-    It takes in list of EDF files names and prprocessing parameters, 
-    look up for the files in source folder, and perform preprocessing 
-    and extraction, if found.
+def slice_edfs(source_folder, target_folder, target_length, *, source_scan_ids = None,
+               target_frequency = None, lfreq = None, hfreq = None, target_segments=1, nfiles=None):
+    """ The function runs a pipeline for preprocessing and extracting 
+    clean segment(s) of requested length from multiple EDF files.
+    It takes in a list of EDF file names and preprocessing parameters, 
+    looks up for the files in source folder, and performs preprocessing 
+    and extraction.
     
     Args:
-        source_scan_ids: list of EDF files to preprocess and extract segments from 
-        source_folder: folder path with EDF files 
-        target_folder: folder where to save extractd segments in EDF formats
-        target_frequency: interger indicating the final EEG frequency after resampling
-        target_length: length of each of the extracted segments (in seconds)
-        lfreq: lower frequency boundary of the signal to keep in Hz (default=0.5)
-        hfreq: higher frequency boundary of the signal to keep in Hz (default=55)
-        target_segments: number of segments to extract from each EDF file;
-            will extract less if less is available (default=1)
-        nfiles: limit number of files to preprocess and extract segments (default=None, no limit)
+        source_folder (str): a pathname to the folder with EDF files 
+        target_folder (str): a pathname to the output folder where the extracted segments
+            will be saved in EDF format
+        target_length (float): the length of each of the extracted segments in seconds
+        source_scan_ids (list of str or None) : a list of short EDF file names without .edf
+            extention to preprocess. If None, all .edf files in the source directory will
+            be preprocessed, up to a limit set by the *nfiles* argument
+        target_frequency (num or None): the final EEG frequency after resampling; if not specified
+            the default for the :class: `PreProcessing` will be used 
+        lfreq (float or None): the lower frequency boundary of the EEG signal in Hz; if not specified
+            the default for the :class: `PreProcessing` will be used
+        hfreq (float or None): the higher frequency boundary of the EEG signal in Hz; if not specified
+            the default for the :class: `PreProcessing` will be used
+        target_segments (int): the maximum number of segments to extract from each EDF file;
+            default=1
+        nfiles (int or None): the max number of the source files to preprocess; (default = None = no limit)
           
     """
-   
-    scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
+  
     existing_edf_names = os.listdir(source_folder)
+
+    if source_scan_ids is None:
+        scan_files = existing_edf_names
+    else:
+        scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
 
     i = 0
     
-    for file in scan_files:
-
-        if file in existing_edf_names:
-
-            path = source_folder + '/' + file
+    for f in scan_files:
+        if f in existing_edf_names:
+            path = source_folder + '/' + f
 
             try:
                 # Initiate the preprocessing object, resample and filter the data
@@ -427,12 +552,11 @@ def slice_edfs(source_scan_ids, source_folder, target_folder, target_frequency,
                 p.extract_good(target_length=target_length, target_segments=target_segments)
 
                 # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
-                p.save_edf(folder=target_folder, filename=file)
+                p.save_edf(folder=target_folder, filename = f)
             
                 i += 1
-                
             except:
-                print('Extraction failed')
+                print('Extraction failed for file ' + f)
             
             if i % 100 == 0 and i != 0:
                 print(i, 'EDF saved')
@@ -446,8 +570,8 @@ def load_edf_data(source_folder, labels_csv_path):
     with lables suitable for analysis and machine learning models.
     
     Args:
-        source_folder: folder with EDF files
-        labels_csv_path: CSV dile containing scan_ids and label (age)
+        source_folder (str): folder with EDF files
+        labels_csv_path (str): CSV dile containing scan_ids and label (age)
         
     Returns:
         X (NumPy array): EEG amplitudes from EDF files, having
