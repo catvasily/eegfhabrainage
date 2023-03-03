@@ -529,8 +529,10 @@ def slice_edfs(source_folder, target_folder, target_length, *, source_scan_ids =
             default=1
         nfiles (int or None): the max number of the source files to preprocess; (default = None = no limit)
           
+    Returns:
+        None
+
     """
-  
     existing_edf_names = os.listdir(source_folder)
 
     if source_scan_ids is None:
@@ -559,11 +561,12 @@ def slice_edfs(source_folder, target_folder, target_length, *, source_scan_ids =
                 print('Extraction failed for file ' + f)
             
             if i % 100 == 0 and i != 0:
-                print(i, 'EDF saved')
+                print(i, 'EDFs processed')
                 
             if i == nfiles:
                 break
 
+    print('\nslice_edfs(): total of {} input EDF records processed.'.format(i))
             
 def load_edf_data(source_folder, labels_csv_path):
     """The function loads multiple EDF files and returns data 
