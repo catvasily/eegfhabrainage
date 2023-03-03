@@ -503,8 +503,8 @@ class PreProcessing:
             print('Found no clean intervals of the specified length')
             
             
-def slice_edfs(source_folder, target_folder, target_length, *, source_scan_ids = None,
-               target_frequency = None, lfreq = None, hfreq = None, target_segments=1, nfiles=None):
+def slice_edfs(source_folder, target_folder, target_length, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
+               source_scan_ids = None, target_frequency = None, lfreq = None, hfreq = None, target_segments=1, nfiles=None):
     """ The function runs a pipeline for preprocessing and extracting 
     clean segment(s) of requested length from multiple EDF files.
     It takes in a list of EDF file names and preprocessing parameters, 
@@ -515,6 +515,10 @@ def slice_edfs(source_folder, target_folder, target_length, *, source_scan_ids =
         source_folder (str): a pathname to the folder with EDF files 
         target_folder (str): a pathname to the output folder where the extracted segments
             will be saved in EDF format
+        conf_json (str): pathname of a json file with configuration parameters.
+           The default configuration file name is given by :data:`JSON_CONFIG_FILE` constant.
+        conf_dict (dict): a dictionary with configurartion parameters.
+           If both *conf_json* and *conf_dict* are given, the latter is used.
         target_length (float): the length of each of the extracted segments in seconds
         source_scan_ids (list of str or None) : a list of short EDF file names without .edf
             extention to preprocess. If None, all .edf files in the source directory will
@@ -548,7 +552,8 @@ def slice_edfs(source_folder, target_folder, target_length, *, source_scan_ids =
 
             try:
                 # Initiate the preprocessing object, resample and filter the data
-                p = PreProcessing(path, target_frequency=target_frequency, lfreq=lfreq, hfreq=hfreq)
+                p = PreProcessing(path, conf_json = conf_json, conf_dict = conf_dict,
+                                  target_frequency=target_frequency, lfreq=lfreq, hfreq=hfreq)
 
                 # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
                 p.extract_good(target_length=target_length, target_segments=target_segments)
