@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>&lt;no title&gt; &#8212; eegfh 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Python software documentation for the EEG Fraser Health project" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <p># EEG preprocessing pipeline for FHA EDF dataset</p>
+<p>## Summary</p>
+<p>The code is aimed to preprocess clinical EEG recordings and make them a suitable input for later analysis and ML applications.
+- <strong>Input</strong>: EDF file
+- <strong>Output</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><ol class="arabic simple">
+<li><p>Pandas DataFrame with columns: file name, interval start, interval end, and data - Numpy array of shape (20, 500 * target length)</p></li>
+</ol>
+</li>
+<li><ol class="arabic simple" start="2">
+<li><p>new EDF file(s) containing only clean EEG interval of target length</p></li>
+</ol>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>Parameters</strong>:
+- number of clean EEG slices to extract from each EDF file
+- target length of each slice, in seconds</p>
+<p>## Performed operations
+1) resample each recording’s signal to 500 Hz frequency, since some recordings might have different sampling frequencies.
+2) applied frequency filtering that keeps only signal with frequencies between 0.5 and 55 Hz (by default), to exclude unwanted noise such as electricity grid frequency (60 Hz in Canada) or sudden patients` moves (&lt;1 Hz)
+3) identify and remove intervals of special procedures performed on patients during recordings, such as hyperventilation (deep breathing) and photic stimulation (flashing light). Physicians apply these tests to patients in order to detect brain abnormal activity for epilepsy diagnosis. Since these procedures burst abnormal activity, and weren’t performed for all subjects, we exclude them from the analysis. Also the recordings contain intervals with no signal. It is the results of turned off equipment or disconnected electrode. So we also have to avoid these flat intervals with zero signal. Thus traget slices acquired only from clean intervals from each EEG, without flat intervals, hyperventilation and photic stimulation. Slices taken from the beginning, first minute taken as “bad” by default. The algoritm also handles cases when “bad intervals” overlap
+4) <strong>In case of extracting to Numpy arrays</strong> signal values are also ZScore noramilized. Doesn’t apply in case of saving output to EDF file(s).</p>
+<p>## Usage
+You need both modules edf_preprocessing.py and individual_func.py. The later contains python routine for saving output in EDF format again.</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python</p>
+<p>from edf_preprocessing import PreProcessing</p>
+<p>file_name = “81c0c60a-8fcc-4aae-beed-87931e582c45.edf”
+path = “/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/” + file_name
+output_path = “your_folder”</p>
+<p># Initiate the preprocessing object, filter the data between 0.5 Hz and 55 Hz and resample to 200 Hz.
+p = PreProcessing(path, target_frequency=200, lfreq=0.5, hfreq=55)</p>
+<p># This calls internal functions to detect ‘bad intervals’ and define 5 ‘good’ ones 60 seconds each
+p.extract_good(target_length=60, target_segments=5)</p>
+<p># Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix “_n” to the file name
+p.save_edf(folder=output_path, filename=file_name)</p>
+<p># Extract and convert data to Numpy arrays
+p.create_intervals_data()
+df = p.intervals_df</p>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p><strong>NOTE</strong>
+When extracting to Numpy, saving this dataframe to a csv file will damage your data.
+It converts Numpy arrays to string and truncate it, leaving few values in the beginning and the end.</p>
+<p>To save your data in numpy arrays format for later use, you can use this code:
+<a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>python
+numpy_data = np.stack(df[‘data’])</p>
+<p>np.save(output_path, numpy_data)
+<a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+<p>As the result, you will get numpy array of shape (number_of_slices, 20, lengths_in_seconds * 500). Following the above example it is (5, 20, 30000).
+You should also save inital df to csv to keep track of scan IDs for later match with target label, like age.</p>
+<p>## Pipeline for extraction from multiple files</p>
+<p>Preprocessing and saving new data to multiple EDF files into target folder</p>
+<p><a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a>python
+from edf_preprocessing import slice_edfs</p>
+<p>import pandas as pd
+import mne
+import warnings
+warnings.filterwarnings(‘ignore’)
+mne.set_log_level(‘warning’)</p>
+<p>source_folder = “/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby”
+target_folder = “eeg_fragments_10sec”</p>
+<p>labels_file = pd.read_csv(‘age_ScanID.csv’)
+scan_ids = labels_file[~(labels_file[‘AgeYears’].isnull())][‘ScanID’] # &lt;- drop records without age</p>
+<p># takes scan ids from the list, look for them in source folder, and apply the preprocessing to 100 files in total
+# filter the data between 0.5 Hz and 55 Hz, resample to 200 Hz, extract 1 segment of 10 seconds from each EDF file
+# saves new segments as EDF into target folder</p>
+<dl class="simple">
+<dt>slice_edfs(source_scan_ids=scan_ids, source_folder=source_folder, target_folder=target_folder,</dt><dd><p>target_frequency=200, lfreq=0.5, hfreq=55, target_length=10, target_segments=1, nfiles=100)</p>
+</dd>
+</dl>
+<p># if you don’t need files limit - don’t specify the parameter “nfiles”, default is None</p>
+<p><a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
+<p>## Loading data</p>
+<p><a href="#id25"><span class="problematic" id="id26">``</span></a><a href="#id27"><span class="problematic" id="id28">`</span></a>python
+from edf_preprocessing import load_edf_data</p>
+<p>folder = ‘eeg_fragments_10sec’
+label_file = ‘age_ScanID.csv’</p>
+<p># X - np_array of shape (n_samples, 20, length is seconds * frequency),
+# labels - pd.DataFrame with scan_ids and age, same length as X
+X, labels = load_edf_data(folder, label_file)
+<a href="#id29"><span class="problematic" id="id30">``</span></a><a href="#id31"><span class="problematic" id="id32">`</span></a></p>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">eegfh</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Python software documentation for the EEG Fraser Health project</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, AM.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/README.md.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>EEG preprocessing pipeline for FHA EDF dataset &#8212; eegfh 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Classes and functions" href="code.html" />
+    <link rel="prev" title="Python software documentation for the EEG Fraser Health project" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="eeg-preprocessing-pipeline-for-fha-edf-dataset">
+<h1>EEG preprocessing pipeline for FHA EDF dataset<a class="headerlink" href="#eeg-preprocessing-pipeline-for-fha-edf-dataset" title="Permalink to this heading">¶</a></h1>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading">¶</a></h2>
+<p>The code is aimed to preprocess clinical EEG recordings and make them a suitable input for later analyses and ML applications.</p>
+<ul class="simple">
+<li><p><strong>Input</strong>: EDF file</p></li>
+<li><p><strong>Output</strong>:</p>
+<ul>
+<li><p>(1) Pandas DataFrame with columns: file name, interval start, interval end, and data - Numpy array of shape (20, 500 * target length)</p></li>
+<li><p>(2) new EDF file(s) containing only clean EEG interval of target length</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Parameters</strong>:</p>
+<ul class="simple">
+<li><p>number of clean EEG slices to extract from each EDF file</p></li>
+<li><p>target length of each slice, in seconds</p></li>
+</ul>
+</section>
+<section id="performed-operations">
+<h2>Performed operations<a class="headerlink" href="#performed-operations" title="Permalink to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>resample each recording’s signal to a common frequency, since some recordings might have different sampling frequencies.</p></li>
+<li><p>bandpass filter to a specified frequency band to avoid unwatned interference, specifically to exclude the electric power grid frequencies and patient’s motion related artifacts</p></li>
+<li><p>identify and remove intervals of special procedures performed on patients during recordings, such as hyperventilation (deep breathing) and photic stimulation (flashing light). Physicians apply these tests to patients in order to detect brain abnormal activity for epilepsy diagnosis. Since these procedures cause abnormal brain activity, and weren’t performed for all subjects, we exclude them from the analyses. Also the recordings contain intervals with no signal. This is the results of turned off equipment or disconnected electrodes. So we also have to avoid these flat intervals with zero signal. Thus traget slices acquired only from clean intervals from each EEG, without flat intervals, hyperventilation and photic stimulation. Also a certain time interval at the beginning of the recording is marked as “bad” by default. All types of “bad” intervals are allowed to overlap.</p></li>
+<li><p><strong>in case of extracting to Numpy arrays</strong> the signal values are also ZScore noramalized. This doesn’t apply when saving output to EDF file(s).</p></li>
+</ol>
+<p>All preprocessing parameters may be specified either explicitly, or their default values will be used. The lattter are stored in file <strong>preproc_conf.json</strong> described later in this document.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
+<p>You need both modules edf_preprocessing.py and individual_func.py. The later contains python routine for saving output in EDF format again.</p>
+<p>This is an example script which uses class <strong>PreProcessing</strong>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="kn">from</span> <span class="nn">edf_preprocessing</span> <span class="kn">import</span> <span class="n">PreProcessing</span>
+
+<span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;81c0c60a-8fcc-4aae-beed-87931e582c45.edf&quot;</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/&quot;</span> <span class="o">+</span> <span class="n">file_name</span>
+<span class="n">output_path</span> <span class="o">=</span> <span class="s2">&quot;your_folder&quot;</span>
+
+<span class="c1"># Initiate the preprocessing object, filter the data between 0.5 Hz and 55 Hz and resample to 200 Hz.</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">PreProcessing</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target_frequency</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">lfreq</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">hfreq</span><span class="o">=</span><span class="mi">55</span><span class="p">)</span>
+
+<span class="c1"># This calls internal functions to detect &#39;bad intervals&#39; and define 5 &#39;good&#39; ones 60 seconds each</span>
+<span class="n">p</span><span class="o">.</span><span class="n">extract_good</span><span class="p">(</span><span class="n">target_length</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">target_segments</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix &quot;_n&quot; to the file name </span>
+<span class="n">p</span><span class="o">.</span><span class="n">save_edf</span><span class="p">(</span><span class="n">folder</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">file_name</span><span class="p">)</span>
+
+<span class="c1"># Extract and convert data to Numpy arrays</span>
+<span class="n">p</span><span class="o">.</span><span class="n">create_intervals_data</span><span class="p">()</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">intervals_df</span>
+
+</pre></div>
+</div>
+<p><strong>NOTE</strong>
+When extracting to Numpy, saving this dataframe to a csv file will damage your data.
+It converts Numpy arrays to string and truncate it, leaving few values in the beginning and the end.</p>
+<p>To save your data in numpy arrays format for later use, you can use this code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">numpy_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">numpy_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As the result, you will get numpy array of shape (number_of_slices, 20, lengths_in_seconds * 500). Following the above example it is (5, 20, 30000).
+You should also save inital df to csv to keep track of scan IDs for later match with target label, like age.</p>
+</section>
+<section id="pipeline-for-extraction-from-multiple-files">
+<h2>Pipeline for extraction from multiple files<a class="headerlink" href="#pipeline-for-extraction-from-multiple-files" title="Permalink to this heading">¶</a></h2>
+<p>Preprocessing and saving new data to multiple EDF files into target folder</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">edf_preprocessing</span> <span class="kn">import</span> <span class="n">slice_edfs</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">mne</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+<span class="n">mne</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s1">&#39;warning&#39;</span><span class="p">)</span>
+
+<span class="n">source_folder</span> <span class="o">=</span> <span class="s2">&quot;/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby&quot;</span>
+<span class="n">target_folder</span> <span class="o">=</span> <span class="s2">&quot;eeg_fragments_10sec&quot;</span>
+
+<span class="n">labels_file</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;age_ScanID.csv&#39;</span><span class="p">)</span>
+<span class="n">scan_ids</span> <span class="o">=</span> <span class="n">labels_file</span><span class="p">[</span><span class="o">~</span><span class="p">(</span><span class="n">labels_file</span><span class="p">[</span><span class="s1">&#39;AgeYears&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">())][</span><span class="s1">&#39;ScanID&#39;</span><span class="p">]</span> <span class="c1"># &lt;- drop records without age</span>
+
+<span class="c1"># take scan ids from the list, look for them in the source folder, and apply the preprocessing to at most 100 files;</span>
+<span class="c1"># filter the data to the default band specified in preproc_conf.json, resample it to 500 Hz (!!! this overrides the default</span>
+<span class="c1"># setting stored in preproc_conf.json file !!!), extract 1 segment of 10 seconds from each EDF file,</span>
+<span class="c1"># save new segments as EDFs into the target folder</span>
+
+<span class="n">slice_edfs</span><span class="p">(</span><span class="n">source_folder</span><span class="o">=</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">target_folder</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">target_length</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">source_scan_ids</span> <span class="o">=</span> <span class="n">scan_ids</span><span class="p">,</span>
+           <span class="n">target_frequency</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">target_segments</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nfiles</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+           
+<span class="c1"># if you don&#39;t need files limit - don&#39;t specify the parameter &quot;nfiles&quot;, default is None</span>
+
+</pre></div>
+</div>
+</section>
+<section id="loading-data">
+<h2>Loading data<a class="headerlink" href="#loading-data" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">edf_preprocessing</span> <span class="kn">import</span> <span class="n">load_edf_data</span>
+
+<span class="n">folder</span> <span class="o">=</span> <span class="s1">&#39;eeg_fragments_10sec&#39;</span>
+<span class="n">label_file</span> <span class="o">=</span> <span class="s1">&#39;age_ScanID.csv&#39;</span>
+
+<span class="c1"># X - np_array of shape (n_samples, 20, length is seconds * frequency), </span>
+<span class="c1"># labels - pd.DataFrame with scan_ids and age, same length as X</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">load_edf_data</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">label_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="preprocessing-configuration">
+<h2>Preprocessing configuration<a class="headerlink" href="#preprocessing-configuration" title="Permalink to this heading">¶</a></h2>
+<p>All default preprocessing configuration parameters are stored in the JSON file <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code>. Those can
+be changed when instantiating <code class="docutils literal notranslate"><span class="pre">PreProcess</span></code> class or calling its methods by passing a custom JSON configuration
+file or equivalent Python dictionary object, or by specifying some of the parameters explicitly. The parameters
+may be changed in a similar way when processing multiple records with <code class="docutils literal notranslate"><span class="pre">slice_edfs()</span></code> function.</p>
+<p>Specifically, an alternative configuration file name is passed to <code class="docutils literal notranslate"><span class="pre">PreProcess</span></code> class constructor (or to <code class="docutils literal notranslate"><span class="pre">slice_edfs()</span></code>)
+via an argument <code class="docutils literal notranslate"><span class="pre">conf_json</span> <span class="pre">=</span> <span class="pre">&lt;file-pathname&gt;</span></code>; an equivalent dictionary object may be passed as <code class="docutils literal notranslate"><span class="pre">conf_dict</span> <span class="pre">=</span> <span class="pre">&lt;dictionary-object&gt;</span></code>.
+A subset of individual configuration paramters may be given explicitly using corresponding keywords -
+for example, <code class="docutils literal notranslate"><span class="pre">target_frequency</span> <span class="pre">=</span> <span class="pre">300</span></code>.</p>
+<p>Note that explicitly supplied parameter values take precedence over those provided in conf_dict; the latter take precedence
+over the parameter values read from <code class="docutils literal notranslate"><span class="pre">conf_json</span></code> file.</p>
+<p>The meaning of parameters in the JSON configuration file is explained in the comments in the code below, which start
+with <code class="docutils literal notranslate"><span class="pre">#</span></code> character. Mind that <strong>comments are NOT allowed in a real JSON file</strong> - please remove those if using this example
+in practice.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+	<span class="c1"># A list of mandatory channels. An input recording is discarded if any of those is missing</span>
+	<span class="s2">&quot;target_channels&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;FP1&quot;</span><span class="p">,</span> <span class="s2">&quot;FPZ&quot;</span><span class="p">,</span>   <span class="s2">&quot;FP2&quot;</span><span class="p">,</span>  <span class="s2">&quot;F3&quot;</span><span class="p">,</span>   <span class="s2">&quot;F4&quot;</span><span class="p">,</span>   <span class="s2">&quot;F7&quot;</span><span class="p">,</span>     <span class="s2">&quot;F8&quot;</span><span class="p">,</span>   <span class="s2">&quot;FZ&quot;</span><span class="p">,</span>   <span class="s2">&quot;T3&quot;</span><span class="p">,</span>   <span class="s2">&quot;T4&quot;</span><span class="p">,</span>
+			     <span class="s2">&quot;T5&quot;</span><span class="p">,</span>  <span class="s2">&quot;T6&quot;</span><span class="p">,</span>    <span class="s2">&quot;C3&quot;</span><span class="p">,</span>   <span class="s2">&quot;C4&quot;</span><span class="p">,</span>   <span class="s2">&quot;CZ&quot;</span><span class="p">,</span>   <span class="s2">&quot;P3&quot;</span><span class="p">,</span>     <span class="s2">&quot;P4&quot;</span><span class="p">,</span>   <span class="s2">&quot;PZ&quot;</span><span class="p">,</span>   <span class="s2">&quot;O1&quot;</span><span class="p">,</span>   <span class="s2">&quot;O2&quot;</span><span class="p">],</span>
+
+	<span class="c1"># A list of channels that will be removed from the input recording, if present</span>
+	<span class="s2">&quot;exclude_channels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;A1&quot;</span><span class="p">,</span>   <span class="s2">&quot;A2&quot;</span><span class="p">,</span>   <span class="s2">&quot;AUX1&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX2&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX3&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX4&quot;</span><span class="p">,</span>   <span class="s2">&quot;AUX5&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX6&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX7&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX8&quot;</span><span class="p">,</span>
+			     <span class="s2">&quot;Cz&quot;</span><span class="p">,</span>   <span class="s2">&quot;DC1&quot;</span><span class="p">,</span>  <span class="s2">&quot;DC2&quot;</span><span class="p">,</span>  <span class="s2">&quot;DC3&quot;</span><span class="p">,</span>  <span class="s2">&quot;DC4&quot;</span><span class="p">,</span>  <span class="s2">&quot;DIF1&quot;</span><span class="p">,</span>   <span class="s2">&quot;DIF2&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF3&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF4&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG1&quot;</span><span class="p">,</span>
+			     <span class="s2">&quot;ECG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 1&quot;</span><span class="p">,</span><span class="s2">&quot;EOG 2&quot;</span><span class="p">,</span><span class="s2">&quot;EOG1&quot;</span><span class="p">,</span>   <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span> <span class="s2">&quot;Fp1&quot;</span><span class="p">,</span>  <span class="s2">&quot;Fp2&quot;</span><span class="p">,</span>  <span class="s2">&quot;Fpz&quot;</span><span class="p">,</span> 
+			     <span class="s2">&quot;Fz&quot;</span><span class="p">,</span>   <span class="s2">&quot;PG1&quot;</span><span class="p">,</span>  <span class="s2">&quot;PG2&quot;</span><span class="p">,</span>  <span class="s2">&quot;Patient Event&quot;</span><span class="p">,</span> <span class="s2">&quot;Photic&quot;</span><span class="p">,</span> <span class="s2">&quot;Pz&quot;</span><span class="p">,</span> <span class="s2">&quot;Trigger Event&quot;</span><span class="p">,</span> <span class="s2">&quot;X1&quot;</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">,</span> <span class="s2">&quot;aux1&quot;</span><span class="p">,</span>
+			     <span class="s2">&quot;phoic&quot;</span><span class="p">,</span> <span class="s2">&quot;photic&quot;</span><span class="p">],</span>
+
+	<span class="s2">&quot;discard_at_start_seconds&quot;</span><span class="p">:</span> <span class="mi">420</span><span class="p">,</span>	<span class="c1"># time interval removed from the begining of the input record</span>
+	<span class="s2">&quot;target_frequency&quot;</span><span class="p">:</span>	    <span class="mi">200</span><span class="p">,</span>	<span class="c1"># the sampling frequency of the output record</span>
+	<span class="s2">&quot;target_band&quot;</span><span class="p">:</span>              <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">55</span><span class="p">],</span>	<span class="c1"># the frequency band of the output record</span>
+
+	<span class="c1"># Parameters to identify flat intervals</span>
+	<span class="s2">&quot;flat_parms&quot;</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="s2">&quot;flat_max_ptp&quot;</span><span class="p">:</span> <span class="mf">1e-06</span><span class="p">,</span>	<span class="c1"># max amplitude peak-to-peak value for the flat interval</span>
+			<span class="s2">&quot;bad_percent&quot;</span><span class="p">:</span> <span class="mf">50.0</span><span class="p">,</span>	<span class="c1"># min percentage of the time the channel&#39;s peak</span>
+            					<span class="c1"># to peak is below the &#39;flat_max_ptp&#39; threshold</span>
+						<span class="c1"># to be considered flat</span>
+			<span class="s2">&quot;min_duration&quot;</span><span class="p">:</span> <span class="mf">10.0</span>	<span class="c1"># minimum interval in seconds for all consecutive samples to</span>
+            					<span class="c1"># be below the &#39;flat_max_ptp&#39; to indicate a flat interval</span>
+		<span class="p">},</span>
+
+	<span class="s2">&quot;hyperventilation&quot;</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="c1"># Sets of keywords in the input record annotations that identify beginnings and ends</span>
+			<span class="c1"># of the hyperventilation intervals</span>
+			<span class="s2">&quot;hv_1min_start_notes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;HV 1Min&quot;</span><span class="p">,</span> <span class="s2">&quot;HV 1 Min&quot;</span><span class="p">],</span>
+			<span class="s2">&quot;hv_1min_end_notes&quot;</span><span class="p">:</span>   <span class="p">[</span><span class="s2">&quot;Post HV 30 Sec&quot;</span><span class="p">,</span> <span class="s2">&quot;Post HV 60 Sec&quot;</span><span class="p">,</span> <span class="s2">&quot;Post HV 90 Sec&quot;</span><span class="p">],</span>
+			<span class="s2">&quot;hv_start_notes&quot;</span><span class="p">:</span>      <span class="p">[</span><span class="s2">&quot;HV Begin&quot;</span><span class="p">,</span> <span class="s2">&quot;Begin HV&quot;</span><span class="p">],</span>
+			<span class="s2">&quot;hv_end_notes&quot;</span><span class="p">:</span>        <span class="p">[</span><span class="s2">&quot;HV End&quot;</span><span class="p">,</span> <span class="s2">&quot;End HV&quot;</span><span class="p">],</span>
+
+			<span class="c1"># Additional padding in seconds added before and after the hyperventilation interval</span>
+			<span class="c1"># boundaries obtained from annotations</span>
+			<span class="s2">&quot;hv_pad_interval&quot;</span><span class="p">:</span> <span class="mi">90</span>
+		<span class="p">},</span>
+
+	<span class="c1"># Keywords in the input record annotations that identify photic stimulation</span>
+	<span class="s2">&quot;photic_stim_keywords&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">eegfh</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">EEG preprocessing pipeline for FHA EDF dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#performed-operations">Performed operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-for-extraction-from-multiple-files">Pipeline for extraction from multiple files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loading-data">Loading data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#preprocessing-configuration">Preprocessing configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Classes and functions</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Python software documentation for the EEG Fraser Health project</a></li>
+      <li>Next: <a href="code.html" title="next chapter">Classes and functions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, AM.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/README.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

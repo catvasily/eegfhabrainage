@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Classes and functions &#8212; eegfh 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="EEG preprocessing pipeline for FHA EDF dataset" href="README.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="classes-and-functions">
+<h1>Classes and functions<a class="headerlink" href="#classes-and-functions" title="Permalink to this heading">¶</a></h1>
+<p>Python modules, classes and functions used in preprocessing.</p>
+<section id="module-test_preproc">
+<span id="test-preproc-py"></span><h2>test_preproc.py<a class="headerlink" href="#module-test_preproc" title="Permalink to this heading">¶</a></h2>
+<p>A test script
+based on the example code in “<a class="reference internal" href="README.html"><span class="doc">EEG preprocessing pipeline for FHA EDF dataset</span></a>” section.</p>
+</section>
+<section id="module-edf_preprocessing">
+<span id="edf-preprocessing-py"></span><h2>edf_preprocessing.py<a class="headerlink" href="#module-edf_preprocessing" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="edf_preprocessing.JSON_CONFIG_FILE">
+<span class="sig-name descname"><span class="pre">JSON_CONFIG_FILE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'preproc_conf.json'</span></em><a class="headerlink" href="#edf_preprocessing.JSON_CONFIG_FILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default name (without a path) for the JSON file with preprocessing parameters. It is expected
+to reside in the same folder as the <em>edf_preprocessing.py</em> source file.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PreProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_parms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class’s aim is preprocessing clinical EEG recordings (in EDF format)
+and make them a suitable input for a later analysis and ML applications.</p>
+<p>The class instantiates a preprocessing object which
+carries a Raw EDF file through a sequence of operations:</p>
+<ol class="arabic simple">
+<li><p>resample each recording’s signal to traget frequency</p></li>
+<li><p>keeps only signal with frequencies in selected range</p></li>
+<li><p>identifies timestamps of hyperventilation (HV), photic stimulation (PhS)
+and flat (zero) signal (together - “bad” intervals)</p></li>
+<li><p>extract EEG segment(s) of needed length from “good” intervals</p></li>
+</ol>
+<p>Then the object can save extracted segment(s) into new EDF files
+OR return a Pandas DataFrame with data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em>) – the EDF file pathname</p></li>
+<li><p><strong>conf_json</strong> (<em>str</em>) – pathname of a json file with configuration parameters.
+The default configuration file name is given by <a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> constant.</p></li>
+<li><p><strong>conf_dict</strong> (<em>dict</em>) – a dictionary with configurartion parameters.
+If both <em>conf_json</em> and <em>conf_dict</em> are given, the latter is used.</p></li>
+<li><p><strong>target_channels</strong> (<em>list</em><em> of </em><em>str</em>) – a list of mandatory channels to read from the EDF
+file.</p></li>
+<li><p><strong>exclude_channels</strong> (<em>list</em><em> of </em><em>str</em>) – a list of channels to be excluded when reading
+the EDF file.</p></li>
+<li><p><strong>target_frequency</strong> (<em>int</em>) – the final EEG frequency after resampling</p></li>
+<li><p><strong>lfreq</strong> (<em>float</em>) – lower frequency boundary of the signal to keep</p></li>
+<li><p><strong>hfreq</strong> (<em>float</em>) – higher frequency boundary of the signal to keep</p></li>
+<li><p><strong>flat_parms</strong> (<em>dict</em>) – parameters for flat intervals selection. Should contain the
+following keys:
+<em>‘flat_max_ptp’</em> - the channel’s amplitude max peak-to-peak value (in channel’s
+units) for this channel to be marked as flat;
+<em>‘bad_percent’</em> - min percentage of the time the channel’s peak
+to peak is below the <em>‘flat_max_ptp’</em> threshold to be considered flat;
+<em>‘min_duration’</em> - minimum interval in seconds for all consecutive samples to
+be below the <em>‘flat_max_ptp’</em> to indicate a flat interval.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>At least one of the arguments: <em>conf_json</em> or <em>conf_dict</em> must be not None. If both <em>conf_json</em> and <em>conf_dict</em>
+are omitted in the constructor, the default settings will be read from <a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> which should
+be present in the same folder as the <em>edf_preprocessing.py</em>.</p></li>
+<li><p>When not None, the explicitly specified parameter values will be used instead of the values
+given by corresponding keys in <em>conf_json</em> or <em>conf_dict</em>.</p></li>
+</ul>
+</div>
+<p><strong>Attributes</strong></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>EDF file path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.conf_dict">
+<span class="sig-name descname"><span class="pre">conf_dict</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.conf_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>a dictionary with configuration parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.target_channels">
+<span class="sig-name descname"><span class="pre">target_channels</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.target_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>a list of mandatory channels to read from the EDF
+file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.exclude_channels">
+<span class="sig-name descname"><span class="pre">exclude_channels</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.exclude_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>a list of channels to be excluded when reading
+the EDF file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.target_frequency">
+<span class="sig-name descname"><span class="pre">target_frequency</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.target_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>the final EEG frequency after resampling</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.raw">
+<span class="sig-name descname"><span class="pre">raw</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>the raw EDF object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.Raw</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.sfreq">
+<span class="sig-name descname"><span class="pre">sfreq</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.sfreq" title="Permalink to this definition">¶</a></dt>
+<dd><p>initial sampling frequency of EEG</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.flat_parms">
+<span class="sig-name descname"><span class="pre">flat_parms</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.flat_parms" title="Permalink to this definition">¶</a></dt>
+<dd><p>parameters for flat intervals selection (see above)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.bad_intervals">
+<span class="sig-name descname"><span class="pre">bad_intervals</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.bad_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>a list of the [start, end] pairs with timestamps in seconds,
+indicating starts and ends of bad intervals (HV, PhS, flat signal)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.clean_intervals">
+<span class="sig-name descname"><span class="pre">clean_intervals</span></span><a class="headerlink" href="#edf_preprocessing.PreProcessing.clean_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>a list of the [start, end] pairs with timestamps in seconds,
+indicating starts and ends of segments to be extracted</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p><strong>Methods</strong></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.create_intervals_data">
+<span class="sig-name descname"><span class="pre">create_intervals_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing.create_intervals_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function updates and returns intervals_df - a DataFrame
+with the EEG data based on timestamps from <a class="reference internal" href="#edf_preprocessing.PreProcessing.clean_intervals" title="edf_preprocessing.PreProcessing.clean_intervals"><code class="xref py py-data docutils literal notranslate"><span class="pre">clean_intervals</span></code></a>.
+Prints warning if no clean segments were found.</p>
+<p>The DataFrame has the following columns:</p>
+<ul class="simple">
+<li><p>scan_id - ID of the EEG recording.</p></li>
+<li><p>interval_start - timestamp in datapoints of the segment start.</p></li>
+<li><p>interval_length - length in datapoints of the segment.</p></li>
+<li><p>data - numpy array of the EEG amplitude data, with shape
+(&lt;n_target_channels&gt;, length in seconds x sampling frequency).</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>self.interval_df</strong> (<em>DataFrame</em>) – a dataframe with extracted segments</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Saving this dataframe into a CSV file will truncate the content
+of the ‘data’ column and convert it to a string, so the data will be lost.
+Recommend to save the data into .npy file separately and keep the .csv
+for later matching with labels.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.extract_good">
+<span class="sig-name descname"><span class="pre">extract_good</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing.extract_good" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calls the functions above to identify “bad” intervals and
+updates the attribute <a class="reference internal" href="#edf_preprocessing.PreProcessing.clean_intervals" title="edf_preprocessing.PreProcessing.clean_intervals"><code class="xref py py-data docutils literal notranslate"><span class="pre">clean_intervals</span></code></a> with timesptamps to extract</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_length</strong> (<em>float</em>) – length in seconds of the segments to be extracted
+from this EEG recording</p></li>
+<li><p><strong>target_segments</strong> (<em>int</em>) – a total number of the segments to extract
+from this EEG recording</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.flat_intervals">
+<span class="sig-name descname"><span class="pre">flat_intervals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing.flat_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify beginning and end times of flat signal</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>intervals</strong> (<em>list</em>) – List of <em>[start, end]</em> time values
+for each interval</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.hyperventilation">
+<span class="sig-name descname"><span class="pre">hyperventilation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing.hyperventilation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify beginning and end of hyperventilation from EEG data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>intervals</strong> (<em>list</em>) – [[start, end]] or []: a list of start and end times of hyperventilation
+intervals. <strong>Currently contains either a single interval</strong>, or is empty.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.photic_stimulation">
+<span class="sig-name descname"><span class="pre">photic_stimulation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing.photic_stimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify beginning and end times of photic stimulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>intervals</strong> (<em>list</em>) – [[start, end]] or []: a list of start and end times of hyperventilation
+intervals. <strong>Currently contains either a single interval</strong>, or is empty.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.save_edf">
+<span class="sig-name descname"><span class="pre">save_edf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing.save_edf" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function writes out new EDF file(s) based on <a class="reference internal" href="#edf_preprocessing.PreProcessing.clean_intervals" title="edf_preprocessing.PreProcessing.clean_intervals"><code class="xref py py-data docutils literal notranslate"><span class="pre">clean_intervals</span></code></a> timestamps.
+It saves each segment into a separate EDF file, with suffixes “[scan_id]_1”,
+“[scan_id]_2”, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<em>str</em>) – where to save the new EDF files</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – main name for the output files (suffix will be added for more than 1 files)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edf_preprocessing.load_edf_data">
+<span class="sig-name descname"><span class="pre">load_edf_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels_csv_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.load_edf_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function loads multiple EDF files and returns data
+with lables suitable for analysis and machine learning models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_folder</strong> (<em>str</em>) – folder with EDF files</p></li>
+<li><p><strong>labels_csv_path</strong> (<em>str</em>) – CSV dile containing scan_ids and label (age)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X</strong> (<em>NumPy array</em>) – EEG amplitudes from EDF files, having
+shape of ([n_samples], 20, [length in seconds] x [sampling frequency])</p></li>
+<li><p><strong>labels</strong> (<em>NumPy array</em>) – age labels corresponding to each sample from X</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function fits a very specific CSV file ‘age_ScanID.csv’,
+so it’s looking for columns ‘ScanID’ for scan ids, ‘AgeYears’ for age labels.
+You might want to adjust column names in your own file or change this function.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edf_preprocessing.read_edf">
+<span class="sig-name descname"><span class="pre">read_edf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.read_edf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads an EDF file with the MNE package, creates the Raw EDF object.
+Excludes some channels to keep only target ones.
+Prints warning in case the file doesn’t have all
+neeeded channels, doesn’t return object in this case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em>) – EDF file pathname</p></li>
+<li><p><strong>conf_json</strong> (<em>str</em>) – pathname of a json file with configuration parameters; in
+particular it must contain keys <em>“target_channels”</em> and <em>“exclude_channels”</em>.
+Default configuration file name is given by <a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> constant</p></li>
+<li><p><strong>conf_dict</strong> (<em>dict</em>) – a dictionary with configurartion parameters; in
+particular it must contain keys <em>“target_channels”</em> and <em>“exclude_channels”</em>.
+If both <em>conf_json</em> and <em>conf_dict</em> are given, the latter is used.</p></li>
+<li><p><strong>target_channels</strong> (<em>list</em><em> of </em><em>str</em>) – a list of mandatory channels to read from the EDF
+file. If supplied, <em>target_channels</em> list will be used instead of the one provided
+by either of the <em>conf_…</em> arguments.</p></li>
+<li><p><strong>exclude_channels</strong> (<em>list</em><em> of </em><em>str</em>) – a list of channels to be excluded when reading
+the EDF file. If supplied, <em>exlclude_channels</em> list will be used instead of the one provided
+by either of <em>conf_…</em> arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Raw</strong> (<em>mne.Raw</em>) – raw EDF object</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At least one of the arguments: <em>conf_json</em> or <em>conf_dict</em> must be not None. If both <em>conf_json</em>
+and <em>conf_dict</em> are omitted in the function call, the default settings will be read from</p>
+<p><a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> which should be present in the same folder as the <em>edf_preprocessing.py</em>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="edf_preprocessing.slice_edfs">
+<span class="sig-name descname"><span class="pre">slice_edfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_length</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_scan_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.slice_edfs" title="Permalink to this definition">¶</a></dt>
+<dd><p>The function runs a pipeline for preprocessing and extracting
+clean segment(s) of requested length from multiple EDF files.
+It takes in a list of EDF file names and preprocessing parameters,
+looks up for the files in source folder, and performs preprocessing
+and extraction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_folder</strong> (<em>str</em>) – a pathname to the folder with EDF files</p></li>
+<li><p><strong>target_folder</strong> (<em>str</em>) – a pathname to the output folder where the extracted segments
+will be saved in EDF format</p></li>
+<li><p><strong>conf_json</strong> (<em>str</em>) – pathname of a json file with configuration parameters.
+The default configuration file name is given by <a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> constant.</p></li>
+<li><p><strong>conf_dict</strong> (<em>dict</em>) – a dictionary with configurartion parameters.
+If both <em>conf_json</em> and <em>conf_dict</em> are given, the latter is used.</p></li>
+<li><p><strong>target_length</strong> (<em>float</em>) – the length of each of the extracted segments in seconds</p></li>
+<li><p><strong>source_scan_ids</strong> (<em>list</em><em> of </em><em>str</em><em> or </em><em>None</em>) – a list of short EDF file names without .edf
+extention to preprocess. If None, all .edf files in the source directory will
+be preprocessed, up to a limit set by the <em>nfiles</em> argument</p></li>
+<li><p><strong>target_frequency</strong> (<em>num</em><em> or </em><em>None</em>) – the final EEG frequency after resampling; if not specified
+the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
+<li><p><strong>lfreq</strong> (<em>float</em><em> or </em><em>None</em>) – the lower frequency boundary of the EEG signal in Hz; if not specified
+the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
+<li><p><strong>hfreq</strong> (<em>float</em><em> or </em><em>None</em>) – the higher frequency boundary of the EEG signal in Hz; if not specified
+the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
+<li><p><strong>target_segments</strong> (<em>int</em>) – the maximum number of segments to extract from each EDF file;
+default=1</p></li>
+<li><p><strong>nfiles</strong> (<em>int</em><em> or </em><em>None</em>) – the max number of the source files to preprocess; (default = None = no limit)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-individual_func">
+<span id="individual-func-py"></span><h2>individual_func.py<a class="headerlink" href="#module-individual_func" title="Permalink to this heading">¶</a></h2>
+<p>saving the file as .edf</p>
+<p>Created on Wed Dec  5 12:56:31 2018
+&#64;author: skjerns</p>
+<p>Gist to save a mne.io.Raw object to an EDF file using pyEDFlib
+(<a class="reference external" href="https://github.com/holgern/pyedflib">https://github.com/holgern/pyedflib</a>)</p>
+<p>Disclaimer:</p>
+<ul class="simple">
+<li><p>Saving your data this way will result in slight
+loss of precision (magnitude +-1e-09).</p></li>
+<li><p>It is assumed that the data is presented in Volt (V),
+it will be internally converted to microvolt</p></li>
+<li><p>BDF or EDF+ is selected based on the filename extension</p></li>
+<li><p>Annotations are lost in the process.</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="individual_func.write_mne_edf">
+<span class="sig-name descname"><span class="pre">write_mne_edf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mne_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#individual_func.write_mne_edf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the raw content of an MNE.io.Raw and its subclasses to
+a file using the EDF+/BDF filetype
+pyEDFlib is used to save the raw contents of the RawArray to disk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mne_raw</strong> (<em>mne.io.Raw</em>) – An object with super class mne.io.Raw that contains the data
+to save</p></li>
+<li><p><strong>fname</strong> (<em>string</em>) – File name of the new dataset. This has to be a new filename
+unless data have been preloaded. Filenames should end with .edf</p></li>
+<li><p><strong>picks</strong> (<em>array-like</em><em> of </em><em>int</em><em> | </em><em>None</em>) – Indices of channels to include. If None all channels are kept.</p></li>
+<li><p><strong>tmin</strong> (<em>float</em><em> | </em><em>None</em>) – Time in seconds of first sample to save. If None first sample
+is used.</p></li>
+<li><p><strong>tmax</strong> (<em>float</em><em> | </em><em>None</em>) – Time in seconds of last sample to save. If None last sample
+is used.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em>) – If True, the destination file (if it exists) will be overwritten.
+If False (default), an error will be raised if the file exists.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">eegfh</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">EEG preprocessing pipeline for FHA EDF dataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classes and functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-test_preproc">test_preproc.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-edf_preprocessing">edf_preprocessing.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-individual_func">individual_func.py</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="README.html" title="previous chapter">EEG preprocessing pipeline for FHA EDF dataset</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, AM.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/code.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
