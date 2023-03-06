@@ -4,7 +4,8 @@ eegLog.txt
 # Sphinx working files
 doc/Makefile
 doc/make.bat
-doc/_build/
+doc/_build/doctrees/
+doc/_build/html/_sources/
 
 # Virtual env and/or symbolic link to it other folders
 mne
