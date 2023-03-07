@@ -356,9 +356,10 @@ You might want to adjust column names in your own file or change this function.<
 <dt class="sig sig-object py" id="edf_preprocessing.read_edf">
 <span class="sig-name descname"><span class="pre">read_edf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.read_edf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads an EDF file with the MNE package, creates the Raw EDF object.
-Excludes some channels to keep only target ones.
-Prints warning in case the file doesn’t have all
-neeeded channels, doesn’t return object in this case.</p>
+Excludes some channels to keep only target ones plus possibly some additional
+non-eeg channels.</p>
+<p>Prints a warning in case the input recording  doesn’t have all
+mandatory channels, doesn’t return object in this case.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
