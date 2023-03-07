@@ -1,12 +1,15 @@
 {
-	"target_channels":  ["FP1", "FPZ",   "FP2",  "F3",   "F4",   "F7",     "F8",   "FZ",   "T3",   "T4",
-			     "T5",  "T6",    "C3",   "C4",   "CZ",   "P3",     "P4",   "PZ",   "O1",   "O2"],
+	"target_channels":  ["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4",
+			     "T5",  "T6",  "C3",  "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"],
 
-	"exclude_channels": ["A1",   "A2",   "AUX1", "AUX2", "AUX3", "AUX4",   "AUX5", "AUX6", "AUX7", "AUX8",
-			     "Cz",   "DC1",  "DC2",  "DC3",  "DC4",  "DIF1",   "DIF2", "DIF3", "DIF4", "ECG1",
-			     "ECG2", "EKG1", "EKG2", "EOG 1","EOG 2","EOG1",   "EOG2", "Fp1",  "Fp2",  "Fpz", 
-			     "Fz",   "PG1",  "PG2",  "Patient Event", "Photic", "Pz", "Trigger Event", "X1", "X2", "aux1",
+	"aux_channels":     ["ECG1", "ECG2", "EKG1", "EKG2", "EOG 1", "EOG 2", "EOG1", "EOG2", "PG1", "PG2"],
+
+	"exclude_channels": ["A1",   "A2",  "AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8",
+			     "Cz",   "DC1", "DC2",  "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",  "Fp1", 
+			     "Fp2",  "Fpz", "Fz", "Patient Event", "Photic", "Pz", "Trigger Event", "X1", "X2", "aux1",
 			     "phoic", "photic"],
+
+	"print_aux_channels": false,
 
 	"discard_at_start_seconds": 420,
 	"target_frequency":	    200,

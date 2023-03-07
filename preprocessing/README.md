@@ -115,28 +115,33 @@ may be changed in a similar way when processing multiple records with `slice_edf
 
 Specifically, an alternative configuration file name is passed to `PreProcess` class constructor (or to `slice_edfs()`)
 via an argument `conf_json = <file-pathname>`; an equivalent dictionary object may be passed as `conf_dict = <dictionary-object>`.
-A subset of individual configuration paramters may be given explicitly using corresponding keywords -
+A subset of individual configuration parameters may be given explicitly using corresponding keywords -
 for example, `target_frequency = 300`.
 
 Note that explicitly supplied parameter values take precedence over those provided in conf_dict; the latter take precedence
-over the parameter values read from `conf_json` file. 
+over values found in `conf_json` file. 
 
-The meaning of parameters in the JSON configuration file is explained in the comments in the code below, which start
-with `#` character. Mind that **comments are NOT allowed in a real JSON file** - please remove those if using this example
+The meaning of parameters in the JSON configuration file is explained in the comments in the code below. Comment lines start
+with the `#` character. Mind that **comments are NOT allowed in a real JSON file** - please remove those if using this example
 in practice.
 
 ```python
 {
 	# A list of mandatory channels. An input recording is discarded if any of those is missing
-	"target_channels":  ["FP1", "FPZ",   "FP2",  "F3",   "F4",   "F7",     "F8",   "FZ",   "T3",   "T4",
-			     "T5",  "T6",    "C3",   "C4",   "CZ",   "P3",     "P4",   "PZ",   "O1",   "O2"],
+	"target_channels":  ["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4",
+			     "T5",  "T6",  "C3",  "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"],
 
-	# A list of channels that will be removed from the input recording, if present
-	"exclude_channels": ["A1",   "A2",   "AUX1", "AUX2", "AUX3", "AUX4",   "AUX5", "AUX6", "AUX7", "AUX8",
-			     "Cz",   "DC1",  "DC2",  "DC3",  "DC4",  "DIF1",   "DIF2", "DIF3", "DIF4", "ECG1",
-			     "ECG2", "EKG1", "EKG2", "EOG 1","EOG 2","EOG1",   "EOG2", "Fp1",  "Fp2",  "Fpz", 
-			     "Fz",   "PG1",  "PG2",  "Patient Event", "Photic", "Pz", "Trigger Event", "X1", "X2", "aux1",
+	# A list of optional non_EEG channels that will be included in the output EDF, if present
+	"aux_channels":     ["ECG1", "ECG2", "EKG1", "EKG2", "EOG 1", "EOG 2", "EOG1", "EOG2", "PG1", "PG2"],
+
+	# A list of channels that will be removed from the output recording, if present
+	"exclude_channels": ["A1",   "A2",  "AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8",
+			     "Cz",   "DC1", "DC2",  "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",  "Fp1", 
+			     "Fp2",  "Fpz", "Fz", "Patient Event", "Photic", "Pz", "Trigger Event", "X1", "X2", "aux1",
 			     "phoic", "photic"],
+
+	# A flag to print out the auxiliary channels included in the output EDF (true or false, lower case)
+	"print_aux_channels": false,
 
 	"discard_at_start_seconds": 420,	# time interval removed from the begining of the input record
 	"target_frequency":	    200,	# the sampling frequency of the output record

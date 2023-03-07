@@ -25,9 +25,11 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
 	exclude_channels = None):
     '''
     Reads an EDF file with the MNE package, creates the Raw EDF object. 
-    Excludes some channels to keep only target ones.
-    Prints warning in case the file doesn't have all 
-    neeeded channels, doesn't return object in this case.
+    Excludes some channels to keep only target ones plus possibly some additional
+    non-eeg channels. 
+
+    Prints a warning in case the input recording  doesn't have all 
+    mandatory channels, doesn't return object in this case.
     
     Args:
       filepath (str): EDF file pathname
@@ -78,10 +80,21 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
     current_channels = set(data.ch_names)
     
     # checking whether we have all needed channels
-    if target_channels == current_channels:
+    # Originally was:
+    #  if target_channels == current_channels:
+    # Now we optionally include some non_EEG channels, so:
+    if target_channels.issubset(current_channels):
+        if conf_dict["print_aux_channels"]:
+            # Print all additional channels read from the input EDF
+            aux_list = list(current_channels.difference(target_channels))
+
+            if len(aux_list) > 0:
+                aux_list.sort()
+                print(filepath, " - auxiliary channels included: ", aux_list)
+
         return data
     else:
-        print(filepath, "File doesn't have all needed channels")
+        print(filepath, ": File doesn't have all mandatory channels")
 
 class PreProcessing:
     """The class's aim is preprocessing clinical EEG recordings (in EDF format)
