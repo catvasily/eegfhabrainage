@@ -82,15 +82,28 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
     # checking whether we have all needed channels
     # Originally was:
     #  if target_channels == current_channels:
-    # Now we optionally include some non_EEG channels, so:
-    if target_channels.issubset(current_channels):
+    # Now we:
+    #     - also include lower or mixed case of the target channels list
+    #     - optionally include some non_EEG channels:
+
+    # Generate upper case versions of the lists
+    tlst_set = set([c.upper() for c in target_channels])
+    clst_lst = [c.upper() for c in data.ch_names]
+    clst_set = set(clst_lst)
+
+    if tlst_set.issubset(clst_set):
         if conf_dict["print_opt_channels"]:
             # Print all additional channels read from the input EDF
-            aux_list = list(current_channels.difference(target_channels))
+            aux_list = list(clst_set.difference(tlst_set))
 
             if len(aux_list) > 0:
+                # Convert aux_list to the original case
+                for i, c in enumerate(aux_list):
+                    j = clst_lst.index(c)
+                    aux_list[i] = data.ch_names[j]
+
                 aux_list.sort()
-                print(filepath, " - auxiliary channels included: ", aux_list)
+                print(filepath, " - additional channels included: ", aux_list)
 
         return data
     else:
