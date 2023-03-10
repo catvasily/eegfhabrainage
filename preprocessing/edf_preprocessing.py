@@ -84,7 +84,7 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
     #  if target_channels == current_channels:
     # Now we optionally include some non_EEG channels, so:
     if target_channels.issubset(current_channels):
-        if conf_dict["print_aux_channels"]:
+        if conf_dict["print_opt_channels"]:
             # Print all additional channels read from the input EDF
             aux_list = list(current_channels.difference(target_channels))
 

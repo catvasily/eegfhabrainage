@@ -131,20 +131,26 @@ in practice.
 	"target_channels":  ["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4",
 			     "T5",  "T6",  "C3",  "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"],
 
-	# A list of optional non_EEG channels that will be included in the output EDF, if present
-	"aux_channels":     ["ECG1", "ECG2", "EKG1", "EKG2", "EOG 1", "EOG 2", "EOG1", "EOG2", "PG1", "PG2"],
+	# A list of optional non-EEG channels that will be included in the output EDF, if present
+	"opt_channels":     ["ECG1", "ECG2", "EKG1", "EKG2", "EOG 1", "EOG 2", "EOG1", "EOG2", "PG1", "PG2", 
+			     "A1",   "A2"],
 
 	# A list of channels that will be removed from the output recording, if present
-	"exclude_channels": ["A1",   "A2",  "AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8",
-			     "Cz",   "DC1", "DC2",  "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",  "Fp1", 
-			     "Fp2",  "Fpz", "Fz", "Patient Event", "Photic", "Pz", "Trigger Event", "X1", "X2", "aux1",
-			     "phoic", "photic"],
+	# Note that this list is treated as case-sensitive by MNE
+	"exclude_channels": ["AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8", "DC1", "DC2",
+			     "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",
+			     "aux1", "aux2", "aux3", "aux4", "aux5", "aux6", "aux7", "aux8", "dc1", "dc2",
+			     "dc3",  "dc4",  "dif1", "dif2", "dif3", "dif4",
+                             "Patient Event", "Photic", "Trigger Event", "x1", "x2",
+			     "phoic", "Phoic", "photic", 
+			     "PATIENT EVENT", "PHOTIC", "TRIGGER EVENT", "X1", "X2",
+			     "PHOIC", "PHOTIC"],
 
 	# A flag to print out the auxiliary channels included in the output EDF (true or false, lower case)
-	"print_aux_channels": false,
+	"print_opt_channels": false,
 
 	"discard_at_start_seconds": 420,	# time interval removed from the begining of the input record
-	"target_frequency":	    200,	# the sampling frequency of the output record
+	"target_frequency":	    256,	# the sampling frequency of the output record
 	"target_band":              [0.5, 55],	# the frequency band of the output record
 
 	# Parameters to identify flat intervals
