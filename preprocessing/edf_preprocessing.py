@@ -351,10 +351,10 @@ class PreProcessing:
         
         Args:
             target_length (float): length in seconds of the segments to be extracted
-                from this EEG recording; the value from self.conf_dict will be used
+                from this EEG recording; the value from `self.conf_dict` will be used
                 if not specified
             target_segments (int): a total number of the segments to extract 
-                from this EEG recording; the value from self.conf_dict will be used
+                from this EEG recording; the value from `self.conf_dict` will be used
                 if not specified
 
         Returns:
@@ -563,9 +563,9 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
         hfreq (float or None): the higher frequency boundary of the EEG signal in Hz; if not specified
             the default for the :class: `PreProcessing` will be used
         target_length (float): the length of each of the extracted segments in seconds; the value
-            from conf_json or conf_dict will be used if not specified
+            from `conf_json` or `conf_dict` will be used if not specified
         target_segments (int): the maximum number of segments to extract from each EDF file; the value
-            from conf_json or conf_dict will be used if not specified
+            from `conf_json` or `conf_dict` will be used if not specified
         nfiles (int or None): the max number of the source files to preprocess; (default = None = no limit)
           
     Returns:
