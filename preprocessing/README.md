@@ -152,6 +152,8 @@ in practice.
 	"discard_at_start_seconds": 420,	# time interval removed from the begining of the input record
 	"target_frequency":	    256,	# the sampling frequency of the output record
 	"target_band":              [0.5, 55],	# the frequency band of the output record
+	"target_segments":	    1,		# Max number of good continuous segments to extract
+	"target_length":	    360,	# The good segment length in seconds
 
 	# Parameters to identify flat intervals
 	"flat_parms":

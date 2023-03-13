@@ -345,20 +345,27 @@ class PreProcessing:
         # null value when no stimulation is present
         # return None
 
-    def extract_good(self, target_length, target_segments):
+    def extract_good(self, target_length = None, target_segments = None):
         """This function calls the functions above to identify "bad" intervals and
         updates the attribute :data:`clean_intervals` with timesptamps to extract
         
         Args:
             target_length (float): length in seconds of the segments to be extracted
-                from this EEG recording
+                from this EEG recording; the value from self.conf_dict will be used
+                if not specified
             target_segments (int): a total number of the segments to extract 
-                from this EEG recording
+                from this EEG recording; the value from self.conf_dict will be used
+                if not specified
 
         Returns:
             None
              
         """
+        if target_length is None:
+            target_length = self.conf_dict["target_length"]
+
+        if target_segments is None:
+            target_segments = self.conf_dict["target_segments"]
         
         self.bad_intervals = []
         # calling functions to identify different kinds of "bad" intervals
@@ -529,8 +536,9 @@ class PreProcessing:
             print('Found no clean intervals of the specified length')
             
             
-def slice_edfs(source_folder, target_folder, target_length, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
-               source_scan_ids = None, target_frequency = None, lfreq = None, hfreq = None, target_segments=1, nfiles=None):
+def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
+               source_scan_ids = None, target_frequency = None, lfreq = None, hfreq = None, 
+               target_length = None, target_segments = None, nfiles=None):
     """ The function runs a pipeline for preprocessing and extracting 
     clean segment(s) of requested length from multiple EDF files.
     It takes in a list of EDF file names and preprocessing parameters, 
@@ -545,7 +553,6 @@ def slice_edfs(source_folder, target_folder, target_length, *, conf_json = _JSON
            The default configuration file name is given by :data:`JSON_CONFIG_FILE` constant.
         conf_dict (dict): a dictionary with configurartion parameters.
            If both *conf_json* and *conf_dict* are given, the latter is used.
-        target_length (float): the length of each of the extracted segments in seconds
         source_scan_ids (list of str or None) : a list of short EDF file names without .edf
             extention to preprocess. If None, all .edf files in the source directory will
             be preprocessed, up to a limit set by the *nfiles* argument
@@ -555,8 +562,10 @@ def slice_edfs(source_folder, target_folder, target_length, *, conf_json = _JSON
             the default for the :class: `PreProcessing` will be used
         hfreq (float or None): the higher frequency boundary of the EEG signal in Hz; if not specified
             the default for the :class: `PreProcessing` will be used
-        target_segments (int): the maximum number of segments to extract from each EDF file;
-            default=1
+        target_length (float): the length of each of the extracted segments in seconds; the value
+            from conf_json or conf_dict will be used if not specified
+        target_segments (int): the maximum number of segments to extract from each EDF file; the value
+            from conf_json or conf_dict will be used if not specified
         nfiles (int or None): the max number of the source files to preprocess; (default = None = no limit)
           
     Returns:

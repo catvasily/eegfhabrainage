@@ -19,6 +19,8 @@
 	"discard_at_start_seconds": 420,
 	"target_frequency":	    256,
 	"target_band":              [0.5, 55],
+	"target_segments":	    1,
+	"target_length":	    360,
 
 	"flat_parms":
 		{
