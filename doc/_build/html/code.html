@@ -249,16 +249,18 @@ for later matching with labels.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="edf_preprocessing.PreProcessing.extract_good">
-<span class="sig-name descname"><span class="pre">extract_good</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing.extract_good" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">extract_good</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing.extract_good" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function calls the functions above to identify “bad” intervals and
 updates the attribute <a class="reference internal" href="#edf_preprocessing.PreProcessing.clean_intervals" title="edf_preprocessing.PreProcessing.clean_intervals"><code class="xref py py-data docutils literal notranslate"><span class="pre">clean_intervals</span></code></a> with timesptamps to extract</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>target_length</strong> (<em>float</em>) – length in seconds of the segments to be extracted
-from this EEG recording</p></li>
+from this EEG recording; the value from <cite>self.conf_dict</cite> will be used
+if not specified</p></li>
 <li><p><strong>target_segments</strong> (<em>int</em>) – a total number of the segments to extract
-from this EEG recording</p></li>
+from this EEG recording; the value from <cite>self.conf_dict</cite> will be used
+if not specified</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -392,7 +394,7 @@ and <em>conf_dict</em> are omitted in the function call, the default settings wi
 
 <dl class="py function">
 <dt class="sig sig-object py" id="edf_preprocessing.slice_edfs">
-<span class="sig-name descname"><span class="pre">slice_edfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_length</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_scan_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.slice_edfs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">slice_edfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_folder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_scan_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.slice_edfs" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function runs a pipeline for preprocessing and extracting
 clean segment(s) of requested length from multiple EDF files.
 It takes in a list of EDF file names and preprocessing parameters,
@@ -408,7 +410,6 @@ will be saved in EDF format</p></li>
 The default configuration file name is given by <a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> constant.</p></li>
 <li><p><strong>conf_dict</strong> (<em>dict</em>) – a dictionary with configurartion parameters.
 If both <em>conf_json</em> and <em>conf_dict</em> are given, the latter is used.</p></li>
-<li><p><strong>target_length</strong> (<em>float</em>) – the length of each of the extracted segments in seconds</p></li>
 <li><p><strong>source_scan_ids</strong> (<em>list</em><em> of </em><em>str</em><em> or </em><em>None</em>) – a list of short EDF file names without .edf
 extention to preprocess. If None, all .edf files in the source directory will
 be preprocessed, up to a limit set by the <em>nfiles</em> argument</p></li>
@@ -418,8 +419,10 @@ the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
 the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
 <li><p><strong>hfreq</strong> (<em>float</em><em> or </em><em>None</em>) – the higher frequency boundary of the EEG signal in Hz; if not specified
 the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
-<li><p><strong>target_segments</strong> (<em>int</em>) – the maximum number of segments to extract from each EDF file;
-default=1</p></li>
+<li><p><strong>target_length</strong> (<em>float</em>) – the length of each of the extracted segments in seconds; the value
+from <cite>conf_json</cite> or <cite>conf_dict</cite> will be used if not specified</p></li>
+<li><p><strong>target_segments</strong> (<em>int</em>) – the maximum number of segments to extract from each EDF file; the value
+from <cite>conf_json</cite> or <cite>conf_dict</cite> will be used if not specified</p></li>
 <li><p><strong>nfiles</strong> (<em>int</em><em> or </em><em>None</em>) – the max number of the source files to preprocess; (default = None = no limit)</p></li>
 </ul>
 </dd>
