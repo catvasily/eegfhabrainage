@@ -38,8 +38,9 @@
 			"hv_pad_interval": 90
 		},
 
-	"photic_stim_keywords": ["Hz"]
-			
+	"photic_starts": ["Hz"],
+	"photic_ends": ["Off"],
 
+	"max_isi": 360
 }
 

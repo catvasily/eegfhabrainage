@@ -320,30 +320,89 @@ class PreProcessing:
                 intervals. **Currently contains either a single interval**, or is empty.
              
         """
-        
-        # store times when stimulation occurs
-        stimulation = []
-        
+        starts = []	# Timestamps for annotationreferring to photic stim starts
+        ends = []	# Timestamps for annotations referring to photic stim ends
+        lst_starts = [s.upper() for s in self.conf_dict["photic_starts"]]
+        lst_ends = [s.upper() for s in self.conf_dict["photic_ends"]]
+
         # loop over descriptions and identify those that contain frequencies
-        for position, annot in enumerate(self.raw.annotations.description):
-            for kword in self.conf_dict["photic_stim_keywords"]:
-                if kword in annot:
+        for iannot, annot in enumerate(self.raw.annotations.description):
+            a = annot.upper()
+
+            # For stim start, the annotation must INCLUDE the keyword
+            for kword in lst_starts:
+                if kword in a:
                     # record the positions of stimulations
-                    stimulation.append(position)
+                    starts.append(self.raw.annotations.onset[iannot])
                     break
-        
-        # provided stimulation has occured
-        if len(stimulation)>1:
-            # identify beginning and end
-            start = self.raw.annotations.onset[stimulation[0]]
-            end = self.raw.annotations.onset[stimulation[-1]] + self.raw.annotations.duration[stimulation[-1]]
-            return [[start, end]]    
+
+            # For stim end, the annotation must BE EQUAL TO the keyword
+            # (because for example kword 'Off' may be part of other annotations - 
+            # simply checking for its presence won't work)
+            for kword in lst_ends:
+                if kword == a:
+                    # record the positions of stimulations
+                    ends.append(self.raw.annotations.onset[iannot])
+                    break
+
+        # Avoid empty lists, to simplify processing.
+        if not starts:
+            # Insert one tick long interval at the start of the recording
+            # (it will be discarded anyways)
+            starts.append(self.raw.times[0])
+            ends.insert(0, self.raw.times[1])
+
+        # Sanity checks
+        if ends[0] < starts[0]:
+            starts.insert[0, 0.]	# Add start of stim at time = 0
+            print('\nWARNING: Missing start of photic stimulation in file ', self.filename)
+            print('Start of the recording is assumed\n')
+
+        if ends[-1] < starts[-1]:
+            ends.append(self.raw.times[-1])	# Add end of stim at time = end
+            print('\nWARNING: Missing end of photic stimulation in file ', self.filename)
+            print('End of the recording is assumed\n')
+
+        # At this point always starts[0] < ends[-1]
+        if len(starts) != len(ends):
+            print('\nWARNING: Mismatch in numbers of start and end marks for photic stimulation in file ',
+                    self.filename, '\n')
+            return [[starts[0], ends[-1]]]
+
+        # At this point len(starts) == len(ends). Convert starts and ends to arrays now
+        starts = np.array(starts); ends = np.array(ends)
+
+        if any(ends - starts < 0):
+            print('\nWARNING: Some photic stim end marks precede start marks in file ',
+                    self.filename, '\n')
+            return [[starts[0], ends[-1]]]
+            
+        # Split photic stim into intervals, if there is more than one
+        tmp = np.roll(starts, 1); tmp[0] =  starts[0]	# Shift starts to the right
+        incs = starts - tmp				# Intervals between pulse onsets
+        gaps = incs > self.conf_dict["max_isi"]
+
+        if any(gaps):
+            # Yes, there is more than one photic stim series
+            gaps[0] = True			# We don't want to skip the 1st interval
+            ser_starts = starts[gaps]		# Starting times of the series
+
+            # One should use the ends which precede the new series starts
+            # as the ends of previous series
+            gaps1 = np.roll(gaps, -1); gaps1[-1] = True	# Shift gaps array one element left
+            ser_ends = ends[gaps1]
+
+            assert all(ser_ends - ser_starts > 0), "Starts and ends of photic stim intervals messed up"
+
+            # Now numpy arrays ser_starts, ser_ends contain starts and ends of the series
+            lst_out = []
+            for i in range(len(ser_starts)):
+                lst_out.append([ser_starts[i], ser_ends[i]])
+
+            return lst_out
         else:
-            return []
-       
-        # AM: ?? this code is unreachable - commented out
-        # null value when no stimulation is present
-        # return None
+            # There is just one series
+            return [[starts[0], ends[-1]]]
 
     def extract_good(self, target_length = None, target_segments = None):
         """This function calls the functions above to identify "bad" intervals and

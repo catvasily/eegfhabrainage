@@ -180,8 +180,11 @@ in practice.
 			"hv_pad_interval": 90
 		},
 
-	# Keywords in the input record annotations that identify photic stimulation
-	"photic_stim_keywords": ["Hz"]
+	"photic_starts": ["Hz"],	# Keyword in annotation that marks the start of the photic stim
+	"photic_ends": ["Off"],		# !! EXACT WORDING !! of the annotation that marks the end of the photic stim
+
+	"max_isi": 360			# Max interval in seconds between photic stimulations to consider those
+					# belonging to the same photic stimulation series
 }
 
 ```
