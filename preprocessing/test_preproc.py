@@ -1,5 +1,36 @@
+def get_data_folders():
+	'''Setup input and output data folders depending on the host machine.
+
+	Returns:
+	    data_root, out_root (str, str): paths to the root input and output
+		data folders
+	    
+	'''
+	import os.path as path
+	import socket
+
+	host = socket.gethostname()
+
+	# path.expanduser("~") results in /home/<username>
+	user_home = path.expanduser("~")
+	user = path.basename(user_home) # Yields just <username>
+
+	if 'ub20-04' in host:
+		data_root = '/data/eegfhabrainage'
+		out_root = data_root + '/processed'
+	elif 'cedar' in host:
+		data_root = '/project/6019337/databases/eeg_fha/release_001/edf'
+		out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
+	else:
+		home_dir = os.getcwd()
+		data_root = home_dir
+		out_root = home_dir + '/processed'
+
+	return data_root, out_root
+
 """A test script
 based on the example code in \":doc:`README`\" section.
+
 """
 # The 'if' is needed to prevent running this code when the file is 
 # imported into some other source and is not supposed to run
@@ -7,21 +38,24 @@ if __name__ == '__main__':
 	# Test processing a single record using the PreProcessing class directly
 	from edf_preprocessing import PreProcessing
 
+	data_root, out_root = get_data_folders()
+
 	# Burnaby
-	#input_dir = "/data/eegfhabrainage/Burnaby"
-	#file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
+	input_dir = data_root + "/Burnaby"
+	output_dir = out_root + "/Burnaby"
+	file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
 	#file_name = "81be60fc-ed17-4f91-a265-c8a9f1770517.edf"
 	#file_name = "fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2.edf"
 	#file_name = "ffff1021-f5ba-49a9-a588-1c4778fb38d3.edf"
 
 	# Abbotsford
-	input_dir = "/data/eegfhabrainage/Abbotsford"
-	file_name = "fffcedd0-503f-4400-8557-f74b58cff9d9.edf"	# HV
+	#input_dir = data_root + "/Abbotsford"
+	#output_dir = out_root + "/Abbotsford"
+	#file_name = "fffcedd0-503f-4400-8557-f74b58cff9d9.edf"	# HV
 	#file_name = "fffaab93-e908-4b93-a021-ab580e573585.edf"	# No HV
 	#file_name = "test_HV.edf"				# Several HV series
 
 	path = input_dir + '/' + file_name
-	output_dir = input_dir + "/results"
 
 	# These will be used if explicitly specified in the PreProcessing class constructor
 	target_frequency=200
@@ -52,5 +86,5 @@ if __name__ == '__main__':
 	from edf_preprocessing import slice_edfs
 
 	source_scan_ids = ["fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2", "ffff1021-f5ba-49a9-a588-1c4778fb38d3"]
-	slice_edfs(input_dir, output_dir, source_scan_ids = None)
+	slice_edfs(input_dir, output_dir, source_scan_ids = source_scan_ids)
 
