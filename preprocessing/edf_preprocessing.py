@@ -572,7 +572,7 @@ class PreProcessing:
             
             return self.intervals_df
         else:
-            print('Found no clean intervals of the specified length')
+            print('Found no clean intervals of the specified length in file ', self.filename)
             
     def save_edf(self, folder, filename):
         """ The function writes out new EDF file(s) based on :data:`clean_intervals` timestamps.
@@ -604,7 +604,7 @@ class PreProcessing:
                 else:
                     write_mne_edf(tmp_raw_edf, fname=folder+'/'+filename, overwrite=True)
         else:
-            print('Found no clean intervals of the specified length')
+            print('Found no clean intervals of the specified length in file ', self.filename)
             
             
 def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
