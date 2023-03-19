@@ -29,14 +29,8 @@
 			"min_duration": 10.0
 		},
 
-	"hyperventilation":
-		{
-			"hv_1min_start_notes": ["HV 1Min", "HV 1 Min"],
-			"hv_1min_end_notes":   ["Post HV 30 Sec", "Post HV 60 Sec", "Post HV 90 Sec"],
-			"hv_start_notes":      ["HV Begin", "Begin HV"],
-			"hv_end_notes":        ["HV End", "End HV"],
-			"hv_pad_interval": 90
-		},
+	"HV_regexp":	"H.*V.*\\d+\\s*[MmIiNn]{3}",
+	"hv_pad_interval": 30,
 
 	"photic_starts": ["Hz"],
 	"photic_ends": ["Off"],

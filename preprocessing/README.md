@@ -166,19 +166,11 @@ in practice.
             					# be below the 'flat_max_ptp' to indicate a flat interval
 		},
 
-	"hyperventilation":
-		{
-			# Sets of keywords in the input record annotations that identify beginnings and ends
-			# of the hyperventilation intervals
-			"hv_1min_start_notes": ["HV 1Min", "HV 1 Min"],
-			"hv_1min_end_notes":   ["Post HV 30 Sec", "Post HV 60 Sec", "Post HV 90 Sec"],
-			"hv_start_notes":      ["HV Begin", "Begin HV"],
-			"hv_end_notes":        ["HV End", "End HV"],
-
-			# Additional padding in seconds added before and after the hyperventilation interval
-			# boundaries obtained from annotations
-			"hv_pad_interval": 90
-		},
+	"HV_regexp":	"H.*V.*\\d+\\s*[MmIiNn]{3}",	# Regular expression to identify HV annotations like "HV 1 Min"
+	"hv_pad_interval": 30,				# Padding interval in seconds around HV series. Final HV boundaries
+							# are set as follows:
+							# HV start = 1st HV mark - pad_interval
+							# HV end = last HV mark + 60 + pad_interval
 
 	"photic_starts": ["Hz"],	# Keyword in annotation that marks the start of the photic stim
 	"photic_ends": ["Off"],		# !! EXACT WORDING !! of the annotation that marks the end of the photic stim

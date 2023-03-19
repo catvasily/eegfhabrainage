@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import zscore
 import json
+import re
 
 JSON_CONFIG_FILE = "preproc_conf.json"
 '''Default name (without a path) for the JSON file with preprocessing parameters. It is expected
@@ -265,59 +266,70 @@ class PreProcessing:
         """Identify beginning and end of hyperventilation from EEG data
 
         Returns:
-            intervals (list): [[start, end]] or []: a list of start and end times of hyperventilation
-                intervals. **Currently contains either a single interval**, or is empty.
-             
+            intervals (list): [[start1, end1],...,[startN, endN]] or []: a list of start and end times
+                of hyperventilation intervals.
+
         """
+        hvticks = []	# Time stamps for annotations like "HV N min"
+        # hvmins = []		# Minutes count for those time stamps
+        ptrn = self.conf_dict["HV_regexp"]
 
-        start = np.nan
-        end = np.nan
-        parms = self.conf_dict["hyperventilation"]
+        for ia, a in enumerate(self.raw.annotations.description):
+            match = re.findall(ptrn, a)
 
-        for position, item in enumerate(self.raw.annotations.description):
-            if item in parms["hv_1min_start_notes"]:
-                start = self.raw.annotations.onset[position] - parms["hv_pad_interval"]
+            if len(match):
+                hvticks.append(self.raw.annotations.onset[ia])
+                # (dstart, dend) = re.search(r"\d+", a).span()
+                # hvmins.append(int(a[dstart:dend]))
 
-            if item in parms["hv_1min_end_notes"]:
-                end = self.raw.annotations.onset[position] + (parms["hv_pad_interval"] - int(item.split(' ')[2]))
+        if not hvticks:
+            return []	# No HV intervals found
 
-        if np.isnan(start):
-            for position, item in enumerate(self.raw.annotations.description):
-                if item in parms["hv_start_notes"]:
-                    # AM: was:
-                    # 	start = self.raw.annotations.onset[position] - 30
-                    # This prepends with 30 seconds, while in all other cases pre/post-
-                    # pending is done with parms["hv_pad_interval"] seconds. Corrected.
-                    start = self.raw.annotations.onset[position] - parms["hv_pad_interval"]
+        hvticks = np.array(hvticks)
 
-        if np.isnan(end):
-            for position, item in enumerate(self.raw.annotations.description):
-                if item in parms["hv_end_notes"]:
-                    end = self.raw.annotations.onset[position] + parms["hv_pad_interval"]
-
-        # when hyperventilation is present
-        # eliminate the corresponding segment
-	# AM: was:
-        #	if start != np.nan and end != np.nan:
-	# This is wrong, because np.nan != np.nan returns True. Thus when both
-	# start and end are NaNs the returned interval is [NaN, NaN] instead of
-	# empty []. The correct test is 
-        if (not np.isnan(start)) and (not np.isnan(end)):
-            return [[start, end]]
+        if len(hvticks) > 1:
+            incs = hvticks[1:] - hvticks[:-1]
+            gaps = incs > 90.	# If increment > 1.5 min - then this is a new HV interval 
         else:
-            # AM: ?? This will return [] if any of (start, end) is NaN. This is
-            # a correct behavior only provided both starting and ending annotations are 
-            # ALWAYS present. Is it indeed the case? Not sure - so added a check here:
-            assert np.isnan(start) and np.isnan(end), \
-                'Only one end of a hyperventilation interval is found'	# Assert when only one of them is NaN
-            return []
+            gaps = [False]
+
+        pad_int = self.conf_dict["hv_pad_interval"]
+        padd_it = lambda lst: [lst[0] - pad_int, lst[-1]+60.+pad_int]
+
+        if any(gaps):
+            gaps = np.append(gaps, True)	# Make gaps same length as hvticks
+            gaps = np.roll(gaps, 1)		# Now 0th element in gaps is always True
+
+            lst_out = []
+            l = [hvticks[0]]
+            for i in range(len(gaps)):
+                if i == 0:
+                    continue
+                if gaps[i]:
+                    l.append(hvticks[i-1])	# Set the end of the previous interval
+                    lst_out.append(l)		# Save the previous interval
+                    l = [hvticks[i]]		# Start a new interval
+
+            l.append(hvticks[-1])		# Set the end of the last interval
+            lst_out.append(l)			# Save it
+
+            # Padd all the intervals
+            lst_final = []
+            for l in lst_out:
+                lst_final.append(padd_it(l))
+
+            return lst_final		# Return multiple padded HV intervals
+        # end of if any(gaps)
+
+        return [padd_it(hvticks)]	# Return a single padded HV interval
+
 
     def photic_stimulation(self):
         """Identify beginning and end times of photic stimulation.
            
         Returns:
             intervals (list): [[start1, end1],...,[startN, endN]] or []: a list of start and end times
-                of hyperventilation intervals.
+                of photic stimulation series.
              
         """
         starts = []	# Timestamps for annotationreferring to photic stim starts

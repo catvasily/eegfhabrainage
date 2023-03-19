@@ -7,12 +7,19 @@ if __name__ == '__main__':
 	# Test processing a single record using the PreProcessing class directly
 	from edf_preprocessing import PreProcessing
 
+	# Burnaby
+	#input_dir = "/data/eegfhabrainage/Burnaby"
 	#file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
 	#file_name = "81be60fc-ed17-4f91-a265-c8a9f1770517.edf"
 	#file_name = "fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2.edf"
-	file_name = "ffff1021-f5ba-49a9-a588-1c4778fb38d3.edf"
+	#file_name = "ffff1021-f5ba-49a9-a588-1c4778fb38d3.edf"
 
-	input_dir = "/data/eegfhabrainage/Burnaby"
+	# Abbotsford
+	input_dir = "/data/eegfhabrainage/Abbotsford"
+	file_name = "fffcedd0-503f-4400-8557-f74b58cff9d9.edf"	# HV
+	#file_name = "fffaab93-e908-4b93-a021-ab580e573585.edf"	# No HV
+	#file_name = "test_HV.edf"				# Several HV series
+
 	path = input_dir + '/' + file_name
 	output_dir = input_dir + "/results"
 
