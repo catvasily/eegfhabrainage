@@ -201,19 +201,11 @@ in practice.</p>
             					<span class="c1"># be below the &#39;flat_max_ptp&#39; to indicate a flat interval</span>
 		<span class="p">},</span>
 
-	<span class="s2">&quot;hyperventilation&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="c1"># Sets of keywords in the input record annotations that identify beginnings and ends</span>
-			<span class="c1"># of the hyperventilation intervals</span>
-			<span class="s2">&quot;hv_1min_start_notes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;HV 1Min&quot;</span><span class="p">,</span> <span class="s2">&quot;HV 1 Min&quot;</span><span class="p">],</span>
-			<span class="s2">&quot;hv_1min_end_notes&quot;</span><span class="p">:</span>   <span class="p">[</span><span class="s2">&quot;Post HV 30 Sec&quot;</span><span class="p">,</span> <span class="s2">&quot;Post HV 60 Sec&quot;</span><span class="p">,</span> <span class="s2">&quot;Post HV 90 Sec&quot;</span><span class="p">],</span>
-			<span class="s2">&quot;hv_start_notes&quot;</span><span class="p">:</span>      <span class="p">[</span><span class="s2">&quot;HV Begin&quot;</span><span class="p">,</span> <span class="s2">&quot;Begin HV&quot;</span><span class="p">],</span>
-			<span class="s2">&quot;hv_end_notes&quot;</span><span class="p">:</span>        <span class="p">[</span><span class="s2">&quot;HV End&quot;</span><span class="p">,</span> <span class="s2">&quot;End HV&quot;</span><span class="p">],</span>
-
-			<span class="c1"># Additional padding in seconds added before and after the hyperventilation interval</span>
-			<span class="c1"># boundaries obtained from annotations</span>
-			<span class="s2">&quot;hv_pad_interval&quot;</span><span class="p">:</span> <span class="mi">90</span>
-		<span class="p">},</span>
+	<span class="s2">&quot;HV_regexp&quot;</span><span class="p">:</span>	<span class="s2">&quot;H.*V.*</span><span class="se">\\</span><span class="s2">d+</span><span class="se">\\</span><span class="s2">s*[MmIiNn]</span><span class="si">{3}</span><span class="s2">&quot;</span><span class="p">,</span>	<span class="c1"># Regular expression to identify HV annotations like &quot;HV 1 Min&quot;</span>
+	<span class="s2">&quot;hv_pad_interval&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>				<span class="c1"># Padding interval in seconds around HV series. Final HV boundaries</span>
+							<span class="c1"># are set as follows:</span>
+							<span class="c1"># HV start = 1st HV mark - pad_interval</span>
+							<span class="c1"># HV end = last HV mark + 60 + pad_interval</span>
 
 	<span class="s2">&quot;photic_starts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>	<span class="c1"># Keyword in annotation that marks the start of the photic stim</span>
 	<span class="s2">&quot;photic_ends&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Off&quot;</span><span class="p">],</span>		<span class="c1"># !! EXACT WORDING !! of the annotation that marks the end of the photic stim</span>
