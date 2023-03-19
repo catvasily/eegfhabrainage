@@ -643,7 +643,7 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
         None
 
     """
-    existing_edf_names = os.listdir(source_folder)
+    existing_edf_names = [op.basename(f) for f in glob.glob(source_folder + '/*.edf')]
 
     if source_scan_ids is None:
         scan_files = existing_edf_names
