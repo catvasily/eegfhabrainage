@@ -215,8 +215,11 @@ in practice.</p>
 			<span class="s2">&quot;hv_pad_interval&quot;</span><span class="p">:</span> <span class="mi">90</span>
 		<span class="p">},</span>
 
-	<span class="c1"># Keywords in the input record annotations that identify photic stimulation</span>
-	<span class="s2">&quot;photic_stim_keywords&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">]</span>
+	<span class="s2">&quot;photic_starts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>	<span class="c1"># Keyword in annotation that marks the start of the photic stim</span>
+	<span class="s2">&quot;photic_ends&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Off&quot;</span><span class="p">],</span>		<span class="c1"># !! EXACT WORDING !! of the annotation that marks the end of the photic stim</span>
+
+	<span class="s2">&quot;max_isi&quot;</span><span class="p">:</span> <span class="mi">360</span>			<span class="c1"># Max interval in seconds between photic stimulations to consider those</span>
+					<span class="c1"># belonging to the same photic stimulation series</span>
 <span class="p">}</span>
 
 </pre></div>

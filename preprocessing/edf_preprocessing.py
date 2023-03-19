@@ -316,8 +316,8 @@ class PreProcessing:
         """Identify beginning and end times of photic stimulation.
            
         Returns:
-            intervals (list): [[start, end]] or []: a list of start and end times of hyperventilation
-                intervals. **Currently contains either a single interval**, or is empty.
+            intervals (list): [[start1, end1],...,[startN, endN]] or []: a list of start and end times
+                of hyperventilation intervals.
              
         """
         starts = []	# Timestamps for annotationreferring to photic stim starts
