@@ -217,6 +217,46 @@ in practice.</p>
 </pre></div>
 </div>
 </section>
+<section id="setting-up-python-virtual-environment-on-compute-canada-cluster">
+<h2>Setting up Python virtual environment on Compute Canada cluster<a class="headerlink" href="#setting-up-python-virtual-environment-on-compute-canada-cluster" title="Permalink to this heading">¶</a></h2>
+<p>The following steps should be performed to run the code on Compute Canada:</p>
+<ul class="simple">
+<li><p>Create your working folder for the project</p></li>
+<li><p>Upload the Python sources and JSON configuration file to your source files location
+on the cluster</p></li>
+<li><p>Assume that the virtual environment name is <strong><code class="docutils literal notranslate"><span class="pre">mne</span></code></strong>. Change your current folder to
+the project working folder and perform the following commands:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">module</span> <span class="n">load</span> <span class="n">python</span><span class="o">/</span><span class="mf">3.8.10</span>
+        <span class="n">module</span> <span class="n">load</span> <span class="n">scipy</span><span class="o">-</span><span class="n">stack</span>
+
+        <span class="n">virtualenv</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">download</span> <span class="n">mne</span>
+        <span class="n">source</span> <span class="n">mne</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+        <span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">pip</span>
+        <span class="n">pip3</span> <span class="n">install</span> <span class="n">wheel</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span>
+        <span class="n">pip3</span> <span class="n">install</span> <span class="n">mne</span><span class="p">[</span><span class="n">hdf5</span><span class="p">]</span>
+
+        <span class="n">pip3</span> <span class="n">install</span> <span class="n">pyqt5</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span>
+        <span class="n">pip3</span> <span class="n">install</span> <span class="n">pyedflib</span>
+        <span class="n">pip3</span> <span class="n">install</span> <span class="n">pandas</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span>
+        <span class="n">pip3</span> <span class="n">install</span> <span class="n">mne</span><span class="o">-</span><span class="n">qt</span><span class="o">-</span><span class="n">browser</span>     <span class="c1"># If one wants to use QT backend</span>
+	<span class="n">deactivate</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>In your sbatch scripts, use commands</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">module</span> <span class="n">load</span> <span class="n">python</span><span class="o">/</span><span class="mf">3.8.10</span>
+        <span class="n">module</span> <span class="n">load</span> <span class="n">scipy</span><span class="o">-</span><span class="n">stack</span>
+	<span class="n">cd</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">working</span> <span class="n">folder</span><span class="o">&gt;</span>
+        <span class="n">source</span> <span class="n">mne</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+
+	<span class="o">&lt;</span> <span class="n">run</span> <span class="n">your</span> <span class="n">python</span> <span class="n">program</span> <span class="o">&gt;</span>
+
+	<span class="n">deactivate</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -245,6 +285,7 @@ in practice.</p>
 <li class="toctree-l2"><a class="reference internal" href="#pipeline-for-extraction-from-multiple-files">Pipeline for extraction from multiple files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#loading-data">Loading data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#preprocessing-configuration">Preprocessing configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-python-virtual-environment-on-compute-canada-cluster">Setting up Python virtual environment on Compute Canada cluster</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="code.html">Classes and functions</a></li>

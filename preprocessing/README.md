@@ -181,3 +181,39 @@ in practice.
 
 ```
 
+## Setting up Python virtual environment on Compute Canada cluster
+The following steps should be performed to run the code on Compute Canada:
+- Create your working folder for the project
+
+- Upload the Python sources and JSON configuration file to your source files location
+on the cluster
+
+- Assume that the virtual environment name is **`mne`**. Change your current folder to
+the project working folder and perform the following commands:
+```
+        module load python/3.8.10
+        module load scipy-stack
+
+        virtualenv --no-download mne
+        source mne/bin/activate
+        pip3 install --no-index --upgrade pip
+        pip3 install wheel --no-index
+        pip3 install mne[hdf5]
+
+        pip3 install pyqt5 --no-index
+        pip3 install pyedflib
+        pip3 install pandas --no-index
+        pip3 install mne-qt-browser     # If one wants to use QT backend
+	deactivate
+```
+- In your sbatch scripts, use commands
+```
+        module load python/3.8.10
+        module load scipy-stack
+	cd <your working folder>
+        source mne/bin/activate
+
+	< run your python program >
+
+	deactivate
+```
