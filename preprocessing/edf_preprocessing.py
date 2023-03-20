@@ -651,28 +651,31 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
         scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
 
     i = 0
-    
+    print('\nProcessing files:')
     for f in scan_files:
         if f in existing_edf_names:
             path = source_folder + '/' + f
+            print(f + '\t', end = '')
 
             try:
                 # Initiate the preprocessing object, resample and filter the data
                 p = PreProcessing(path, conf_json = conf_json, conf_dict = conf_dict,
                                   target_frequency=target_frequency, lfreq=lfreq, hfreq=hfreq)
 
-                # This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
+                # This calls internal functions to detect 'bad intervals' and extract requested number of good
+                # segments of specified length
                 p.extract_good(target_length=target_length, target_segments=target_segments)
 
                 # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
                 p.save_edf(folder=target_folder, filename = f)
+                print('OK')
             
                 i += 1
             except:
-                print('Extraction failed for file ' + f)
+                print('!!! FAILED !!!')
             
             if i % 100 == 0 and i != 0:
-                print(i, 'EDFs processed')
+                print('\n {} EDFs processed\n'.format(i))
                 
             if i == nfiles:
                 break
