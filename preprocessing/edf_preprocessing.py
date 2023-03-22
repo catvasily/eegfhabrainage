@@ -675,10 +675,12 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
                 print('!!! FAILED !!!')
             
             if i % 100 == 0 and i != 0:
-                print('\n {} EDFs processed\n'.format(i))
+                print('\n{} EDFs processed\n'.format(i))
                 
             if i == nfiles:
                 break
+        else:	# File does not exist
+            print('\n!!! File {} not found !!!\n'.format(f))
 
     print('\nslice_edfs(): total of {} input EDF records processed.'.format(i))
             
