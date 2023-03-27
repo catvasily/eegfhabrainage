@@ -23,7 +23,7 @@ _JSON_CONFIG_PATHNAME = os.path.dirname(__file__) + "/" + JSON_CONFIG_FILE
 '''
 
 def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, target_channels = None,
-	exclude_channels = None):
+	exclude_channels = None, preload=True):
     '''
     Reads an EDF file with the MNE package, creates the Raw EDF object. 
     Excludes some channels to keep only target ones plus possibly some additional
@@ -46,6 +46,7 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
       exclude_channels (list of str): a list of channels to be excluded when reading
          the EDF file. If supplied, *exlclude_channels* list will be used instead of the one provided
          by either of *conf_...* arguments.
+      preload (Bool): (default True) flag to read all the data into memory
     Returns:
       Raw (mne.Raw): raw EDF object
 
@@ -74,7 +75,7 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
     # At this point both target_channels and exclude_channels are set
 
     # read EDF file while excluding some channels
-    data = mne.io.read_raw_edf(filepath, exclude = exclude_channels, verbose='warning', preload=True)
+    data = mne.io.read_raw_edf(filepath, exclude = exclude_channels, verbose='warning', preload=preload)
     
     # the list of target channels to keep
     target_channels = set(target_channels)
@@ -227,17 +228,36 @@ class PreProcessing:
         self.target_channels = target_channels
         self.exclude_channels = exclude_channels
         self.target_frequency = target_frequency
-        self.raw = read_edf(filepath, target_channels = target_channels, exclude_channels = exclude_channels)
-        self.raw.filter(l_freq=lfreq, h_freq=hfreq)
-        self.sfreq = dict(self.raw.info)['sfreq']
-        self.flat_parms = flat_parms
+        self.raw = read_edf(filepath, target_channels = target_channels, exclude_channels = exclude_channels,
+                              preload = False)	# Do not read the data into memory yet
 
-        if(self.sfreq != self.target_frequency):
-            self.raw.resample(self.target_frequency)
-        
-        self.clean_intervals = []
-        self.intervals_df = pd.DataFrame()
-        mne.set_log_level('warning')
+        # Check if this EDF should not be processed for some reason
+        self.skip_it = False	# Flag to advise to skip processing of this file
+        duration = self.raw.times[-1] - self.raw.times[0]
+        if duration > conf_dict['max_rec_length']:
+            self.skip_it = True
+            print('\n{} recording length is {} s which exceeds the max length threshold of {} s'.format(filepath,
+                    duration, conf_dict['max_rec_length']))
+        elif not conf_dict['allow_upsampling']:
+            if self.raw.info['sfreq'] < target_frequency:
+                self.skip_it = True
+                print('\n{} sampling frequency {} Hz is smaller than the target frequency {} Hz'.format(filepath,
+                    self.raw.info['sfreq'], target_frequency))
+
+        if self.skip_it:
+            print('The record was not loaded into memory, and no filtering or resampling was applied')
+        else:
+            self.raw.load_data()	# Read the full record now
+            self.raw.filter(l_freq=lfreq, h_freq=hfreq)
+            self.sfreq = dict(self.raw.info)['sfreq']
+            self.flat_parms = flat_parms
+
+            if(self.sfreq != self.target_frequency):
+                self.raw.resample(self.target_frequency)
+            
+            self.clean_intervals = []
+            self.intervals_df = pd.DataFrame()
+            mne.set_log_level('warning')
         
     def flat_intervals(self):
         '''Identify beginning and end times of flat signal
@@ -662,6 +682,10 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
                 p = PreProcessing(path, conf_json = conf_json, conf_dict = conf_dict,
                                   target_frequency=target_frequency, lfreq=lfreq, hfreq=hfreq)
 
+                if p.skip_it:
+                    print("Record {} SKIPPED\n".format(f))
+                    continue
+
                 # This calls internal functions to detect 'bad intervals' and extract requested number of good
                 # segments of specified length
                 p.extract_good(target_length=target_length, target_segments=target_segments)
@@ -672,7 +696,7 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
             
                 i += 1
             except:
-                print('!!! FAILED !!!')
+                print('Record {} !!! FAILED !!!'.format(f))
             
             if i % 100 == 0 and i != 0:
                 print('\n{} EDFs processed\n'.format(i))
