@@ -248,7 +248,7 @@ class PreProcessing:
             print('The record was not loaded into memory, and no filtering or resampling was applied')
         else:
             self.raw.load_data()	# Read the full record now
-            self.raw.filter(l_freq=lfreq, h_freq=hfreq)
+            self.raw.filter(l_freq=lfreq, h_freq=hfreq, method = 'iir')
             self.sfreq = dict(self.raw.info)['sfreq']
             self.flat_parms = flat_parms
 
@@ -695,8 +695,9 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
                 print('OK', flush = True)
             
                 i += 1
-            except:
-                print('Record {} !!! FAILED !!!'.format(f), flush = True)
+            except Exception as e:
+                print('Record {} !!! FAILED !!!'.format(f))
+                print(e, flush = True)
             
             if i % 100 == 0 and i != 0:
                 print('\n{} EDFs processed\n'.format(i), flush = True)
