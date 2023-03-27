@@ -21,6 +21,7 @@
 	"target_band":              [0.5, 55],
 	"target_segments":	    1,
 	"target_length":	    360,
+	"allow_upsampling": 	    false,
 
 	"flat_parms":
 		{
@@ -35,6 +36,7 @@
 	"photic_starts": ["Hz"],
 	"photic_ends": ["Off"],
 
-	"max_isi": 360
+	"max_isi": 360,
+	"max_rec_length": 3600
 }
 

@@ -154,6 +154,8 @@ in practice.
 	"target_band":              [0.5, 55],	# the frequency band of the output record
 	"target_segments":	    1,		# Max number of good continuous segments to extract
 	"target_length":	    360,	# The good segment length in seconds
+	"allow_upsampling": 	    false,	# Allow upsampling a record if its sampling rate
+						# is smaller than requested
 
 	# Parameters to identify flat intervals
 	"flat_parms":
@@ -175,8 +177,9 @@ in practice.
 	"photic_starts": ["Hz"],	# Keyword in annotation that marks the start of the photic stim
 	"photic_ends": ["Off"],		# !! EXACT WORDING !! of the annotation that marks the end of the photic stim
 
-	"max_isi": 360			# Max interval in seconds between photic stimulations to consider those
+	"max_isi": 360,			# Max interval in seconds between photic stimulations to consider those
 					# belonging to the same photic stimulation series
+	"max_rec_length": 3600		# Max allowed EDF file length in seconds (skip longer files)
 }
 
 ```
