@@ -675,7 +675,7 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
     for f in scan_files:
         if f in existing_edf_names:
             path = source_folder + '/' + f
-            print(f + '\t', end = '')
+            print(f + '\t', end = '', flush = True)
 
             try:
                 # Initiate the preprocessing object, resample and filter the data
@@ -683,7 +683,7 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
                                   target_frequency=target_frequency, lfreq=lfreq, hfreq=hfreq)
 
                 if p.skip_it:
-                    print("Record {} SKIPPED\n".format(f))
+                    print("Record {} SKIPPED\n".format(f), flush = True)
                     continue
 
                 # This calls internal functions to detect 'bad intervals' and extract requested number of good
@@ -692,21 +692,21 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
 
                 # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
                 p.save_edf(folder=target_folder, filename = f)
-                print('OK')
+                print('OK', flush = True)
             
                 i += 1
             except:
-                print('Record {} !!! FAILED !!!'.format(f))
+                print('Record {} !!! FAILED !!!'.format(f), flush = True)
             
             if i % 100 == 0 and i != 0:
-                print('\n{} EDFs processed\n'.format(i))
+                print('\n{} EDFs processed\n'.format(i), flush = True)
                 
             if i == nfiles:
                 break
         else:	# File does not exist
-            print('\n!!! File {} not found !!!\n'.format(f))
+            print('\n!!! File {} not found !!!\n'.format(f), flush = True)
 
-    print('\nslice_edfs(): total of {} input EDF records processed.'.format(i))
+    print('\nslice_edfs(): total of {} input EDF records processed.'.format(i), flush = True)
             
 def load_edf_data(source_folder, labels_csv_path):
     """The function loads multiple EDF files and returns data 
