@@ -189,6 +189,8 @@ in practice.</p>
 	<span class="s2">&quot;target_band&quot;</span><span class="p">:</span>              <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">55</span><span class="p">],</span>	<span class="c1"># the frequency band of the output record</span>
 	<span class="s2">&quot;target_segments&quot;</span><span class="p">:</span>	    <span class="mi">1</span><span class="p">,</span>		<span class="c1"># Max number of good continuous segments to extract</span>
 	<span class="s2">&quot;target_length&quot;</span><span class="p">:</span>	    <span class="mi">360</span><span class="p">,</span>	<span class="c1"># The good segment length in seconds</span>
+	<span class="s2">&quot;allow_upsampling&quot;</span><span class="p">:</span> 	    <span class="n">false</span><span class="p">,</span>	<span class="c1"># Allow upsampling a record if its sampling rate</span>
+						<span class="c1"># is smaller than requested</span>
 
 	<span class="c1"># Parameters to identify flat intervals</span>
 	<span class="s2">&quot;flat_parms&quot;</span><span class="p">:</span>
@@ -210,8 +212,9 @@ in practice.</p>
 	<span class="s2">&quot;photic_starts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>	<span class="c1"># Keyword in annotation that marks the start of the photic stim</span>
 	<span class="s2">&quot;photic_ends&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Off&quot;</span><span class="p">],</span>		<span class="c1"># !! EXACT WORDING !! of the annotation that marks the end of the photic stim</span>
 
-	<span class="s2">&quot;max_isi&quot;</span><span class="p">:</span> <span class="mi">360</span>			<span class="c1"># Max interval in seconds between photic stimulations to consider those</span>
+	<span class="s2">&quot;max_isi&quot;</span><span class="p">:</span> <span class="mi">360</span><span class="p">,</span>			<span class="c1"># Max interval in seconds between photic stimulations to consider those</span>
 					<span class="c1"># belonging to the same photic stimulation series</span>
+	<span class="s2">&quot;max_rec_length&quot;</span><span class="p">:</span> <span class="mi">3600</span>		<span class="c1"># Max allowed EDF file length in seconds (skip longer files)</span>
 <span class="p">}</span>
 
 </pre></div>
