@@ -207,6 +207,7 @@ the project working folder and perform the following commands:
         pip3 install pyedflib
         pip3 install pandas --no-index
         pip3 install mne-qt-browser     # If one wants to use QT backend
+	pip3 install pyprep
 	deactivate
 ```
 - In your sbatch scripts, use commands
