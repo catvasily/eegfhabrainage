@@ -231,6 +231,17 @@ class PreProcessing:
         self.raw = read_edf(filepath, target_channels = target_channels, exclude_channels = exclude_channels,
                               preload = False)	# Do not read the data into memory yet
 
+        # Change non-standard channel names, if any
+        # First find channels to rename
+        to_rename = dict()
+        for c in self.raw.ch_names:
+            if c.upper() in conf_dict["rename_channels"]:
+                to_rename[c] = conf_dict["rename_channels"][c.upper()]
+
+        if len(to_rename) > 0:
+            mne.rename_channels(self.raw.info, to_rename,
+                                allow_duplicates=False, verbose=None)
+                    
         # Check if this EDF should not be processed for some reason
         self.skip_it = False	# Flag to advise to skip processing of this file
         duration = self.raw.times[-1] - self.raw.times[0]
