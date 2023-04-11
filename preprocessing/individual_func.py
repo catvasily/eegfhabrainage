@@ -30,6 +30,7 @@ from pyedflib import FILETYPE_BDF, FILETYPE_BDFPLUS, FILETYPE_EDF, FILETYPE_EDFP
 from datetime import datetime, timezone, timedelta
 import mne
 import os
+import numpy as np
 
 import warnings
 
@@ -88,6 +89,18 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
     
     #print('saving to {}, filetype {}'.format(fname, file_type))
     sfreq = mne_raw.info['sfreq']
+
+    # Prepare 'prefilter' string for the channel_info
+    prefilter = ''
+    if not np.isclose(mne_raw.info['highpass'], 0.):
+        prefilter = 'HP:{}Hz'.format(mne_raw.info['highpass'])
+
+    if not np.isclose(mne_raw.info['lowpass'], sfreq/2):
+        if len(prefilter) > 0:
+            prefilter = prefilter + ' '
+
+        prefilter = prefilter + 'LP:{}Hz'.format(mne_raw.info['lowpass'])
+
     date = _stamp_to_dt(mne_raw.info['meas_date'])
     # no conversion necessary, as pyedflib can handle datetime.
     #date = date.strftime('%d %b %Y %H:%M:%S')
@@ -134,7 +147,7 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
                                'digital_min':  mne_raw._raw_extras[0]['digital_min'][i], 
                                'digital_max':  mne_raw._raw_extras[0]['digital_max'][i], 
                                'transducer': '', 
-                               'prefilter': ''}
+                               'prefilter': prefilter}
                 except:
                     ch_dict = {'label': mne_raw.ch_names[i], 
                                'dimension': mne_raw._orig_units[keys[i]], 
@@ -144,7 +157,7 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
                                'digital_min':  dmin, 
                                'digital_max':  dmax, 
                                'transducer': '', 
-                               'prefilter': ''}
+                               'prefilter': prefilter}
             
                 channel_info.append(ch_dict)
             f.setPatientCode(mne_raw._raw_extras[0]['subject_info']['id'])
