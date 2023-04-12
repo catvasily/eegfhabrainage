@@ -140,6 +140,7 @@ class PreProcessing:
         target_frequency (int): the final EEG frequency after resampling
         lfreq (float): lower frequency boundary of the signal to keep
         hfreq (float): higher frequency boundary of the signal to keep
+        notch_freq (float): notch frequency (typically - power line frequency)
         flat_parms (dict): parameters for flat intervals selection. Should contain the
             following keys:
             *'flat_max_ptp'* - the channel's amplitude max peak-to-peak value (in channel's
@@ -190,8 +191,8 @@ class PreProcessing:
     #     save_edf: write new EDF files based on clean_intervals timestamps
 
     def __init__(self, filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
-                 target_channels = None, exclude_channels = None,
-                 target_frequency = None, lfreq = None, hfreq = None, flat_parms = None):
+                 target_channels = None, exclude_channels = None, target_frequency = None,
+                 lfreq = None, hfreq = None, notch_freq = None, flat_parms = None):
         """Constructor args are explained in the class description above.
             
         """
@@ -219,6 +220,9 @@ class PreProcessing:
 
         if hfreq is None:
             hfreq = conf_dict["target_band"][1]
+
+        if notch_freq is None:
+            notch_freq = conf_dict["powerline_frq"]
 
         if flat_parms is None:
             flat_parms = conf_dict["flat_parms"]
@@ -259,6 +263,7 @@ class PreProcessing:
             print('The record was not loaded into memory, and no filtering or resampling was applied')
         else:
             self.raw.load_data()	# Read the full record now
+            self.raw.notch_filter(freqs = notch_freq, method='iir')
             self.raw.filter(l_freq=lfreq, h_freq=hfreq, method = 'iir')
             self.sfreq = dict(self.raw.info)['sfreq']
             self.flat_parms = flat_parms

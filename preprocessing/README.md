@@ -163,6 +163,7 @@ in practice.
 	"target_band":              [0.5, 55],	# the frequency band of the output record
 	"target_segments":	    1,		# Max number of good continuous segments to extract
 	"target_length":	    360,	# The good segment length in seconds
+	"powerline_frq": 	    60.0,	# Power line main frequency, Hz
 	"allow_upsampling": 	    false,	# Allow upsampling a record if its sampling rate
 						# is smaller than requested
 

@@ -30,6 +30,7 @@
 	"target_band":              [0.5, 55],
 	"target_segments":	    1,
 	"target_length":	    360,
+	"powerline_frq": 	    60.0,
 	"allow_upsampling": 	    false,
 
 	"flat_parms":
