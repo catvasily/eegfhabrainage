@@ -9,7 +9,7 @@ file_type = ".edf" # replace with the f extension you want to find
 all_chans = set()
 hosp_chans = []
 cnt = 0
-max_cnt = 100
+max_cnt = 30000
 stop = False
 
 for hosp in hospitals:
