@@ -238,8 +238,11 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
             ch_idx = range(n_channels) if picks is None else picks
             keys = list(mne_raw._orig_units.keys())
             for i in ch_idx:
+                # Add channel type to the channel label, like "EEG Cz"
+                label = mne.channel_type(mne_raw.info, i).upper() + ' ' + mne_raw.ch_names[i]
+
                 try:
-                    ch_dict = {'label': mne_raw.ch_names[i], 
+                    ch_dict = {'label': label, 
                                'dimension': mne_raw._orig_units[keys[i]], 
                                'sample_rate': mne_raw._raw_extras[0]['n_samps'][i], 
                                'physical_min': mne_raw._raw_extras[0]['physical_min'][i], 
@@ -249,7 +252,7 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
                                'transducer': '', 
                                'prefilter': prefilter}
                 except:
-                    ch_dict = {'label': mne_raw.ch_names[i], 
+                    ch_dict = {'label': label, 
                                'dimension': mne_raw._orig_units[keys[i]], 
                                'sample_rate': sfreq, 
                                'physical_min': channels.min(), 
@@ -260,12 +263,14 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
                                'prefilter': prefilter}
             
                 channel_info.append(ch_dict)
+
             f.setPatientCode(mne_raw._raw_extras[0]['subject_info']['id'])
             #f.setPatientName(mne_raw._raw_extras[0]['subject_info']['name'])
             f.setTechnician('mne-gist-save-edf-skjerns')
             f.setSignalHeaders(channel_info)
             f.setStartdatetime(date)
             f.writeSamples(channels)
+
             for annotation in mne_raw.annotations:
                 onset = annotation['onset']
                 duration = annotation['duration']
