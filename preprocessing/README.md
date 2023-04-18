@@ -127,16 +127,24 @@ in practice.
 
 ```python
 {
-	# A list of mandatory channels. An input recording is discarded if any of those is missing
+	# A list of mandatory EEG channels. An input recording is discarded if any of those is missing
+	# (case-insensitive)
 	"target_channels":  ["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4",
 			     "T5",  "T6",  "C3",  "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"],
 
 	# A list of optional non-EEG channels that will be included in the output EDF, if present
+	# (case-insensitive)
 	"opt_channels":     ["ECG1", "ECG2", "EKG", "EKG1", "EKG2", "EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG",
 			     "R EOG","PG1",  "PG2", "A1",   "A2"],
 
+	# Known EOG channel names
+	"eog_channels":     ["EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG", "R EOG", "PG1", "PG2"],
+
+	# Known ECG channel names
+	"ecg_channels":     ["ECG1", "ECG2", "EKG", "EKG1", "EKG2"],
+
 	# A list of channels that will be removed from the output recording, if present
-	# Note that this list is treated as case-sensitive by MNE
+	# Note that this list is treated as !!! CASE-SENSITIVE  !!! by MNE
 	"exclude_channels": ["AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8", "DC1", "DC2",
 			     "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",
 			     "", "L SPH", "R SPH",

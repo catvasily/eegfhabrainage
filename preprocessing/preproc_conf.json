@@ -5,6 +5,10 @@
 	"opt_channels":     ["ECG1", "ECG2", "EKG", "EKG1", "EKG2", "EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG",
 			     "R EOG","PG1",  "PG2", "A1",   "A2"],
 
+	"eog_channels":     ["EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG", "R EOG", "PG1", "PG2"],
+
+	"ecg_channels":     ["ECG1", "ECG2", "EKG", "EKG1", "EKG2"],
+
 	"exclude_channels": ["AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8", "DC1", "DC2",
 			     "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",
 			     "", "L SPH", "R SPH",
