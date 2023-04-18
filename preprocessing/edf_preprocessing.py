@@ -2,7 +2,7 @@ import mne
 import os
 import os.path as op
 import glob
-from individual_func import write_mne_edf
+from individual_func import select_chans, set_channel_types, write_mne_edf
 from mne.preprocessing import annotate_amplitude
 import matplotlib.pyplot as plt 
 import numpy as np
@@ -29,8 +29,12 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
     Excludes some channels to keep only target ones plus possibly some additional
     non-eeg channels. 
 
-    Prints a warning in case the input recording  doesn't have all 
-    mandatory channels, doesn't return object in this case.
+    All target channels are set to be 'eeg' type - that is, EEG sensor type
+    Channels with names matching those in EOG, ECG channels lists are set to be 
+    'eog', 'ecg' types respectively. All other included channels are set to be of 'misc' type.
+
+    Raises an exception in case the input recording  doesn't have all 
+    mandatory channels.
     
     Args:
       filepath (str): EDF file pathname
@@ -73,43 +77,45 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
         exclude_channels = conf_dict["exclude_channels"]
 
     # At this point both target_channels and exclude_channels are set
+    # Read all channels except excluded ones without loading the data
+    # and initially set them as 'misc'
+    raw = mne.io.read_raw_edf(filepath, exclude = exclude_channels, verbose='warning',
+                              preload = False)
 
-    # read EDF file while excluding some channels
-    data = mne.io.read_raw_edf(filepath, exclude = exclude_channels, verbose='warning', preload=preload)
-    
-    # the list of target channels to keep
-    target_channels = set(target_channels)
-    current_channels = set(data.ch_names)
-    
-    # checking whether we have all needed channels
-    # Originally was:
-    #  if target_channels == current_channels:
-    # Now we:
-    #     - also include lower or mixed case of the target channels list
-    #     - optionally include some non_EEG channels:
+    # Verify that all mandatory channels are present
+    if select_chans(target_channels, raw.ch_names, belong = False)[0]:
+        raise ValueError(filepath + ": File doesn't have all mandatory channels")
 
-    # Generate upper case versions of the lists
-    tlst_set = set([c.upper() for c in target_channels])
-    clst_lst = [c.upper() for c in data.ch_names]
-    clst_set = set(clst_lst)
+    # Now set types of channels that we know
+    ch_groups = dict()
+    set_channel_types(raw, 'eeg', target_channels, ch_groups = ch_groups)
+    set_channel_types(raw, 'eog', conf_dict["eog_channels"], ch_groups = ch_groups)
+    set_channel_types(raw, 'ecg', conf_dict["ecg_channels"], ch_groups = ch_groups)
 
-    if tlst_set.issubset(clst_set):
-        if conf_dict["print_opt_channels"]:
-            # Print all additional channels read from the input EDF
-            aux_list = list(clst_set.difference(tlst_set))
+    # Set all other channels to 'misc'
+    # NOTE: one could set all channels to 'misc' from the beginning, then proceed
+    # to setting known types. However MNE discards channel's units when setting 
+    # the type to 'mics' - we do not want that for known channels
+    known_lst = target_channels.copy()
+    known_lst.extend(conf_dict["eog_channels"])
+    known_lst.extend(conf_dict["ecg_channels"])
+    misc_lst = select_chans(raw.ch_names, known_lst, belong = False)[0]
 
-            if len(aux_list) > 0:
-                # Convert aux_list to the original case
-                for i, c in enumerate(aux_list):
-                    j = clst_lst.index(c)
-                    aux_list[i] = data.ch_names[j]
+    if misc_lst:
+        set_channel_types(raw, 'misc', misc_lst, ch_groups = ch_groups)
 
-                aux_list.sort()
-                print(filepath, " - additional channels included: ", aux_list)
+    if conf_dict["print_opt_channels"]:
+        aux_list = select_chans(raw.ch_names, target_channels, belong = False)[0]
 
-        return data
-    else:
-        print(filepath, ": File doesn't have all mandatory channels")
+        if aux_list:
+            aux_list.sort()
+            print(filepath, " - additional channels included: ", aux_list)
+
+    # Load channel's data into memory if requested
+    if preload:
+        raw.load_data()
+
+    return raw
 
 class PreProcessing:
     """The class's aim is preprocessing clinical EEG recordings (in EDF format)
@@ -233,7 +239,7 @@ class PreProcessing:
         self.exclude_channels = exclude_channels
         self.target_frequency = target_frequency
         self.raw = read_edf(filepath, target_channels = target_channels, exclude_channels = exclude_channels,
-                              preload = False)	# Do not read the data into memory yet
+                              preload = False)	# Do not read the data into memory just yet
 
         # Change non-standard channel names, if any
         # First find channels to rename
@@ -242,10 +248,10 @@ class PreProcessing:
             if c.upper() in conf_dict["rename_channels"]:
                 to_rename[c] = conf_dict["rename_channels"][c.upper()]
 
-        if len(to_rename) > 0:
+        if to_rename:
             mne.rename_channels(self.raw.info, to_rename,
                                 allow_duplicates=False, verbose=None)
-                    
+
         # Check if this EDF should not be processed for some reason
         self.skip_it = False	# Flag to advise to skip processing of this file
         duration = self.raw.times[-1] - self.raw.times[0]
@@ -263,8 +269,19 @@ class PreProcessing:
             print('The record was not loaded into memory, and no filtering or resampling was applied')
         else:
             self.raw.load_data()	# Read the full record now
-            self.raw.notch_filter(freqs = notch_freq, method='iir')
-            self.raw.filter(l_freq=lfreq, h_freq=hfreq, method = 'iir')
+
+            # Always notch powerline main frequency first (or whatever is notch setting)
+            self.raw.notch_filter(freqs = notch_freq, picks = ['eeg', 'eog', 'ecg'], method='iir')
+
+            # Save notch info with the raw object, as this is not done automatically
+            desc = "Notch filter: {} Hz".format(notch_freq)
+
+            if self.raw.info['description'] is None:
+                self.raw.info['description'] = desc
+            else:
+                self.raw.info['description'] = self.raw.info['description'] + ' ' + desc
+
+            self.raw.filter(l_freq=lfreq, h_freq=hfreq, picks = 'eeg', method = 'iir')
             self.sfreq = dict(self.raw.info)['sfreq']
             self.flat_parms = flat_parms
 
