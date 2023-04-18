@@ -78,8 +78,10 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
 
     # At this point both target_channels and exclude_channels are set
     # Read all channels except excluded ones without loading the data
-    # and initially set them as 'misc'
-    raw = mne.io.read_raw_edf(filepath, exclude = exclude_channels, verbose='warning',
+    # Hopefully types of some channels will be inferred too
+    raw = mne.io.read_raw_edf(filepath, exclude = exclude_channels,
+                              infer_types=True,
+                              verbose='warning',
                               preload = False)
 
     # Verify that all mandatory channels are present
