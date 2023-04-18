@@ -31,8 +31,43 @@ from datetime import datetime, timezone, timedelta
 import mne
 import os
 import numpy as np
+import re
 
 import warnings
+
+def select_chans(ch_list, target_list, belong = True):
+    """ From the input channel list `ch_list` select channels that belong to the target list.
+    The string comparison is performed case insensitive, but original case is
+    preserved in the returned list.
+
+    Args:
+        ch_list (list of str): input channel list
+        target_list (list of str): a target channel list
+        belong (bool): True (default) if request is to find channels that belong to the target list,
+            False if one wants channels that do NOT belong to the target list
+
+    Returns:
+        selected_channels, flags
+        selected_channels (list of str): a list of channels from the input list
+            that belong to the `target list`
+        flags (list of bool): list of flags indicating if elements of `ch_list`
+            belong / not belong to the `target_list`; `len(flags)` equals to `len(ch_list)`
+    """
+
+    target_upper  = [s.upper() for s in target_list]
+    
+    selected = []
+    flags = []
+    yes = lambda x: belong if x.upper() in target_upper else (not belong)
+
+    for item in ch_list:
+        if yes(item):
+            selected.append(item)
+            flags.append(True)
+        else:
+            flags.append(False)
+
+    return selected, flags
 
 def _stamp_to_dt(utc_stamp):
     """Convert timestamp to datetime object in Windows-friendly way."""
@@ -44,6 +79,59 @@ def _stamp_to_dt(utc_stamp):
     return (datetime.fromtimestamp(0, tz=timezone.utc) +
             timedelta(0, stamp[0], stamp[1]))  # day, sec, μs
 
+
+def set_channel_types(raw, type_name, type_list, ch_groups = None):     
+    '''Set data channel types based on their names.
+
+    If a channel name belongs to the `type_list` (case-insensitive),
+    then corresponding channel's type will be set to the `type_name`.
+    The raw object will also be updated. As a result, 
+    `ch_groups[type_name]` will contain all channels belonging to
+    the type including those that were previously marked in self.raw.
+    
+
+    Args:
+        raw (mne.Raw): the Raw object; channel data does not need to be preloaded
+        type_name (str): the channel type, such as 'eog', 'ecg', 'eeg', etc.
+        type_list(list of str): list of known channel names that belong to this type.
+        ch_groups (dict): a dictionary with known channel types (see below). If None,
+            this dictionary will be created
+    Returns:
+        ch_groups (dict): a dictionary with keys corresponding to channel types and
+            values being lists of corresponding channel names. If supplied as an argument,
+            its key equal to `type_name` will be updated.
+    '''
+    # Get channels that already have the target type
+    raw1 = raw.copy()
+    kwargs = {type_name: True}
+
+    if ch_groups is None:
+        ch_groups = dict()
+
+    try:
+        raw1.pick_types(**kwargs)
+        ch_groups[type_name] = raw1.ch_names
+    except ValueError:
+        ch_groups[type_name] = []
+
+    del raw1
+
+    tlst, _ = select_chans(raw.ch_names, type_list)
+
+    if tlst:
+        mapping = dict.fromkeys(tlst, type_name)
+
+        # Ignore warning when changing units to NA for misc channels
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore',
+                                    message = r"The unit for channel.+\shas changed from V to NA")
+            raw.set_channel_types(mapping)
+
+        l = ch_groups[type_name]		# Current list
+        l.extend(tlst)				# Append found channels
+        ch_groups[type_name] = list(set(l))	# Remove dupes, if any
+
+    return ch_groups
 
 def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None, 
                   overwrite=False):
@@ -100,6 +188,18 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
             prefilter = prefilter + ' '
 
         prefilter = prefilter + 'LP:{}Hz'.format(mne_raw.info['lowpass'])
+
+    # Add notch info, if any
+    if not (mne_raw.info['description'] is None):
+        tmp = re.search(r"Notch filter: \d+\.*\d*\s*Hz",
+                        mne_raw.info['description'])	# Returns a 'Match' object
+
+        if not (tmp is None):
+            ninfo = tmp.group()
+            if len(prefilter) > 0:
+                prefilter = prefilter + ' '
+
+            prefilter = prefilter + 'N:' + re.search(r"\d+\.*\d*", ninfo).group() + 'Hz'
 
     date = _stamp_to_dt(mne_raw.info['meas_date'])
     # no conversion necessary, as pyedflib can handle datetime.
