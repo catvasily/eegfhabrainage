@@ -1,0 +1,99 @@
+{
+	"eog_channels":  ["EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG", "R EOG", "PG1", "PG2"],
+	"ecg_channels":  ["ECG1", "ECG2", "EKG", "EKG1", "EKG2"],
+	"montage": "standard_1020",
+	"powerline_frq": 60.0,
+
+	"eog_filter_kwargs":
+	{
+		"l_freq": 1.0, "h_freq": 5.0, 
+		"picks": null, "filter_length": "auto", "l_trans_bandwidth": "auto",
+		"h_trans_bandwidth": "auto", "n_jobs": null, "method": "fir", "iir_params": null,
+		"phase": "zero", "fir_window": "hamming", "fir_design": "firwin",
+		"skip_by_annotation": ["edge", "bad_acq_skip"], "pad": "reflect_limited",
+		"verbose": null
+	},
+
+	"ecg_filter_kwargs":
+	{
+		"l_freq": 8.0, "h_freq": 16.0, 
+		"picks": null, "filter_length": "auto", "l_trans_bandwidth": "auto",
+		"h_trans_bandwidth": "auto", "n_jobs": null, "method": "fir", "iir_params": null,
+		"phase": "zero", "fir_window": "hamming", "fir_design": "firwin",
+		"skip_by_annotation": ["edge", "bad_acq_skip"], "pad": "reflect_limited",
+		"verbose": null
+	},
+
+	"prep":
+	{
+		"prep_params":
+		{
+			"ref_chs": "eeg",
+			"reref_chs": "eeg",
+			"line_freqs": [60.0], 
+			"max_iterations": 4			
+		},
+		"other_kwargs":
+		{
+			"ransac": true,
+			"channel_wise": false,
+			"max_chunk_size": null,
+			"random_state": 12345,
+			"filter_kwargs":
+			{
+				"method": "fir"
+			},
+			"matlab_strict": false
+		}
+	},
+
+	"ica":
+	{
+		"applyICA": true,
+
+		"init":
+		{
+			"n_components":  0.99999,
+			"random_state": 12345,
+			"method": "fastica",
+			"max_iter": "auto",
+			"verbose": null
+		},
+
+		"fit":
+		{
+			"picks": "eeg",
+			"tstep": 2.0,
+			"verbose": null
+		},
+
+		"find_bads_eog":
+		{
+			"measure": "zscore",
+			"threshold": 3.0,
+			"verbose": null
+		},
+
+		"find_bads_ecg":
+		{
+			"method": "correlation",
+			"measure": "zscore",
+			"threshold": 3.0,
+			"verbose": null
+		}
+	},
+
+	"plot":
+	{
+		"time_window": 40.0,
+		"scalings": "auto",
+		"fmin": 0.0,
+		"fmax": 100.0,
+                "fstep": 10.0,
+		"spect_log_x": true,
+		"spect_log_y": true,
+		"n_fft": 1024
+	}
+	
+}
+

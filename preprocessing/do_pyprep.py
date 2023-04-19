@@ -2,34 +2,45 @@ import mne
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import json
 from mne import viz
 from pyprep.prep_pipeline import PrepPipeline
 from mne.preprocessing import (ICA, create_eog_epochs, create_ecg_epochs,
                                corrmap)
+from individual_func import set_channel_types
+
+JSON_CONFIG_FILE = "pyprep_ica_conf.json"
+'''Default name (without a path) for the JSON file with parameter settings for
+the PYPREP procedure and ICA artifact removal. This file is expected
+to reside in the same folder as the *do_pyprep.py* source file.
+
+'''
+
+_JSON_CONFIG_PATHNAME = os.path.dirname(__file__) + "/" + JSON_CONFIG_FILE
+'''Automatically generated fully qualified pathname to the default JSON config file
+'''
+
 class Pipeline:
     """The class' aim is preprocessing clean extracted segments of clinical 
     EEG recordings (in EDF format) and make them a suitable input for later analysis 
     and ML applications.
 
     The class instantiates a preprocessing object which 
-    carries a Raw EDF file through a sequence of operations: 
-    (1) resample each recording's signal to traget frequency
-    (2) filters the EEG segemts from a lower frequency of 5 Hz to an upper frequency of 100 Hz
-    (3) marks the "bad" channels as per the PREP pipeline
-    (4) performs ICA on the given EEG segment for both EOG and ECG channels
-    Then the object returns a pre-processed EEG data in raw format
+    carries a Raw EDF file through the following operations: 
+    (1) Removes power lines, re-references the channels and identifies bad channels
+        as per the PREP pipeline.
+    (2) Performs ICA on the given EEG segment for both EOG and ECG channels.
+        Then the object returns a pre-processed EEG data in raw format.
 
     Attributes:
-        rawResampled: contains the resampled EEG segment in raw format
-        rawFiltered: contains the filtered EEG segment in raw format
-        raw: MNE Raw EDF object
-        rawPrep: contains the EEG segment in raw format after marking bad channels(as per PREP)
-        rawIca: contains the EEG segment after ICA is performed on it for both EOG and ECG channels
+        conf_dict (dict): a dictionary containing all settings; typically reflects
+            contents of the JSON file :data:`JSON_CONFIG_FILE`
+        ch_groups (dict): a dictionary containing lists of channels of certain types
+        raw (mne.Raw): the MNE Raw EDF object
             
     Methods:
-        resample: resamples the EEG segment to the target_frequency
-        filter: filters the EEG signal from 5 Hz to 100 Hz
         prep: applies the PREP pipeline the mark the bad channels
+        filter_group: filters EOG or ECG channels to be used for ICA artifact removal
         ica: performs ICA on the given EEG segment for both EOG and ECG channels
         showplot: shows the time domain plot of the given EEG segment
         applyPipeline: applies the pipeline (resampling, filtering, applying PREP, performing ICA)
@@ -38,67 +49,74 @@ class Pipeline:
 
     """
 
-    def __init__(self, file_name, view_plots = False) -> None:
+    def __init__(self, file_name, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
+                 view_plots = False) -> None:
         """
         Args:
-            file_name: str with path to EDF file
-            view_plots: boolean value to denote if we want to view plots. 
-                        Turned off while processing multiple files. 
+            file_name (str): EDF file pathname
+            conf_json (str): pathname of a json file with configuration parameters.
+                The default configuration file name is given by :data:`JSON_CONFIG_FILE` constant.
+            conf_dict (dict): a dictionary with configurartion parameters.
+                If both *conf_json* and *conf_dict* are given, the latter is used.
+            view_plots (bool): If True, various interactive data plots will be shown.
+            Set it to False (default) if processing multiple files. 
         """
-        self.raw = mne.io.read_raw_edf(file_name)
-        if 'EKG1' in self.raw.ch_names and 'EOG1' in self.raw.ch_names:
-            self.raw.set_channel_types({'EOG1': 'eog', 'EOG2': 'eog', 'EKG1': 'ecg', 'EKG2': 'ecg'})
-        elif 'ECG1' in self.raw.ch_names and 'EOG1' in self.raw.ch_names:
-            self.raw.set_channel_types({'EOG1': 'eog', 'EOG2': 'eog', 'ECG1': 'ecg', 'ECG2': 'ecg'})
-        
-        self.rawResampled = None
-        self.rawFiltered = None
-        self.rawPrep = None
-        self.rawIca = None
+        # Load configuration settings
+        if (conf_json is None) and (conf_dict is None):
+            raise ValueError("At least one of the arguments 'conf_json' or 'conf_dict' should be specified")
 
-        print("Created raw object")
+        if conf_dict is None:
+            # Read configuraion from a json file
+            with open(conf_json, "r") as fp:
+                conf_dict = json.loads(fp.read())
+
+        self.conf_dict = conf_dict
+
+        self.raw = mne.io.read_raw_edf(file_name, infer_types = True, preload=False,
+                                       verbose = 'ERROR')	# Get a light Raw object for now
+
+        # Set known channel types
+        self.ch_groups = dict()
+        set_channel_types(self.raw, 'eog', conf_dict["eog_channels"], self.ch_groups)
+        set_channel_types(self.raw, 'ecg', conf_dict["ecg_channels"], self.ch_groups)
+
         if (view_plots):
-            self.showplot(self.raw)
+            self.showplot(title = "Original EDF", show = False)	# Do not pause until processing results are shown too
         
-        
-    def resample(self, target_frequency, view_plots) -> None:
-        """Resamples the given EEG segement to the target frequency
+    def filter_group(self, *, what = "eog", view_plots = False) -> None:
+        """Filters specified channel group to be used as templates for ICA artifact removal
 
         Args:
-            target_frequency: interger indicating the final EEG frequency after resampling
-            view_plots: boolean value to denote if we want to view plots
+            what (str): currently either "eog" or "ecg" - the channel group name
+            view_plots (bool): flag to view plots
 
         Returns:
             None
         """
-        self.rawResampled = self.raw
-        self.rawResampled.resample(target_frequency)
+        assert what == 'eog' or what == 'ecg'
 
-        print("Resampled raw object")
+        self.raw.load_data()	# Ensure data is read in before filtering
+				# (even if there will be nothing to filter)
+
+        if len(self.ch_groups[what]) == 0:
+            return
+
+        ch_lst = self.ch_groups[what]
+
+        if view_plots:
+            self.showplot(title = "Original {}s".format(what.upper()), psd = False, picks = ch_lst,
+                          show = False)
+
+        filter_picks = self.conf_dict[what + "_filter_kwargs"]["picks"]
+        self.conf_dict[what + "_filter_kwargs"]["picks"] = ch_lst
+        self.raw.filter(**self.conf_dict[what + "_filter_kwargs"])
+        self.conf_dict[what + "_filter_kwargs"]["picks"] = filter_picks
+
         if (view_plots):
-            self.showplot(self.rawResampled)
+            self.showplot(title = "Filtered {}s".format(what.upper()), psd = False, picks = ch_lst,
+                          show = True)
 
-
-    def filter(self, view_plots) -> None:
-        """Filters the given EEG segement between 5 Hz and 100 Hz
-
-        Args:
-            view_plots: boolean value to denote if we want to view plots
-
-        Returns:
-            None
-        """
-        self.rawFiltered = self.rawResampled
-        channels = list(set(self.rawFiltered.ch_names) - set(["EOG1", "EOG2"]))
-
-        self.rawFiltered.filter(l_freq=1, h_freq=100, picks=channels)
-        self.rawFiltered.filter(l_freq=1, h_freq=5, picks=["EOG1", "EOG2"])
-
-        print("Filtered raw object")
-        if (view_plots):
-            self.showplot(self.rawFiltered)
-
-    def prep(self, view_plots) -> None:
+    def prep(self, *, view_plots = False) -> None:
         """Applies the PREP pipeline to the EEG segment to mark the bad channels
 
         Args:
@@ -107,81 +125,140 @@ class Pipeline:
         Returns:
             None
         """
-        self.rawPrep = self.rawFiltered
-        mne.datasets.eegbci.standardize(self.rawPrep)
+        mne.datasets.eegbci.standardize(self.raw)
 
         # Add a montage to the data
-        montage_kind = "standard_1005"
+        # Was:
+        #	montage_kind = "standard_1005"
+        # Use a standard 10 - 20 montage instead:
+        montage_kind = self.conf_dict["montage"]
+
         montage = mne.channels.make_standard_montage(montage_kind)
-        self.rawPrep.set_montage(montage, on_missing='ignore')
+
+        # Setting on_missing other than 'raise' here does not
+        # change anything because the same call is done again within PrepPipeline()
+        # with on_missing set to 'raise'
+        self.raw.set_montage(montage, on_missing='raise')
 
         # Extract some info
-        sample_rate = self.rawPrep.info["sfreq"]
+        sample_rate = self.raw.info["sfreq"]
+        fpwr = self.conf_dict["powerline_frq"]
 
-        prep_params = {
-            "ref_chs": "eeg",
-            "reref_chs": "eeg",
-            "line_freqs": np.arange(60, sample_rate / 2, 60),
-        }
+        prep_params = self.conf_dict["prep"]["prep_params"]
+        prep_params["line_freqs"] = np.arange(fpwr, sample_rate / 2, fpwr)
 
-        prep = PrepPipeline(self.rawPrep, prep_params, montage)
-        prep.fit()
+        prep = PrepPipeline(self.raw, prep_params, montage,
+                            **self.conf_dict["prep"]["other_kwargs"])
+        prep.fit()			# Original Raw is yet unchanged
+        self.raw = prep.raw		# Replace original Raw with PREP'd one
 
-        print("Bad channels: {}".format(prep.interpolated_channels))
         print("Bad channels original: {}".format(prep.noisy_channels_original["bad_all"]))
+        print("Bad after reref but before interpolation: {}".format(prep.bad_before_interpolation))
+        print("Interpolated channels: {}".format(prep.interpolated_channels))
         print("Bad channels after interpolation: {}".format(prep.still_noisy_channels))
-        print("SUCCESS Step 4: Applied Prep Pipeline to remove bad channels")
-
-        self.rawPrep = prep.raw.copy()
-        print("Applied ICA on raw object")
+        print("DONE PREP Pipeline to re-reference and remove bad channels")
 
         if (view_plots):
-            self.showplot(self.rawPrep)
+            self.showplot(title = "After PREP applied", time_series = True, psd = True)
 
 
-    def ica(self, components, applyICA, view_plots) -> None:
+    def ica(self, *, view_plots = False) -> None:
         """Performs ICA on the given EEG segment for both EOG and ECG channels
 
         Args:
-            components: integer denoting the number of components to be used for performing ICA,
-                        is usually taken same as the number of channels
-            view_plots: boolean value to denote if we want to view plots
+            view_plots: flag to show interactive plots
 
         Returns:
             None
         """
-        self.rawIca = self.rawPrep
-        self.rawIca.filter(l_freq=1, h_freq=None)
-        raw_copy = self.rawIca.copy()
-        ica = ICA(n_components=len(raw_copy.pick_types(eeg=True, exclude='bads', 
-                selection=None, verbose=None).ch_names), max_iter='auto', random_state=97)
-        ica.fit(self.rawIca)
+        init_args = self.conf_dict["ica"]["init"]
+        # NOTE: Was: n_components = number of EEG channels
+        # However often using n_components = None or 0.99999 results in smaller
+        # number of ICs which still fully explain the data. We've set the latter
+        # option in JSON to avoid having redundant ICs
+        ica = ICA(n_components = init_args["n_components"],
+                  random_state = init_args["random_state"],
+                  method = init_args["method"],
+                  max_iter = init_args["max_iter"],
+                  verbose = init_args["verbose"],
+
+                  noise_cov = None,
+                  fit_params = None,
+                  allow_ref_meg = False
+                  )
+
+        fit_args = self.conf_dict["ica"]["fit"]
+        ica.fit(self.raw,
+                picks=fit_args["picks"],	# picks = None or 'eeg' selects all good EEG channels for fitting
+                tstep=fit_args["tstep"],
+                verbose=fit_args["verbose"],
+
+                start=None,
+                stop=None,
+                decim=None,
+                reject=None,
+                flat=None,
+                reject_by_annotation=True
+                )
+
+        # Flag to actually apply ICA cleaning to the data
+        applyICA = self.conf_dict["ica"]["applyICA"]
         
-        if "EOG1" in self.rawIca.ch_names or "EOG2" in self.rawIca.ch_names:
-            eog_indices, eog_scores = ica.find_bads_eog(self.rawIca)
+        if len(self.ch_groups["eog"]) > 0:
+            eog_args = self.conf_dict["ica"]["find_bads_eog"]
+            eog_indices, eog_scores = ica.find_bads_eog(self.raw,
+                                                        measure=eog_args["measure"],
+                                                        threshold=eog_args["threshold"],
+                                                        verbose=eog_args["verbose"],
+
+                                                        ch_name=None,	# Known EOGs will be used
+                                                        start=None,
+                                                        stop=None, 
+                                                        l_freq=None,	# Skip filtering: already done
+                                                        h_freq=None,
+                                                        reject_by_annotation=True,
+                                                        )
             ica.exclude = eog_indices
 
             if (view_plots) and eog_indices != []:
                 ica.plot_scores(eog_scores)
             
                 # plot diagnostics
-                ica.plot_properties(self.rawIca, picks=eog_indices)
+                ica.plot_properties(self.raw, picks=eog_indices)
 
                 # plot ICs applied to raw data, with EOG matches highlighted
-                ica.plot_sources(self.rawIca, show_scrollbars=False)
+                ica.plot_sources(self.raw, show_scrollbars=True)
 
-                print("Removed EOG Artifacts using ICA")
-                self.showplot(self.rawIca)
+                self.showplot(title = "Before removing EOG artifacts", psd = False,
+                              show = False)
 
             if applyICA:
-                ica.apply(self.rawIca)
-                self.showplot(self.rawIca)
+                if len(ica.exclude) > 0:
+                    ica.apply(self.raw)     # All defautl args look good forever - so
+                                            # keeping the call simple
+                    print("Removed EOG Artifacts using ICA")
 
-        if "EKG1" in self.rawIca.ch_names or "EKG2" in self.rawIca.ch_names:
-            ica.exclude = []
+                    if view_plots:
+                        self.showplot(title = "After removing EOG artifacts", psd = False)
+                else:
+                    print("No clear EOG ICs to remove were found")
+
+        if len(self.ch_groups["ecg"]) > 0:
+            ica.exclude = []	# Clear indicies of already excluded EOG ICAs
             # find which ICs match the ECG pattern
-            ecg_indices, ecg_scores = ica.find_bads_ecg(self.rawIca, method='correlation',
-                                                        threshold='auto')
+            ecg_args = self.conf_dict["ica"]["find_bads_ecg"]
+            ecg_indices, ecg_scores = ica.find_bads_ecg(self.raw,
+                                                        method=ecg_args["method"],
+                                                        measure=ecg_args["measure"],
+                                                        threshold=ecg_args["threshold"],
+                                                        verbose=ecg_args["verbose"],
+
+                                                        ch_name=None,
+                                                        start=None,
+                                                        stop=None,
+                                                        l_freq=None,	# ECGS are already filtered
+                                                        h_freq=None, 
+                                                        reject_by_annotation=True)
             ica.exclude = ecg_indices
 
             if (view_plots) and ecg_indices != []:
@@ -189,59 +266,115 @@ class Pipeline:
                 ica.plot_scores(ecg_scores)
 
                 # plot ICs applied to raw data, with ECG matches highlighted
-                ica.plot_sources(self.rawIca, show_scrollbars=False)
-                print("Removed ECG Artifacts using ICA")
+                ica.plot_sources(self.raw, show_scrollbars=False)
 
-                # ica.apply(self.rawIca)                
-                self.showplot(self.rawIca)
+                # ica.apply(self.raw)                
+                self.showplot(title = "Before removing ECG artifacts", psd = False,
+                              show = False)
                 
             if applyICA:
-                ica.apply(self.rawIca)
-                self.showplot(self.rawIca)
+                if len(ica.exclude) > 0:
+                    ica.apply(self.raw)
+                    print("Removed ECG Artifacts using ICA")
 
+                    if view_plots:
+                        self.showplot(title = "After removing ECG artifacts", psd = False)
+                else:
+                    print("No clear ECG ICs to remove were found")
 
-
-    def showplot(self, raw, psd = True, time_series = True) -> None:
-        """Shows the time domain plot of the given EEG segment for 30 seconds
+    def showplot(self, *, title = None, time_series = True, psd = True,
+                 picks = None, show = True) -> None:
+        """Plot the time courses and / or power spectrum  of the data
 
         Args:
-            raw: the EEG segment to be plotted 
+            title (str) the plot title
+            time_series (bool) whether time series should be plotted
+            psd (bool): whether power spectrum should be plotted
+            picks (str or lst): channels to plot; if None (default) -  
+                all channels will be plotted
+            show (bool): flag to show the plot and pause execution
 
         Returns:
             None
         """
+        cfg = self.conf_dict
+
+        if picks is None:
+            raw = self.raw
+            delete_raw = False
+        else:
+            raw = self.raw.copy().pick(picks)
+            delete_raw = True
+
         if time_series:
-            artifact_picks = mne.pick_channels(raw.ch_names, include=raw.ch_names)
-            raw.plot(order=artifact_picks, n_channels=len(artifact_picks),
-                    show_scrollbars=False, duration=5, start=0, block=True, 
-                    scalings='auto')
+            fig = raw.plot(title = title, n_channels=len(self.raw.ch_names),
+                          show_scrollbars=True,
+                          start = 0,
+                          duration = cfg["plot"]["time_window"], 
+                          block=False, 
+                          scalings = cfg["plot"]["scalings"])
+
+            fig.axes[0].set_title(title)
         
         if psd:
-            viz.plot_raw_psd(raw, fmin=1, fmax=99)
-        
+            xscale = 'log' if cfg["plot"]["spect_log_x"] \
+                     else 'linear'
+            fmin = cfg["plot"]["fmin"]
+            fmax= cfg["plot"]["fmax"]
 
-    def applyPipeline(self, target_frequency, components, applyICA = False, view_plots = False) -> None:
+            fig = raw.compute_psd(method='welch',
+                                  fmin = fmin,
+                                  fmax= fmax,
+                                  n_fft = cfg["plot"]["n_fft"]
+                                  ).plot(
+                                         picks = picks,
+                                         amplitude = True,
+                                         dB = False,
+                                         xscale = xscale,
+                                         show = False)
+            fig.axes[0].set_title(title)
+
+            if cfg["plot"]["spect_log_x"]:
+                first_tick = 1. if np.isclose(fmin, 0) else fmin
+            else:
+                first_tick = fmin
+
+            fstep = cfg["plot"]["fstep"]
+            ticks = [first_tick]
+            ticks.extend(np.arange(fstep, fmax, fstep))
+
+            if cfg["plot"]["spect_log_y"]:
+                fig.axes[0].set_yscale('log')
+
+            fig.axes[0].xaxis.set_ticks(ticks)
+
+            if delete_raw:
+                del raw
+
+            if show:
+                plt.show()
+
+    def applyPipeline(self, applyICA = False, view_plots = False) -> None:
         """Applies the pipeline (resampling, filtering, applying PREP, performing ICA)
             on the given EEG segment
 
         Args:
-            target_frequency: interger indicating the final EEG frequency after resampling
-            components: integer denoting the number of components to be used for performing ICA,
-                        is usually taken same as the number of channels
-            view_plots: boolean value to denote if we want to view plots 
+            applyICA (bool): flag to remove EOG, ECG - related ICs from the signals
+            view_plots (bool): flag to show tons of plots; execution will be paused
+                each time a plot is shown 
 
         Returns:
             None
         """
-        self.resample(target_frequency, view_plots)
-        self.filter(view_plots)
-        self.prep(view_plots)
-        self.ica(components, applyICA, view_plots) 
+        self.filter_group(what = 'eog', view_plots = False)
+        self.filter_group(what = 'ecg', view_plots = False)
+        self.prep(view_plots = view_plots)
+        self.ica(view_plots = view_plots) 
 
     def getRaw(self):
         """
         Returns:
             Raw EDF object (preprocessed)
         """
-        return self.rawIca
+        return self.raw
         
