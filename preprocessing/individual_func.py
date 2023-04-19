@@ -176,6 +176,49 @@ def set_channel_types(raw, type_name, type_list, ch_groups = None):
 
     return ch_groups
 
+def prefilter_string(info, ch_num):
+    '''Generate channel prefilter string like "HP:0.5Hz LP:55Hz N:60Hz"
+
+    NOTE: it is assumed that info["lowpass"] and info["high pass"] values
+        describe a  band pass filter applied to EEG channels only; notch
+        filter info applies to EEG channels plus EOG, ECG channels;
+        both band pass and notch filters info is ignored for other channel types.
+
+    Args:
+        info (MNE info): as is
+        ch_num (int): 0-based channel number
+    Returns:
+        s (string): the prefilter string described above (possibly empty)
+    '''
+
+    prefilter = ''
+    ch_type = mne.channel_type(info, ch_num)
+
+    if not (ch_type in ('eeg', 'eog', 'ecg')):
+        return prefilter
+
+    # Add band pass filter info for EEG channels
+    if ch_type == 'eeg':
+        if not np.isclose(info['highpass'], 0.):
+            prefilter = 'HP:{}Hz'.format(info['highpass'])
+
+        if not np.isclose(info['lowpass'], info['sfreq']/2):
+            if len(prefilter) > 0:
+                prefilter = prefilter + ' '
+
+            prefilter = prefilter + 'LP:{}Hz'.format(info['lowpass'])
+
+    # Add notch info, if any, for all allowed types
+    notch_freq = read_notch_info(info)
+
+    if not (notch_freq is None):
+        if len(prefilter) > 0:
+            prefilter = prefilter + ' '
+
+        prefilter = prefilter + 'N:{}Hz'.format(notch_freq)
+
+    return prefilter
+
 def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None, 
                   overwrite=False):
     """
@@ -221,25 +264,6 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
     #print('saving to {}, filetype {}'.format(fname, file_type))
     sfreq = mne_raw.info['sfreq']
 
-    # Prepare 'prefilter' string for the channel_info
-    prefilter = ''
-    if not np.isclose(mne_raw.info['highpass'], 0.):
-        prefilter = 'HP:{}Hz'.format(mne_raw.info['highpass'])
-
-    if not np.isclose(mne_raw.info['lowpass'], sfreq/2):
-        if len(prefilter) > 0:
-            prefilter = prefilter + ' '
-
-        prefilter = prefilter + 'LP:{}Hz'.format(mne_raw.info['lowpass'])
-
-    # Add notch info, if any
-    notch_freq = read_notch_info(mne_raw.info)
-    if not (notch_freq is None):
-        if len(prefilter) > 0:
-            prefilter = prefilter + ' '
-
-        prefilter = prefilter + 'N:{}Hz'.format(notch_freq)
-
     date = _stamp_to_dt(mne_raw.info['meas_date'])
     # no conversion necessary, as pyedflib can handle datetime.
     #date = date.strftime('%d %b %Y %H:%M:%S')
@@ -279,6 +303,7 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
             for i in ch_idx:
                 # Add channel type to the channel label, like "EEG Cz"
                 label = mne.channel_type(mne_raw.info, i).upper() + ' ' + mne_raw.ch_names[i]
+                prefilter = prefilter_string(mne_raw.info, i)
 
                 try:
                     ch_dict = {'label': label, 
