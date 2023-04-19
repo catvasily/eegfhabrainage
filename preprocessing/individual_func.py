@@ -35,6 +35,49 @@ import re
 
 import warnings
 
+def save_notch_info(info, notch_freq):
+    '''Save notch filter frequency to raw.info["description"] string. 
+    This may be necessary because MNE does not save the notching info neither with
+    the Raw object nor in the FIF file. This is implemented by appending to the
+    value of the "description" key the following string:
+
+    `"Notch filter: {} Hz".format(notch_freq)`
+
+    Args:
+        info (MNE info): as is
+        notch_freq (float or int): the notching frequency, Hz
+    Returns:
+        None; info["description"] key is updated in place
+    '''
+    desc = "Notch filter: {} Hz".format(notch_freq)
+
+    if info['description'] is None:
+        info['description'] = desc
+    else:
+        info['description'] = info['description'] + ' ' + desc
+
+def read_notch_info(info):
+    '''Read notch frequency (if any) from the raw.info["description"] string.
+    It is assumed that if notch filtering was performed, its frequency was
+    saved with the raw.info object using the :data:`save_notch_info` function.
+
+    Args:
+        info (MNE info): as is
+    Returns:
+        notch_freq (float or None)
+    ''' 
+    notch_freq = None
+
+    if not (info['description'] is None):
+        tmp = re.search(r"Notch filter: \d+\.*\d*\s*Hz",
+                        info['description'])	# Returns a 'Match' object
+
+        if not (tmp is None):
+            ninfo = tmp.group()
+            notch_freq = float(re.search(r"\d+\.*\d*", ninfo).group())
+
+    return notch_freq
+
 def select_chans(ch_list, target_list, belong = True):
     """ From the input channel list `ch_list` select channels that belong to the target list.
     The string comparison is performed case insensitive, but original case is
@@ -190,16 +233,12 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
         prefilter = prefilter + 'LP:{}Hz'.format(mne_raw.info['lowpass'])
 
     # Add notch info, if any
-    if not (mne_raw.info['description'] is None):
-        tmp = re.search(r"Notch filter: \d+\.*\d*\s*Hz",
-                        mne_raw.info['description'])	# Returns a 'Match' object
+    notch_freq = read_notch_info(mne_raw.info)
+    if not (notch_freq is None):
+        if len(prefilter) > 0:
+            prefilter = prefilter + ' '
 
-        if not (tmp is None):
-            ninfo = tmp.group()
-            if len(prefilter) > 0:
-                prefilter = prefilter + ' '
-
-            prefilter = prefilter + 'N:' + re.search(r"\d+\.*\d*", ninfo).group() + 'Hz'
+        prefilter = prefilter + 'N:{}Hz'.format(notch_freq)
 
     date = _stamp_to_dt(mne_raw.info['meas_date'])
     # no conversion necessary, as pyedflib can handle datetime.

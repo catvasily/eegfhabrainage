@@ -2,7 +2,7 @@ import mne
 import os
 import os.path as op
 import glob
-from individual_func import select_chans, set_channel_types, write_mne_edf
+from individual_func import save_notch_info, select_chans, set_channel_types, write_mne_edf
 from mne.preprocessing import annotate_amplitude
 import matplotlib.pyplot as plt 
 import numpy as np
@@ -276,12 +276,7 @@ class PreProcessing:
             self.raw.notch_filter(freqs = notch_freq, picks = ['eeg', 'eog', 'ecg'], method='iir')
 
             # Save notch info with the raw object, as this is not done automatically
-            desc = "Notch filter: {} Hz".format(notch_freq)
-
-            if self.raw.info['description'] is None:
-                self.raw.info['description'] = desc
-            else:
-                self.raw.info['description'] = self.raw.info['description'] + ' ' + desc
+            save_notch_info(self.raw.info, notch_freq)
 
             self.raw.filter(l_freq=lfreq, h_freq=hfreq, picks = 'eeg', method = 'iir')
             self.sfreq = dict(self.raw.info)['sfreq']
