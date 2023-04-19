@@ -41,13 +41,14 @@ if __name__ == '__main__':
 	# Test processing a single record using the PreProcessing class directly
 	import sys
 	import glob
+	import os
 	import os.path as path
 	from edf_preprocessing import PreProcessing
 
 	# Inputs
 	N_ARRAY_JOBS = 100	# Number of parrallel jobs to run on cluster
-	hospital = 'Burnaby'	# Either Burnaby or Abbotsford
-	#hospital = 'Abbotsford'	# Either Burnaby or Abbotsford
+	#hospital = 'Burnaby'	# Either Burnaby or Abbotsford
+	hospital = 'Abbotsford'	# Either Burnaby or Abbotsford
 	bRunSingleFile = False	# Flag to test single PreProcessing class instance
 
 	data_root, out_root, cluster_job = get_data_folders()
