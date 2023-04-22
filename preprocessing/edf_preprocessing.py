@@ -22,6 +22,57 @@ _JSON_CONFIG_PATHNAME = os.path.dirname(__file__) + "/" + JSON_CONFIG_FILE
 
 '''
 
+def assign_known_channel_types(raw, *, conf_json = _JSON_CONFIG_PATHNAME,
+                               conf_dict = None, ch_groups = None):
+    '''Set channel types based on type information available in :data:`JSON_CONFIG_FILE`
+
+    Args:
+        raw (mne.Raw): the Raw object; channel data does not need to be preloaded
+        conf_json (str): pathname of a json file with configuration parameters; in
+           particular it must contain keys *"target_channels"* and *"exclude_channels"*.
+           Default configuration file name is given by :data:`JSON_CONFIG_FILE` constant
+        conf_dict (dict): a dictionary with configurartion parameters; in
+           particular it must contain keys *"target_channels"* and *"exclude_channels"*.
+           If both *conf_json* and *conf_dict* are given, the latter is used.
+        ch_groups (dict): a dictionary with known channel types (see below). If None,
+            this dictionary will be created
+
+    Returns:
+        ch_groups (dict): a dictionary with keys representing channel types and values as
+            lists of corresponding channel names. If supplied as an argument,
+            its keys (if present) will be updated.
+    '''
+
+    # Validate args
+    if (conf_json is None) and (conf_dict is None):
+        raise ValueError("At least one of the arguments 'conf_json' or 'conf_dict' should be specified")
+
+    if conf_dict is None:
+        # Read configuraion from a json file
+        with open(conf_json, "r") as fp:
+            conf_dict = json.loads(fp.read())
+
+    if ch_groups is None:
+        ch_groups = dict()
+
+    set_channel_types(raw, 'eeg', conf_dict["target_channels"], ch_groups = ch_groups)
+    set_channel_types(raw, 'eog', conf_dict["eog_channels"], ch_groups = ch_groups)
+    set_channel_types(raw, 'ecg', conf_dict["ecg_channels"], ch_groups = ch_groups)
+
+    # Set all other channels to 'misc'
+    # NOTE: one could set all channels to 'misc' from the beginning, then proceed
+    # to setting known types. However MNE discards channel's units when setting 
+    # the type to 'mics' - we do not want that for known channels
+    known_lst = conf_dict["target_channels"].copy()
+    known_lst.extend(conf_dict["eog_channels"])
+    known_lst.extend(conf_dict["ecg_channels"])
+    misc_lst = select_chans(raw.ch_names, known_lst, belong = False)[0]
+
+    if misc_lst:
+        set_channel_types(raw, 'misc', misc_lst, ch_groups = ch_groups)
+
+    return ch_groups
+
 def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, target_channels = None,
 	exclude_channels = None, preload=True):
     '''
@@ -88,23 +139,8 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
     if select_chans(target_channels, raw.ch_names, belong = False)[0]:
         raise ValueError(filepath + ": File doesn't have all mandatory channels")
 
-    # Now set types of channels that we know
-    ch_groups = dict()
-    set_channel_types(raw, 'eeg', target_channels, ch_groups = ch_groups)
-    set_channel_types(raw, 'eog', conf_dict["eog_channels"], ch_groups = ch_groups)
-    set_channel_types(raw, 'ecg', conf_dict["ecg_channels"], ch_groups = ch_groups)
-
-    # Set all other channels to 'misc'
-    # NOTE: one could set all channels to 'misc' from the beginning, then proceed
-    # to setting known types. However MNE discards channel's units when setting 
-    # the type to 'mics' - we do not want that for known channels
-    known_lst = target_channels.copy()
-    known_lst.extend(conf_dict["eog_channels"])
-    known_lst.extend(conf_dict["ecg_channels"])
-    misc_lst = select_chans(raw.ch_names, known_lst, belong = False)[0]
-
-    if misc_lst:
-        set_channel_types(raw, 'misc', misc_lst, ch_groups = ch_groups)
+    # Now set types of known channels
+    ch_groups = assign_known_channel_types(raw, conf_dict = conf_dict)
 
     if conf_dict["print_opt_channels"]:
         aux_list = select_chans(raw.ch_names, target_channels, belong = False)[0]

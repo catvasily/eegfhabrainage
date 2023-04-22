@@ -1,6 +1,4 @@
 {
-	"eog_channels":  ["EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG", "R EOG", "PG1", "PG2"],
-	"ecg_channels":  ["ECG1", "ECG2", "EKG", "EKG1", "EKG2"],
 	"montage": "standard_1020",
 	"powerline_frq": 60.0,
 

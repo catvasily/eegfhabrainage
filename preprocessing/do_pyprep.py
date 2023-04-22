@@ -7,7 +7,8 @@ from mne import viz
 from pyprep.prep_pipeline import PrepPipeline
 from mne.preprocessing import (ICA, create_eog_epochs, create_ecg_epochs,
                                corrmap)
-from individual_func import set_channel_types
+from edf_preprocessing import assign_known_channel_types
+from edf_preprocessing import _JSON_CONFIG_PATHNAME as first_step_json
 
 JSON_CONFIG_FILE = "pyprep_ica_conf.json"
 '''Default name (without a path) for the JSON file with parameter settings for
@@ -75,10 +76,9 @@ class Pipeline:
         self.raw = mne.io.read_raw_edf(file_name, infer_types = True, preload=False,
                                        verbose = 'ERROR')	# Get a light Raw object for now
 
-        # Set known channel types
-        self.ch_groups = dict()
-        set_channel_types(self.raw, 'eog', conf_dict["eog_channels"], self.ch_groups)
-        set_channel_types(self.raw, 'ecg', conf_dict["ecg_channels"], self.ch_groups)
+        # Set known channel types. Here we need to use another JSON config file - 
+        # one from the initial preprocessing and interval selection step
+        self.ch_groups = assign_known_channel_types(self.raw, conf_json = first_step_json)
 
         if (view_plots):
             self.showplot(title = "Original EDF", show = False)	# Do not pause until processing results are shown too
