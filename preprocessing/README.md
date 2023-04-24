@@ -202,6 +202,135 @@ in practice.
 
 ```
 
+## Running PREP step and ICA artifact removal
+The PREP step implements a EEG preprocessing procedure published in the literature. It performs the following steps:
+- Powerlines removal
+
+- Re-referencing
+
+- Identifying bad channels
+
+The ICA artifact removal is applied after PREP has successfully completed. It attemts to identify EOG and 
+ECG artifacts mixed into sensor channels' waveforms, and remove those.
+
+Please note that during the processing, the EOG and ECG  channels are filtered to different frequency bands
+(the actual channel names corresponding to the EOG, ECG channel types may vary -
+see the `preproc_conf.json` file above). However, no additional filtering of EEG sensor channels is
+performed.
+
+It is assumed that EDF records submitted to the PREP/ICA operations have already passed through the basic preprocessing
+stage described above (see section "*Pipeline for extraction from multiple files*").
+
+For an example code demonstrating how PREP and ICA artifact removal are performed please refer to the 
+source file `tst_PREP.py`. Parameter values used for PREP/ICA operations are defined in a JSON file
+`pyprep_ica_conf.json`, which is described below. Note again that JSON files can not contain comments;
+therefore comments in the code below should be removed if one wants to use this code in practice.
+
+```python
+{
+	"montage": "standard_1020",	# As is
+	"powerline_frq": 60.0,		# Powerline frq, Hz
+
+	# Arguments passed to mne.raw.filter() for EOG channels
+	"eog_filter_kwargs":
+	{
+		"l_freq": 1.0, "h_freq": 5.0, 
+		"picks": null, "filter_length": "auto", "l_trans_bandwidth": "auto",
+		"h_trans_bandwidth": "auto", "n_jobs": null, "method": "fir", "iir_params": null,
+		"phase": "zero", "fir_window": "hamming", "fir_design": "firwin",
+		"skip_by_annotation": ["edge", "bad_acq_skip"], "pad": "reflect_limited",
+		"verbose": null
+	},
+
+	# Arguments passed to mne.raw.filter() for ECG channels
+	"ecg_filter_kwargs":
+	{
+		"l_freq": 8.0, "h_freq": 16.0, 
+		"picks": null, "filter_length": "auto", "l_trans_bandwidth": "auto",
+		"h_trans_bandwidth": "auto", "n_jobs": null, "method": "fir", "iir_params": null,
+		"phase": "zero", "fir_window": "hamming", "fir_design": "firwin",
+		"skip_by_annotation": ["edge", "bad_acq_skip"], "pad": "reflect_limited",
+		"verbose": null
+	},
+
+	# Parameter set for the PREP step
+	"prep":
+	{
+		"prep_params":
+		{
+			"ref_chs": "eeg",
+			"reref_chs": "eeg",
+			"line_freqs": [60.0], 
+			"max_iterations": 4			
+		},
+		"other_kwargs":
+		{
+			"ransac": true,
+			"channel_wise": false,
+			"max_chunk_size": null,
+			"random_state": 12345,
+			"filter_kwargs":
+			{
+				"method": "fir"
+			},
+			"matlab_strict": false
+		}
+	},
+
+	# Parameter set for the ICA artifact removal step
+	"ica":
+	{
+		"applyICA": true,
+
+		"init":
+		{
+			"n_components":  0.99999,
+			"random_state": 12345,
+			"method": "fastica",
+			"max_iter": "auto",
+			"verbose": null
+		},
+
+		"fit":
+		{
+			"picks": "eeg",
+			"tstep": 2.0,
+			"verbose": null
+		},
+
+		"find_bads_eog":
+		{
+			"measure": "zscore",
+			"threshold": 3.0,
+			"verbose": null
+		},
+
+		"find_bads_ecg":
+		{
+			"method": "correlation",
+			"measure": "zscore",
+			"threshold": 3.0,
+			"verbose": null
+		}
+	},
+
+	# Parameters used for plotting EEG waveforms and spectra
+	"plot":
+	{
+		"time_window": 40.0,
+		"scalings": "auto",
+		"fmin": 0.0,
+		"fmax": 100.0,
+                "fstep": 10.0,
+		"spect_log_x": true,
+		"spect_log_y": true,
+		"n_fft": 1024
+	}
+	
+}
+
+```
+
 ## Setting up Python virtual environment on Compute Canada cluster
 The following steps should be performed to run the code on Compute Canada:
 - Create your working folder for the project
