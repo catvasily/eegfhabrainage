@@ -50,7 +50,7 @@ class Pipeline:
 
     """
 
-    def __init__(self, file_name, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
+    def __init__(self, file_name, *, conf_json = None, conf_dict = None,
                  view_plots = False) -> None:
         """
         Args:
@@ -63,8 +63,8 @@ class Pipeline:
             Set it to False (default) if processing multiple files. 
         """
         # Load configuration settings
-        if (conf_json is None) and (conf_dict is None):
-            raise ValueError("At least one of the arguments 'conf_json' or 'conf_dict' should be specified")
+        if conf_json is None:
+            conf_json = _JSON_CONFIG_PATHNAME
 
         if conf_dict is None:
             # Read configuraion from a json file

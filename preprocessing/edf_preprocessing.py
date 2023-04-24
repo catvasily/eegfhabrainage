@@ -22,7 +22,7 @@ _JSON_CONFIG_PATHNAME = os.path.dirname(__file__) + "/" + JSON_CONFIG_FILE
 
 '''
 
-def assign_known_channel_types(raw, *, conf_json = _JSON_CONFIG_PATHNAME,
+def assign_known_channel_types(raw, *, conf_json = None,
                                conf_dict = None, ch_groups = None):
     '''Set channel types based on type information available in :data:`JSON_CONFIG_FILE`
 
@@ -44,8 +44,8 @@ def assign_known_channel_types(raw, *, conf_json = _JSON_CONFIG_PATHNAME,
     '''
 
     # Validate args
-    if (conf_json is None) and (conf_dict is None):
-        raise ValueError("At least one of the arguments 'conf_json' or 'conf_dict' should be specified")
+    if conf_json is None:
+        conf_json = _JSON_CONFIG_PATHNAME
 
     if conf_dict is None:
         # Read configuraion from a json file
@@ -73,7 +73,7 @@ def assign_known_channel_types(raw, *, conf_json = _JSON_CONFIG_PATHNAME,
 
     return ch_groups
 
-def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, target_channels = None,
+def read_edf(filepath, *, conf_json = None, conf_dict = None, target_channels = None,
 	exclude_channels = None, preload=True):
     '''
     Reads an EDF file with the MNE package, creates the Raw EDF object. 
@@ -112,8 +112,8 @@ def read_edf(filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None, t
        
     '''
     # Validate args
-    if (conf_json is None) and (conf_dict is None):
-        raise ValueError("At least one of the arguments 'conf_json' or 'conf_dict' should be specified")
+    if conf_json is None:
+        conf_json = _JSON_CONFIG_PATHNAME
 
     if conf_dict is None:
         # Read configuraion from a json file
@@ -234,15 +234,15 @@ class PreProcessing:
     #     create_intervals_data: returns DataFrame with the EEG data based on clean_intervals
     #     save_edf: write new EDF files based on clean_intervals timestamps
 
-    def __init__(self, filepath, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
+    def __init__(self, filepath, *, conf_json = None, conf_dict = None,
                  target_channels = None, exclude_channels = None, target_frequency = None,
                  lfreq = None, hfreq = None, notch_freq = None, flat_parms = None):
         """Constructor args are explained in the class description above.
             
         """
         # Validate args
-        if (conf_json is None) and (conf_dict is None):
-            raise ValueError("At least one of the arguments 'conf_json' or 'conf_dict' should be specified")
+        if conf_json is None:
+            conf_json = _JSON_CONFIG_PATHNAME
 
         if conf_dict is None:
             # Read configuraion from a json file
@@ -693,7 +693,7 @@ class PreProcessing:
             print('Found no clean intervals of the specified length in file ', self.filename)
             
             
-def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAME, conf_dict = None,
+def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = None,
                source_scan_ids = None, target_frequency = None, lfreq = None, hfreq = None, 
                target_length = None, target_segments = None, nfiles=None):
     """ The function runs a pipeline for preprocessing and extracting 
@@ -729,6 +729,14 @@ def slice_edfs(source_folder, target_folder, *, conf_json = _JSON_CONFIG_PATHNAM
         None
 
     """
+    if conf_json is None:
+        conf_json = _JSON_CONFIG_PATHNAME
+
+    if conf_dict is None:
+        # Read configuraion from a json file
+        with open(conf_json, "r") as fp:
+            conf_dict = json.loads(fp.read())
+
     existing_edf_names = [op.basename(f) for f in glob.glob(source_folder + '/*.edf')]
 
     if source_scan_ids is None:
