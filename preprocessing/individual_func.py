@@ -36,7 +36,7 @@ import re
 import warnings
 
 def save_notch_info(info, notch_freq):
-    '''Save notch filter frequency to raw.info["description"] string. 
+    '''Save notch filter frequency to `raw.info["description"]` string. 
     This may be necessary because MNE does not save the notching info neither with
     the Raw object nor in the FIF file. This is implemented by appending to the
     value of the "description" key the following string:
@@ -79,15 +79,15 @@ def read_notch_info(info):
     return notch_freq
 
 def select_chans(ch_list, target_list, belong = True):
-    """ From the input channel list `ch_list` select channels that belong to the target list.
+    """ From the input channel list `ch_list` select channels that belong to the `target list`.
     The string comparison is performed case insensitive, but original case is
     preserved in the returned list.
 
     Args:
         ch_list (list of str): input channel list
         target_list (list of str): a target channel list
-        belong (bool): True (default) if request is to find channels that belong to the target list,
-            False if one wants channels that do NOT belong to the target list
+        belong (bool): `True` (default) if request is to find channels that belong to the target list,
+            `False` if one wants channels that do NOT belong to the target list
 
     Returns:
         selected_channels, flags
@@ -130,7 +130,8 @@ def set_channel_types(raw, type_name, type_list, ch_groups = None):
     then corresponding channel's type will be set to the `type_name`.
     The raw object will also be updated. As a result, 
     `ch_groups[type_name]` will contain all channels belonging to
-    the type including those that were previously marked in self.raw.
+    the type including those that were previously marked as such in the
+    `self.raw`object`.
     
 
     Args:
@@ -179,16 +180,17 @@ def set_channel_types(raw, type_name, type_list, ch_groups = None):
 def prefilter_string(info, ch_num):
     '''Generate channel prefilter string like "HP:0.5Hz LP:55Hz N:60Hz"
 
-    NOTE: it is assumed that info["lowpass"] and info["high pass"] values
-        describe a  band pass filter applied to EEG channels only; notch
+    Note:
+        It is assumed that `info["lowpass"]` and `info["high pass"]` values
+        describe a bandpass filter applied to EEG channels only; notch
         filter info applies to EEG channels plus EOG, ECG channels;
-        both band pass and notch filters info is ignored for other channel types.
-
+        both bandpass and notch filters info is ignored for other channel types.
     Args:
         info (MNE info): as is
         ch_num (int): 0-based channel number
     Returns:
         s (string): the prefilter string described above (possibly empty)
+
     '''
 
     prefilter = ''
@@ -222,29 +224,28 @@ def prefilter_string(info, ch_num):
 def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None, 
                   overwrite=False):
     """
-    Saves the raw content of an MNE.io.Raw and its subclasses to
+    Saves the raw content of a `MNE.io.Raw` and its subclasses to
     a file using the EDF+/BDF filetype
     pyEDFlib is used to save the raw contents of the RawArray to disk
 
-    Parameters
-    ----------
-    mne_raw : mne.io.Raw
-        An object with super class mne.io.Raw that contains the data
-        to save
-    fname : string
-        File name of the new dataset. This has to be a new filename
-        unless data have been preloaded. Filenames should end with .edf
-    picks : array-like of int | None
-        Indices of channels to include. If None all channels are kept.
-    tmin : float | None
-        Time in seconds of first sample to save. If None first sample
-        is used.
-    tmax : float | None
-        Time in seconds of last sample to save. If None last sample
-        is used.
-    overwrite : bool
-        If True, the destination file (if it exists) will be overwritten.
-        If False (default), an error will be raised if the file exists.
+    Args:
+        mne_raw (mne.io.Raw): 
+            An object with super class `mne.io.Raw` that contains the data
+            to save
+        fname (string):
+            File name of the new dataset. This has to be a new filename
+            unless data have been preloaded. Filenames should end with .edf
+        picks (array-like of int or None):
+            Indices of channels to include. If `None` all channels are kept.
+        tmin (float | None):
+            Time in seconds of first sample to save. If `None` first sample
+            is used.
+        tmax (float | None):
+            Time in seconds of last sample to save. If `None` last sample
+            is used.
+        overwrite (bool):
+            If `True`, the destination file (if it exists) will be overwritten.
+            If `False` (default), an error will be raised if the file exists.
 
     """
     if not issubclass(type(mne_raw), mne.io.BaseRaw):

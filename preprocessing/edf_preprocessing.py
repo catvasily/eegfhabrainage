@@ -106,8 +106,7 @@ def read_edf(filepath, *, conf_json = None, conf_dict = None, target_channels = 
       Raw (mne.Raw): raw EDF object
 
     Note:
-        At least one of the arguments: *conf_json* or *conf_dict* must be not None. If both *conf_json*
-        and *conf_dict* are omitted in the function call, the default settings will be read from 
+        If both *conf_json* and *conf_dict* are omitted in the function call, the default settings will be read from 
        :data:`JSON_CONFIG_FILE` which should be present in the same folder as the *edf_preprocessing.py*.
        
     '''
@@ -195,7 +194,7 @@ class PreProcessing:
             be below the *'flat_max_ptp'* to indicate a flat interval.
 
     Note:
-        * At least one of the arguments: *conf_json* or *conf_dict* must be not None. If both *conf_json* and *conf_dict*
+        * If both *conf_json* and *conf_dict*
           are omitted in the constructor, the default settings will be read from :data:`JSON_CONFIG_FILE` which should
           be present in the same folder as the *edf_preprocessing.py*.
         * When not None, the explicitly specified parameter values will be used instead of the values
