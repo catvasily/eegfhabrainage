@@ -162,16 +162,24 @@ over values found in <code class="docutils literal notranslate"><span class="pre
 with the <code class="docutils literal notranslate"><span class="pre">#</span></code> character. Mind that <strong>comments are NOT allowed in a real JSON file</strong> - please remove those if using this example
 in practice.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-	<span class="c1"># A list of mandatory channels. An input recording is discarded if any of those is missing</span>
+	<span class="c1"># A list of mandatory EEG channels. An input recording is discarded if any of those is missing</span>
+	<span class="c1"># (case-insensitive)</span>
 	<span class="s2">&quot;target_channels&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;FP1&quot;</span><span class="p">,</span> <span class="s2">&quot;FPZ&quot;</span><span class="p">,</span> <span class="s2">&quot;FP2&quot;</span><span class="p">,</span> <span class="s2">&quot;F3&quot;</span><span class="p">,</span> <span class="s2">&quot;F4&quot;</span><span class="p">,</span> <span class="s2">&quot;F7&quot;</span><span class="p">,</span> <span class="s2">&quot;F8&quot;</span><span class="p">,</span> <span class="s2">&quot;FZ&quot;</span><span class="p">,</span> <span class="s2">&quot;T3&quot;</span><span class="p">,</span> <span class="s2">&quot;T4&quot;</span><span class="p">,</span>
 			     <span class="s2">&quot;T5&quot;</span><span class="p">,</span>  <span class="s2">&quot;T6&quot;</span><span class="p">,</span>  <span class="s2">&quot;C3&quot;</span><span class="p">,</span>  <span class="s2">&quot;C4&quot;</span><span class="p">,</span> <span class="s2">&quot;CZ&quot;</span><span class="p">,</span> <span class="s2">&quot;P3&quot;</span><span class="p">,</span> <span class="s2">&quot;P4&quot;</span><span class="p">,</span> <span class="s2">&quot;PZ&quot;</span><span class="p">,</span> <span class="s2">&quot;O1&quot;</span><span class="p">,</span> <span class="s2">&quot;O2&quot;</span><span class="p">],</span>
 
 	<span class="c1"># A list of optional non-EEG channels that will be included in the output EDF, if present</span>
+	<span class="c1"># (case-insensitive)</span>
 	<span class="s2">&quot;opt_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;ECG1&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span> <span class="s2">&quot;L EOG&quot;</span><span class="p">,</span>
 			     <span class="s2">&quot;R EOG&quot;</span><span class="p">,</span><span class="s2">&quot;PG1&quot;</span><span class="p">,</span>  <span class="s2">&quot;PG2&quot;</span><span class="p">,</span> <span class="s2">&quot;A1&quot;</span><span class="p">,</span>   <span class="s2">&quot;A2&quot;</span><span class="p">],</span>
 
+	<span class="c1"># Known EOG channel names</span>
+	<span class="s2">&quot;eog_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;EOG 1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span> <span class="s2">&quot;L EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;R EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;PG1&quot;</span><span class="p">,</span> <span class="s2">&quot;PG2&quot;</span><span class="p">],</span>
+
+	<span class="c1"># Known ECG channel names</span>
+	<span class="s2">&quot;ecg_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;ECG1&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG2&quot;</span><span class="p">],</span>
+
 	<span class="c1"># A list of channels that will be removed from the output recording, if present</span>
-	<span class="c1"># Note that this list is treated as case-sensitive by MNE</span>
+	<span class="c1"># Note that this list is treated as !!! CASE-SENSITIVE  !!! by MNE</span>
 	<span class="s2">&quot;exclude_channels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AUX1&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX2&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX3&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX4&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX5&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX6&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX7&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX8&quot;</span><span class="p">,</span> <span class="s2">&quot;DC1&quot;</span><span class="p">,</span> <span class="s2">&quot;DC2&quot;</span><span class="p">,</span>
 			     <span class="s2">&quot;DC3&quot;</span><span class="p">,</span>  <span class="s2">&quot;DC4&quot;</span><span class="p">,</span>  <span class="s2">&quot;DIF1&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF2&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF3&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF4&quot;</span><span class="p">,</span>
 			     <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;L SPH&quot;</span><span class="p">,</span> <span class="s2">&quot;R SPH&quot;</span><span class="p">,</span>
@@ -198,6 +206,7 @@ in practice.</p>
 	<span class="s2">&quot;target_band&quot;</span><span class="p">:</span>              <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">55</span><span class="p">],</span>	<span class="c1"># the frequency band of the output record</span>
 	<span class="s2">&quot;target_segments&quot;</span><span class="p">:</span>	    <span class="mi">1</span><span class="p">,</span>		<span class="c1"># Max number of good continuous segments to extract</span>
 	<span class="s2">&quot;target_length&quot;</span><span class="p">:</span>	    <span class="mi">360</span><span class="p">,</span>	<span class="c1"># The good segment length in seconds</span>
+	<span class="s2">&quot;powerline_frq&quot;</span><span class="p">:</span> 	    <span class="mf">60.0</span><span class="p">,</span>	<span class="c1"># Power line main frequency, Hz</span>
 	<span class="s2">&quot;allow_upsampling&quot;</span><span class="p">:</span> 	    <span class="n">false</span><span class="p">,</span>	<span class="c1"># Allow upsampling a record if its sampling rate</span>
 						<span class="c1"># is smaller than requested</span>
 
@@ -224,6 +233,131 @@ in practice.</p>
 	<span class="s2">&quot;max_isi&quot;</span><span class="p">:</span> <span class="mi">360</span><span class="p">,</span>			<span class="c1"># Max interval in seconds between photic stimulations to consider those</span>
 					<span class="c1"># belonging to the same photic stimulation series</span>
 	<span class="s2">&quot;max_rec_length&quot;</span><span class="p">:</span> <span class="mi">3600</span>		<span class="c1"># Max allowed EDF file length in seconds (skip longer files)</span>
+<span class="p">}</span>
+
+</pre></div>
+</div>
+</section>
+<section id="running-prep-step-and-ica-artifact-removal">
+<h2>Running PREP step and ICA artifact removal<a class="headerlink" href="#running-prep-step-and-ica-artifact-removal" title="Permalink to this heading">¶</a></h2>
+<p>The PREP step implements a EEG preprocessing procedure published in the literature. It performs the following steps:</p>
+<ul class="simple">
+<li><p>Powerlines removal</p></li>
+<li><p>Re-referencing</p></li>
+<li><p>Identifying bad channels</p></li>
+</ul>
+<p>The ICA artifact removal is applied after PREP has successfully completed. It attemts to identify EOG and
+ECG artifacts mixed into sensor channels’ waveforms, and remove those.</p>
+<p>Please note that during the processing, the EOG and ECG  channels are filtered to different frequency bands
+(the actual channel names corresponding to the EOG, ECG channel types may vary -
+see the <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code> file above). However, no additional filtering of EEG sensor channels is
+performed.</p>
+<p>It is assumed that EDF records submitted to the PREP/ICA operations have already passed through the basic preprocessing
+stage described above (see section “<em>Pipeline for extraction from multiple files</em>”).</p>
+<p>For an example code demonstrating how PREP and ICA artifact removal are performed please refer to the
+source file <code class="docutils literal notranslate"><span class="pre">tst_PREP.py</span></code>. Parameter values used for PREP/ICA operations are defined in a JSON file
+<code class="docutils literal notranslate"><span class="pre">pyprep_ica_conf.json</span></code>, which is described below. Note again that JSON files can not contain comments;
+therefore comments in the code below should be removed if one wants to use this code in practice.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+	<span class="s2">&quot;montage&quot;</span><span class="p">:</span> <span class="s2">&quot;standard_1020&quot;</span><span class="p">,</span>	<span class="c1"># As is</span>
+	<span class="s2">&quot;powerline_frq&quot;</span><span class="p">:</span> <span class="mf">60.0</span><span class="p">,</span>		<span class="c1"># Powerline frq, Hz</span>
+
+	<span class="c1"># Arguments passed to mne.raw.filter() for EOG channels</span>
+	<span class="s2">&quot;eog_filter_kwargs&quot;</span><span class="p">:</span>
+	<span class="p">{</span>
+		<span class="s2">&quot;l_freq&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;h_freq&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span> 
+		<span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;filter_length&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;l_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+		<span class="s2">&quot;h_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span><span class="p">,</span> <span class="s2">&quot;iir_params&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+		<span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_window&quot;</span><span class="p">:</span> <span class="s2">&quot;hamming&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_design&quot;</span><span class="p">:</span> <span class="s2">&quot;firwin&quot;</span><span class="p">,</span>
+		<span class="s2">&quot;skip_by_annotation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;bad_acq_skip&quot;</span><span class="p">],</span> <span class="s2">&quot;pad&quot;</span><span class="p">:</span> <span class="s2">&quot;reflect_limited&quot;</span><span class="p">,</span>
+		<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+	<span class="p">},</span>
+
+	<span class="c1"># Arguments passed to mne.raw.filter() for ECG channels</span>
+	<span class="s2">&quot;ecg_filter_kwargs&quot;</span><span class="p">:</span>
+	<span class="p">{</span>
+		<span class="s2">&quot;l_freq&quot;</span><span class="p">:</span> <span class="mf">8.0</span><span class="p">,</span> <span class="s2">&quot;h_freq&quot;</span><span class="p">:</span> <span class="mf">16.0</span><span class="p">,</span> 
+		<span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;filter_length&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;l_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+		<span class="s2">&quot;h_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span><span class="p">,</span> <span class="s2">&quot;iir_params&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+		<span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_window&quot;</span><span class="p">:</span> <span class="s2">&quot;hamming&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_design&quot;</span><span class="p">:</span> <span class="s2">&quot;firwin&quot;</span><span class="p">,</span>
+		<span class="s2">&quot;skip_by_annotation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;bad_acq_skip&quot;</span><span class="p">],</span> <span class="s2">&quot;pad&quot;</span><span class="p">:</span> <span class="s2">&quot;reflect_limited&quot;</span><span class="p">,</span>
+		<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+	<span class="p">},</span>
+
+	<span class="c1"># Parameter set for the PREP step</span>
+	<span class="s2">&quot;prep&quot;</span><span class="p">:</span>
+	<span class="p">{</span>
+		<span class="s2">&quot;prep_params&quot;</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="s2">&quot;ref_chs&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;reref_chs&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;line_freqs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">60.0</span><span class="p">],</span> 
+			<span class="s2">&quot;max_iterations&quot;</span><span class="p">:</span> <span class="mi">4</span>			
+		<span class="p">},</span>
+		<span class="s2">&quot;other_kwargs&quot;</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="s2">&quot;ransac&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+			<span class="s2">&quot;channel_wise&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+			<span class="s2">&quot;max_chunk_size&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+			<span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
+			<span class="s2">&quot;filter_kwargs&quot;</span><span class="p">:</span>
+			<span class="p">{</span>
+				<span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span>
+			<span class="p">},</span>
+			<span class="s2">&quot;matlab_strict&quot;</span><span class="p">:</span> <span class="n">false</span>
+		<span class="p">}</span>
+	<span class="p">},</span>
+
+	<span class="c1"># Parameter set for the ICA artifact removal step</span>
+	<span class="s2">&quot;ica&quot;</span><span class="p">:</span>
+	<span class="p">{</span>
+		<span class="s2">&quot;applyICA&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+
+		<span class="s2">&quot;init&quot;</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="s2">&quot;n_components&quot;</span><span class="p">:</span>  <span class="mf">0.99999</span><span class="p">,</span>
+			<span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
+			<span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fastica&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;max_iter&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+		<span class="p">},</span>
+
+		<span class="s2">&quot;fit&quot;</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;tstep&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
+			<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+		<span class="p">},</span>
+
+		<span class="s2">&quot;find_bads_eog&quot;</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="s2">&quot;measure&quot;</span><span class="p">:</span> <span class="s2">&quot;zscore&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+			<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+		<span class="p">},</span>
+
+		<span class="s2">&quot;find_bads_ecg&quot;</span><span class="p">:</span>
+		<span class="p">{</span>
+			<span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;correlation&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;measure&quot;</span><span class="p">:</span> <span class="s2">&quot;zscore&quot;</span><span class="p">,</span>
+			<span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+			<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+		<span class="p">}</span>
+	<span class="p">},</span>
+
+	<span class="c1"># Parameters used for plotting EEG waveforms and spectra</span>
+	<span class="s2">&quot;plot&quot;</span><span class="p">:</span>
+	<span class="p">{</span>
+		<span class="s2">&quot;time_window&quot;</span><span class="p">:</span> <span class="mf">40.0</span><span class="p">,</span>
+		<span class="s2">&quot;scalings&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+		<span class="s2">&quot;fmin&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+		<span class="s2">&quot;fmax&quot;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">,</span>
+                <span class="s2">&quot;fstep&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
+		<span class="s2">&quot;spect_log_x&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+		<span class="s2">&quot;spect_log_y&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+		<span class="s2">&quot;n_fft&quot;</span><span class="p">:</span> <span class="mi">1024</span>
+	<span class="p">}</span>
+	
 <span class="p">}</span>
 
 </pre></div>
@@ -298,6 +432,7 @@ the project working folder and perform the following commands:</p></li>
 <li class="toctree-l2"><a class="reference internal" href="#pipeline-for-extraction-from-multiple-files">Pipeline for extraction from multiple files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#loading-data">Loading data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#preprocessing-configuration">Preprocessing configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-prep-step-and-ica-artifact-removal">Running PREP step and ICA artifact removal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-python-virtual-environment-on-compute-canada-cluster">Setting up Python virtual environment on Compute Canada cluster</a></li>
 </ul>
 </li>

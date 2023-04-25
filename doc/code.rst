@@ -13,3 +13,7 @@ edf_preprocessing.py
 individual_func.py
 ------------------
 .. automodule:: individual_func
+
+do_pyprep.py
+------------
+.. automodule:: do_pyprep

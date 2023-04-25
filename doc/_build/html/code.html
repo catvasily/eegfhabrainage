@@ -63,7 +63,7 @@ to reside in the same folder as the <em>edf_preprocessing.py</em> source file.</
 
 <dl class="py class">
 <dt class="sig sig-object py" id="edf_preprocessing.PreProcessing">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PreProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_parms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PreProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notch_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flat_parms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.PreProcessing" title="Permalink to this definition">¶</a></dt>
 <dd><p>The class’s aim is preprocessing clinical EEG recordings (in EDF format)
 and make them a suitable input for a later analysis and ML applications.</p>
 <p>The class instantiates a preprocessing object which
@@ -92,6 +92,7 @@ the EDF file.</p></li>
 <li><p><strong>target_frequency</strong> (<em>int</em>) – the final EEG frequency after resampling</p></li>
 <li><p><strong>lfreq</strong> (<em>float</em>) – lower frequency boundary of the signal to keep</p></li>
 <li><p><strong>hfreq</strong> (<em>float</em>) – higher frequency boundary of the signal to keep</p></li>
+<li><p><strong>notch_freq</strong> (<em>float</em>) – notch frequency (typically - power line frequency)</p></li>
 <li><p><strong>flat_parms</strong> (<em>dict</em>) – parameters for flat intervals selection. Should contain the
 following keys:
 <em>‘flat_max_ptp’</em> - the channel’s amplitude max peak-to-peak value (in channel’s
@@ -106,7 +107,7 @@ be below the <em>‘flat_max_ptp’</em> to indicate a flat interval.</p></li>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>At least one of the arguments: <em>conf_json</em> or <em>conf_dict</em> must be not None. If both <em>conf_json</em> and <em>conf_dict</em>
+<li><p>If both <em>conf_json</em> and <em>conf_dict</em>
 are omitted in the constructor, the default settings will be read from <a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> which should
 be present in the same folder as the <em>edf_preprocessing.py</em>.</p></li>
 <li><p>When not None, the explicitly specified parameter values will be used instead of the values
@@ -337,6 +338,32 @@ It saves each segment into a separate EDF file, with suffixes “[scan_id]_1”,
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="edf_preprocessing.assign_known_channel_types">
+<span class="sig-name descname"><span class="pre">assign_known_channel_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.assign_known_channel_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set channel types based on type information available in <a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw</strong> (<em>mne.Raw</em>) – the Raw object; channel data does not need to be preloaded</p></li>
+<li><p><strong>conf_json</strong> (<em>str</em>) – pathname of a json file with configuration parameters; in
+particular it must contain keys <em>“target_channels”</em> and <em>“exclude_channels”</em>.
+Default configuration file name is given by <a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> constant</p></li>
+<li><p><strong>conf_dict</strong> (<em>dict</em>) – a dictionary with configurartion parameters; in
+particular it must contain keys <em>“target_channels”</em> and <em>“exclude_channels”</em>.
+If both <em>conf_json</em> and <em>conf_dict</em> are given, the latter is used.</p></li>
+<li><p><strong>ch_groups</strong> (<em>dict</em>) – a dictionary with known channel types (see below). If None,
+this dictionary will be created</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ch_groups</strong> (<em>dict</em>) – a dictionary with keys representing channel types and values as
+lists of corresponding channel names. If supplied as an argument,
+its keys (if present) will be updated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="edf_preprocessing.load_edf_data">
 <span class="sig-name descname"><span class="pre">load_edf_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels_csv_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.load_edf_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function loads multiple EDF files and returns data
@@ -366,12 +393,15 @@ You might want to adjust column names in your own file or change this function.<
 
 <dl class="py function">
 <dt class="sig sig-object py" id="edf_preprocessing.read_edf">
-<span class="sig-name descname"><span class="pre">read_edf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.read_edf" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_edf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.read_edf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads an EDF file with the MNE package, creates the Raw EDF object.
 Excludes some channels to keep only target ones plus possibly some additional
 non-eeg channels.</p>
-<p>Prints a warning in case the input recording  doesn’t have all
-mandatory channels, doesn’t return object in this case.</p>
+<p>All target channels are set to be ‘eeg’ type - that is, EEG sensor type
+Channels with names matching those in EOG, ECG channels lists are set to be
+‘eog’, ‘ecg’ types respectively. All other included channels are set to be of ‘misc’ type.</p>
+<p>Raises an exception in case the input recording  doesn’t have all
+mandatory channels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -397,15 +427,14 @@ by either of <em>conf_…</em> arguments.</p></li>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>At least one of the arguments: <em>conf_json</em> or <em>conf_dict</em> must be not None. If both <em>conf_json</em>
-and <em>conf_dict</em> are omitted in the function call, the default settings will be read from</p>
+<p>If both <em>conf_json</em> and <em>conf_dict</em> are omitted in the function call, the default settings will be read from</p>
 <p><a class="reference internal" href="#edf_preprocessing.JSON_CONFIG_FILE" title="edf_preprocessing.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a> which should be present in the same folder as the <em>edf_preprocessing.py</em>.</p>
 </div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="edf_preprocessing.slice_edfs">
-<span class="sig-name descname"><span class="pre">slice_edfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_folder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/home/alexm/mycode/python/eegfhabrainage/preprocessing/preproc_conf.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_scan_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.slice_edfs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">slice_edfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_folder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_scan_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.slice_edfs" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function runs a pipeline for preprocessing and extracting
 clean segment(s) of requested length from multiple EDF files.
 It takes in a list of EDF file names and preprocessing parameters,
@@ -461,28 +490,303 @@ it will be internally converted to microvolt</p></li>
 <li><p>Annotations are lost in the process.</p></li>
 </ul>
 <dl class="py function">
+<dt class="sig sig-object py" id="individual_func.prefilter_string">
+<span class="sig-name descname"><span class="pre">prefilter_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_num</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#individual_func.prefilter_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate channel prefilter string like “HP:0.5Hz LP:55Hz N:60Hz”</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is assumed that <cite>info[“lowpass”]</cite> and <cite>info[“high pass”]</cite> values
+describe a bandpass filter applied to EEG channels only; notch
+filter info applies to EEG channels plus EOG, ECG channels;
+both bandpass and notch filters info is ignored for other channel types.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>info</strong> (<em>MNE info</em>) – as is</p></li>
+<li><p><strong>ch_num</strong> (<em>int</em>) – 0-based channel number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>s</strong> (<em>string</em>) – the prefilter string described above (possibly empty)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="individual_func.read_notch_info">
+<span class="sig-name descname"><span class="pre">read_notch_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#individual_func.read_notch_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read notch frequency (if any) from the raw.info[“description”] string.
+It is assumed that if notch filtering was performed, its frequency was
+saved with the raw.info object using the <a class="reference internal" href="#individual_func.save_notch_info" title="individual_func.save_notch_info"><code class="xref py py-data docutils literal notranslate"><span class="pre">save_notch_info</span></code></a> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>info</strong> (<em>MNE info</em>) – as is</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>notch_freq</strong> (<em>float or None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="individual_func.save_notch_info">
+<span class="sig-name descname"><span class="pre">save_notch_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notch_freq</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#individual_func.save_notch_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save notch filter frequency to <cite>raw.info[“description”]</cite> string.
+This may be necessary because MNE does not save the notching info neither with
+the Raw object nor in the FIF file. This is implemented by appending to the
+value of the “description” key the following string:</p>
+<p><cite>“Notch filter: {} Hz”.format(notch_freq)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>info</strong> (<em>MNE info</em>) – as is</p></li>
+<li><p><strong>notch_freq</strong> (<em>float</em><em> or </em><em>int</em>) – the notching frequency, Hz</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None; info[“description”] key is updated in place</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="individual_func.select_chans">
+<span class="sig-name descname"><span class="pre">select_chans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ch_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">belong</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#individual_func.select_chans" title="Permalink to this definition">¶</a></dt>
+<dd><p>From the input channel list <cite>ch_list</cite> select channels that belong to the <cite>target list</cite>.
+The string comparison is performed case insensitive, but original case is
+preserved in the returned list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ch_list</strong> (<em>list</em><em> of </em><em>str</em>) – input channel list</p></li>
+<li><p><strong>target_list</strong> (<em>list</em><em> of </em><em>str</em>) – a target channel list</p></li>
+<li><p><strong>belong</strong> (<em>bool</em>) – <cite>True</cite> (default) if request is to find channels that belong to the target list,
+<cite>False</cite> if one wants channels that do NOT belong to the target list</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>selected_channels, flags</strong></p></li>
+<li><p><strong>selected_channels</strong> (<em>list of str</em>) – a list of channels from the input list
+that belong to the <cite>target list</cite></p></li>
+<li><p><strong>flags</strong> (<em>list of bool</em>) – list of flags indicating if elements of <cite>ch_list</cite>
+belong / not belong to the <cite>target_list</cite>; <cite>len(flags)</cite> equals to <cite>len(ch_list)</cite></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="individual_func.set_channel_types">
+<span class="sig-name descname"><span class="pre">set_channel_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#individual_func.set_channel_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set data channel types based on their names.</p>
+<p>If a channel name belongs to the <cite>type_list</cite> (case-insensitive),
+then corresponding channel’s type will be set to the <cite>type_name</cite>.
+The raw object will also be updated. As a result,
+<cite>ch_groups[type_name]</cite> will contain all channels belonging to
+the type including those that were previously marked as such in the
+<cite>self.raw`object</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw</strong> (<em>mne.Raw</em>) – the Raw object; channel data does not need to be preloaded</p></li>
+<li><p><strong>type_name</strong> (<em>str</em>) – the channel type, such as ‘eog’, ‘ecg’, ‘eeg’, etc.</p></li>
+<li><p><strong>type_list</strong> (<em>list</em><em> of </em><em>str</em>) – list of known channel names that belong to this type.</p></li>
+<li><p><strong>ch_groups</strong> (<em>dict</em>) – a dictionary with known channel types (see below). If None,
+this dictionary will be created</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ch_groups</strong> (<em>dict</em>) – a dictionary with keys corresponding to channel types and
+values being lists of corresponding channel names. If supplied as an argument,
+its key equal to <cite>type_name</cite> will be updated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="individual_func.write_mne_edf">
 <span class="sig-name descname"><span class="pre">write_mne_edf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mne_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#individual_func.write_mne_edf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves the raw content of an MNE.io.Raw and its subclasses to
+<dd><p>Saves the raw content of a <cite>MNE.io.Raw</cite> and its subclasses to
 a file using the EDF+/BDF filetype
 pyEDFlib is used to save the raw contents of the RawArray to disk</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mne_raw</strong> (<em>mne.io.Raw</em>) – An object with super class mne.io.Raw that contains the data
+<li><p><strong>mne_raw</strong> (<em>mne.io.Raw</em>) – An object with super class <cite>mne.io.Raw</cite> that contains the data
 to save</p></li>
 <li><p><strong>fname</strong> (<em>string</em>) – File name of the new dataset. This has to be a new filename
 unless data have been preloaded. Filenames should end with .edf</p></li>
-<li><p><strong>picks</strong> (<em>array-like</em><em> of </em><em>int</em><em> | </em><em>None</em>) – Indices of channels to include. If None all channels are kept.</p></li>
-<li><p><strong>tmin</strong> (<em>float</em><em> | </em><em>None</em>) – Time in seconds of first sample to save. If None first sample
+<li><p><strong>picks</strong> (<em>array-like</em><em> of </em><em>int</em><em> or </em><em>None</em>) – Indices of channels to include. If <cite>None</cite> all channels are kept.</p></li>
+<li><p><strong>tmin</strong> (<em>float</em><em> | </em><em>None</em>) – Time in seconds of first sample to save. If <cite>None</cite> first sample
 is used.</p></li>
-<li><p><strong>tmax</strong> (<em>float</em><em> | </em><em>None</em>) – Time in seconds of last sample to save. If None last sample
+<li><p><strong>tmax</strong> (<em>float</em><em> | </em><em>None</em>) – Time in seconds of last sample to save. If <cite>None</cite> last sample
 is used.</p></li>
-<li><p><strong>overwrite</strong> (<em>bool</em>) – If True, the destination file (if it exists) will be overwritten.
-If False (default), an error will be raised if the file exists.</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em>) – If <cite>True</cite>, the destination file (if it exists) will be overwritten.
+If <cite>False</cite> (default), an error will be raised if the file exists.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="module-do_pyprep">
+<span id="do-pyprep-py"></span><h2>do_pyprep.py<a class="headerlink" href="#module-do_pyprep" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="do_pyprep.JSON_CONFIG_FILE">
+<span class="sig-name descname"><span class="pre">JSON_CONFIG_FILE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyprep_ica_conf.json'</span></em><a class="headerlink" href="#do_pyprep.JSON_CONFIG_FILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default name (without a path) for the JSON file with parameter settings for
+the PYPREP procedure and ICA artifact removal. This file is expected
+to reside in the same folder as the <em>do_pyprep.py</em> source file.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_pyprep.Pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class’ aim is preprocessing clean extracted segments of clinical
+EEG recordings (in EDF format) and make them a suitable input for later analysis
+and ML applications.</p>
+<p>The class instantiates a preprocessing object which
+carries a Raw EDF file through the following operations:
+1. Removes power lines, re-references the channels and identifies bad channels
+as per the PREP pipeline.</p>
+<p>2. Performs ICA on the given EEG segment for both EOG and ECG channels.
+Then the object returns a pre-processed EEG data in raw format.</p>
+<p><strong>Attributes</strong></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.conf_dict">
+<span class="sig-name descname"><span class="pre">conf_dict</span></span><a class="headerlink" href="#do_pyprep.Pipeline.conf_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>a dictionary containing all settings; typically reflects
+contents of the JSON file <a class="reference internal" href="#do_pyprep.JSON_CONFIG_FILE" title="do_pyprep.JSON_CONFIG_FILE"><code class="xref py py-data docutils literal notranslate"><span class="pre">JSON_CONFIG_FILE</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.ch_groups">
+<span class="sig-name descname"><span class="pre">ch_groups</span></span><a class="headerlink" href="#do_pyprep.Pipeline.ch_groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>a dictionary containing lists of channels of certain types</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.raw">
+<span class="sig-name descname"><span class="pre">raw</span></span><a class="headerlink" href="#do_pyprep.Pipeline.raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>the MNE Raw EDF object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mne.Raw</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p><strong>Methods</strong></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.applyPipeline">
+<span class="sig-name descname"><span class="pre">applyPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">applyICA</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#do_pyprep.Pipeline.applyPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Applies the pipeline (resampling, filtering, applying PREP, performing ICA)</dt><dd><p>on the given EEG segment</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>applyICA</strong> (<em>bool</em>) – flag to remove EOG, ECG - related ICs from the signals</p></li>
+<li><p><strong>view_plots</strong> (<em>bool</em>) – flag to show tons of plots; execution will be paused
+each time a plot is shown</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.filter_group">
+<span class="sig-name descname"><span class="pre">filter_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">what</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'eog'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#do_pyprep.Pipeline.filter_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters specified channel group to be used as templates for ICA artifact removal</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>what</strong> (<em>str</em>) – currently either “eog” or “ecg” - the channel group name</p></li>
+<li><p><strong>view_plots</strong> (<em>bool</em>) – flag to view plots</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.getRaw">
+<span class="sig-name descname"><span class="pre">getRaw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#do_pyprep.Pipeline.getRaw" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Raw EDF object</strong> (<em>preprocessed</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.ica">
+<span class="sig-name descname"><span class="pre">ica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#do_pyprep.Pipeline.ica" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs ICA on the given EEG segment for both EOG and ECG channels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>view_plots</strong> – flag to show interactive plots</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.prep">
+<span class="sig-name descname"><span class="pre">prep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view_plots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#do_pyprep.Pipeline.prep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the PREP pipeline to the EEG segment to mark the bad channels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>view_plots</strong> – boolean value to denote if we want to view plots</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="do_pyprep.Pipeline.showplot">
+<span class="sig-name descname"><span class="pre">showplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_series</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#do_pyprep.Pipeline.showplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the time courses and / or power spectrum  of the data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str</em>) – the plot title</p></li>
+<li><p><strong>time_series</strong> (<em>bool</em>) – whether time series should be plotted</p></li>
+<li><p><strong>psd</strong> (<em>bool</em>) – whether power spectrum should be plotted</p></li>
+<li><p><strong>picks</strong> (<em>str</em><em> or </em><em>lst</em>) – channels to plot; if <cite>None</cite> (default) -
+all channels will be plotted</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – flag to show the plot interactively (execution
+is paused)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -512,6 +816,7 @@ If False (default), an error will be raised if the file exists.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-test_preproc">test_preproc.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-edf_preprocessing">edf_preprocessing.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-individual_func">individual_func.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-do_pyprep">do_pyprep.py</a></li>
 </ul>
 </li>
 </ul>
