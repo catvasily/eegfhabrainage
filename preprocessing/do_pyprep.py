@@ -19,6 +19,7 @@ to reside in the same folder as the *do_pyprep.py* source file.
 
 _JSON_CONFIG_PATHNAME = os.path.dirname(__file__) + "/" + JSON_CONFIG_FILE
 '''Automatically generated fully qualified pathname to the default JSON config file
+
 '''
 
 class Pipeline:
@@ -28,10 +29,13 @@ class Pipeline:
 
     The class instantiates a preprocessing object which 
     carries a Raw EDF file through the following operations: 
-    (1) Removes power lines, re-references the channels and identifies bad channels
-        as per the PREP pipeline.
-    (2) Performs ICA on the given EEG segment for both EOG and ECG channels.
-        Then the object returns a pre-processed EEG data in raw format.
+    1. Removes power lines, re-references the channels and identifies bad channels
+    as per the PREP pipeline.
+
+    2. Performs ICA on the given EEG segment for both EOG and ECG channels.
+    Then the object returns a pre-processed EEG data in raw format.
+
+    **Attributes**
 
     Attributes:
         conf_dict (dict): a dictionary containing all settings; typically reflects
@@ -39,16 +43,19 @@ class Pipeline:
         ch_groups (dict): a dictionary containing lists of channels of certain types
         raw (mne.Raw): the MNE Raw EDF object
             
-    Methods:
-        prep: applies the PREP pipeline the mark the bad channels
-        filter_group: filters EOG or ECG channels to be used for ICA artifact removal
-        ica: performs ICA on the given EEG segment for both EOG and ECG channels
-        showplot: shows the time domain plot of the given EEG segment
-        applyPipeline: applies the pipeline (resampling, filtering, applying PREP, performing ICA)
-                        on the given EEG segment
-        getRaw: returns the preprocessed EEG segment in raw format
+    **Methods**
 
     """
+    # This part of the class description was moved out of a docstring to avoid sphinx warnings
+    # about duplicate descriptions. Now only descriptions from the methods themselves will
+    # be present in the generated documentation.
+    #   prep: applies the PREP pipeline the mark the bad channels
+    #   filter_group: filters EOG or ECG channels to be used for ICA artifact removal
+    #   ica: performs ICA on the given EEG segment for both EOG and ECG channels
+    #   showplot: shows the time domain plot of the given EEG segment
+    #   applyPipeline: applies the pipeline (resampling, filtering, applying PREP, performing ICA)
+    #       on the given EEG segment
+    #   getRaw: returns the preprocessed EEG segment in raw format
 
     def __init__(self, file_name, *, conf_json = None, conf_dict = None,
                  view_plots = False) -> None:
@@ -58,9 +65,10 @@ class Pipeline:
             conf_json (str): pathname of a json file with configuration parameters.
                 The default configuration file name is given by :data:`JSON_CONFIG_FILE` constant.
             conf_dict (dict): a dictionary with configurartion parameters.
-                If both *conf_json* and *conf_dict* are given, the latter is used.
-            view_plots (bool): If True, various interactive data plots will be shown.
-            Set it to False (default) if processing multiple files. 
+                If both `conf_json` and `conf_dict` are given, the latter is used.
+            view_plots (bool): If `True`, various interactive data plots will be shown.
+                Set it to False (default) if processing multiple files. 
+
         """
         # Load configuration settings
         if conf_json is None:
@@ -287,15 +295,17 @@ class Pipeline:
         """Plot the time courses and / or power spectrum  of the data
 
         Args:
-            title (str) the plot title
-            time_series (bool) whether time series should be plotted
+            title (str): the plot title
+            time_series (bool): whether time series should be plotted
             psd (bool): whether power spectrum should be plotted
-            picks (str or lst): channels to plot; if None (default) -  
+            picks (str or lst): channels to plot; if `None` (default) -  
                 all channels will be plotted
-            show (bool): flag to show the plot and pause execution
+            show (bool): flag to show the plot interactively (execution
+                is paused)
 
         Returns:
             None
+
         """
         cfg = self.conf_dict
 
