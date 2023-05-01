@@ -1,0 +1,93 @@
+'''A script to perform filtering and extraction of hyperventilation (HV)
+intervals.
+'''
+import sys
+import glob
+import os
+import os.path as path
+import socket
+
+from edf_preprocessing import slice_edfs
+
+def get_data_folders():
+	'''Setup input and output data folders depending on the host machine.
+
+	Returns:
+	    data_root, out_root, cluster_job (str, str, bool): paths to the root input and output
+		data folders, and a flag indicating whether host is on CC cluster
+	    
+	'''
+	host = socket.gethostname()
+
+	# path.expanduser("~") results in /home/<username>
+	user_home = path.expanduser("~")
+	user = path.basename(user_home) # Yields just <username>
+
+	if 'ub20-04' in host:
+		data_root = '/data/eegfhabrainage'
+		out_root = data_root + '/hv_segments'
+		cluster_job = False
+	elif 'cedar' in host:
+		data_root = '/project/6019337/databases/eeg_fha/release_001/edf'
+		out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/hv_segments'
+		cluster_job = True
+	else:
+		home_dir = os.getcwd()
+		data_root = home_dir
+		out_root = home_dir + '/hv_segments'
+		cluster_job = False
+
+	return data_root, out_root, cluster_job
+
+# The 'if' is needed to prevent running this code when the file is 
+# imported into some other source and is not supposed to run
+if __name__ == '__main__': 
+	# Inputs
+	N_ARRAY_JOBS = 100	# Number of parrallel jobs to run on cluster
+	#hospital = 'Burnaby'	# Either Burnaby or Abbotsford
+	hospital = 'Abbotsford'	# Either Burnaby or Abbotsford
+
+	data_root, out_root, cluster_job = get_data_folders()
+
+	# Burnaby
+	#source_scan_ids = ["fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2", "ffff1021-f5ba-49a9-a588-1c4778fb38d3"]
+	#source_scan_ids = [
+        #        '819ebadf-1bcb-4c35-8280-fb63d4747b35','ffedacda-ce90-452c-8007-f46ec1a04cd1',
+	#	'81a91d9d-281d-4321-a656-5b68ecb37090','ffee84ea-1238-4ef5-99fd-8ea9a05b98ca',
+	#	'81aa06db-db61-45af-965d-71813cf34a81','ffef5962-ed51-45d6-b20a-a95dd1f6ddde',
+	#	'81be60fc-ed17-4f91-a265-c8a9f1770517','fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
+	#	'81c0c60a-8fcc-4aae-beed-87931e582c45','ffff1021-f5ba-49a9-a588-1c4778fb38d3']
+	source_scan_ids = None
+
+	# Abbotsford
+
+	input_dir = data_root + "/" + hospital
+	output_dir = out_root + "/" + hospital
+
+	if not path.exists(output_dir):
+		os.makedirs(output_dir)
+
+	# When running on the CC cluster, 1st command line argument is a 0-based
+	# array job index
+	if len(sys.argv) == 1:	# No command line args
+		ijob = 0
+	else:
+		ijob = int(sys.argv[1])
+
+	if source_scan_ids is None:
+		source_scan_ids = [path.basename(f)[:-4] for f in glob.glob(input_dir + '/*.edf')]
+
+	if cluster_job:
+		nfiles = len(source_scan_ids)
+		files_per_job = nfiles // N_ARRAY_JOBS + 1
+		istart = ijob * files_per_job
+
+		if istart > nfiles - 1:
+			print('All done')
+			sys.exit()
+
+		iend = min(istart + files_per_job, nfiles)
+		source_scan_ids = source_scan_ids[istart:iend]
+
+	slice_edfs(input_dir, output_dir, source_scan_ids = source_scan_ids, extract = 'HV')
+
