@@ -379,7 +379,7 @@ class PreProcessing:
             gaps = [False]
 
         pad_int = self.conf_dict["hv_pad_interval"]
-        padd_it = lambda lst: [lst[0] - pad_int, lst[-1]+60.+pad_int]
+        padd_it = lambda lst: [lst[0]-60.-pad_int, lst[-1]+60.+pad_int]
 
         if any(gaps):
             gaps = np.append(gaps, True)	# Make gaps same length as hvticks
@@ -669,31 +669,35 @@ class PreProcessing:
             filename (str) : main name for the output files (suffix will be added for more than 1 files)
 
         Returns:
-            None
+            success (bool): `True` if clean interval(s) exist and are saved, `False` otherwise
 
         """
         
         # check if there are available clean segments
         if self.resolution:
-            for n in range(len(self.clean_intervals)):
-                interval_start = self.clean_intervals[n][0]
-                interval_end = self.clean_intervals[n][1]
+            for i in range(len(self.clean_intervals)):
+                interval_start = self.clean_intervals[i][0]
+                interval_end = self.clean_intervals[i][1]
                 
                 tmp_raw_edf = self.clean_part.copy()
                 
                 tmp_raw_edf.crop(interval_start, interval_end, include_tmax=False)
                 
-                if n > 0:
+                if i > 0:
                     scan_id = filename.split('.')[0]
-                    write_mne_edf(tmp_raw_edf, fname=folder+'/'+scan_id + '_' + str(n)+'.edf', overwrite=True)
+                    write_mne_edf(tmp_raw_edf, fname=folder+'/'+scan_id + '_' + str(i)+'.edf', overwrite=True)
                 else:
                     write_mne_edf(tmp_raw_edf, fname=folder+'/'+filename, overwrite=True)
+
+                return True
         else:
-            print('Found no clean intervals of the specified length in file ', self.filename)
+            print('Found no clean intervals of the specified length in file ', self.filename, '\n')
+            return False
             
             
 def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = None,
                source_scan_ids = None, target_frequency = None, lfreq = None, hfreq = None, 
+               extract = 'good',
                target_length = None, target_segments = None, nfiles=None):
     """ The function runs a pipeline for preprocessing and extracting 
     clean segment(s) of requested length from multiple EDF files.
@@ -718,10 +722,14 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
             the default for the :class: `PreProcessing` will be used
         hfreq (float or None): the higher frequency boundary of the EEG signal in Hz; if not specified
             the default for the :class: `PreProcessing` will be used
+        extract (str): one of 'good' (default) or 'HV'. In the first case good segments (no artifacts
+            stimuli, etc. present). In the 2nd case hyperventilation intervals will be extracted.
         target_length (float): the length of each of the extracted segments in seconds; the value
-            from `conf_json` or `conf_dict` will be used if not specified
+            from `conf_json` or `conf_dict` will be used if not specified. Only applies when 
+            `extract = 'good'`. In HV case the length will be equal to that of 1st HV interval.
         target_segments (int): the maximum number of segments to extract from each EDF file; the value
-            from `conf_json` or `conf_dict` will be used if not specified
+            from `conf_json` or `conf_dict` will be used if not specified. Only applies when 
+            `extract = 'good'`. In HV case only the 1st HV interval will be extracted.
         nfiles (int or None): the max number of the source files to preprocess; (default = None = no limit)
           
     Returns:
@@ -736,6 +744,9 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
         with open(conf_json, "r") as fp:
             conf_dict = json.loads(fp.read())
 
+    if not (extract in ['good', 'HV']):
+        raise ValueError("Unrecognized value for the 'extract' argument specified: extract = '{}'".format(extract))
+
     existing_edf_names = [op.basename(f) for f in glob.glob(source_folder + '/*.edf')]
 
     if source_scan_ids is None:
@@ -743,7 +754,7 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
     else:
         scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
 
-    i = 0
+    cnt = 0
     print('\nProcessing files:')
     for f in scan_files:
         if f in existing_edf_names:
@@ -759,28 +770,53 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
                     print("Record {} SKIPPED\n".format(f), flush = True)
                     continue
 
-                # This calls internal functions to detect 'bad intervals' and extract requested number of good
-                # segments of specified length
-                p.extract_good(target_length=target_length, target_segments=target_segments)
+                #-------------------
+                if extract == 'good':	# Extract good intervals
+                #-------------------
+                    # extract_good() calls member functions to detect 'bad intervals' and extract requested number of good
+                    # segments of specified length
+                    p.extract_good(target_length=target_length, target_segments=target_segments)
+ 
+                    # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
+                    if p.save_edf(folder=target_folder, filename = f):
+                        print('OK', flush = True)
+                #-------------------
+                elif extract == 'HV':
+                #-------------------
+                    lst_hv = p.hyperventilation()
 
-                # Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
-                p.save_edf(folder=target_folder, filename = f)
-                print('OK', flush = True)
+                    if not lst_hv:
+                        print('\nNo HV intervals found in the record\n')
+                        continue
+
+                    if len(lst_hv) > 1:
+                        print('\nWarning: {} HV intervals found in the record.'.format(len(lst_hv)))
+                        print('Only the first one is saved')
+
+                    hv_int = lst_hv[0]
+                    p.raw.crop(hv_int[0], hv_int[1], include_tmax=False)	# !!! Raw object modified in place !!!
+
+                    # !!! For some reason, MNE raw.crop() (at least in this case) leaves
+                    # annotations' onsets relative to the start of recording unchanged. Fix it:
+                    p.raw.annotations.onset -= hv_int[0]
+
+                    write_mne_edf(p.raw, fname=target_folder+'/'+f, overwrite=True)
+                    print('OK', flush = True)
             
-                i += 1
+                cnt += 1
             except Exception as e:
                 print('Record {} !!! FAILED !!!'.format(f))
                 print(e, flush = True)
             
-            if i % 100 == 0 and i != 0:
-                print('\n{} EDFs processed\n'.format(i), flush = True)
+            if cnt % 100 == 0 and cnt != 0:
+                print('\n{} EDFs processed\n'.format(cnt), flush = True)
                 
-            if i == nfiles:
+            if cnt == nfiles:
                 break
         else:	# File does not exist
             print('\n!!! File {} not found !!!\n'.format(f), flush = True)
 
-    print('\nslice_edfs(): total of {} input EDF records processed.'.format(i), flush = True)
+    print('\nslice_edfs(): total of {} input EDF records processed.'.format(cnt), flush = True)
             
 def load_edf_data(source_folder, labels_csv_path):
     """The function loads multiple EDF files and returns data 
