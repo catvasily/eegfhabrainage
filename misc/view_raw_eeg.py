@@ -10,12 +10,13 @@ BACKEND = 'matplotlib'		# Backend to use: 'matplotlib' or 'qt'
 DURATION = 30			# Time window width
 
 # --- Inputs: ----
-file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
-path = "/data/eegfhabrainage"
+file_name = "2f8ab0f5-08c4-4677-96bc-6d4b48735da2.edf"
+#path = "/data/eegfhabrainage/hv_segments/Abbotsford/"
+path = "/data/eegfhabrainage/processed/Burnaby/"
 dsname = path + '/' + file_name 
 picks = None
-highpass=0.5
-lowpass=55
+highpass=None
+lowpass=None
 raw = None
 exclude = None
 include = None
@@ -28,11 +29,16 @@ def view_raw_eeg(*, dsname = None, raw = None, picks = None, highpass = None, lo
 	mne.viz.set_browser_backend(BACKEND)
 
 	if exclude is None:	# Default excludes based on FH project
-		exclude = ['A1', 'A2', 'AUX1','AUX2', 'AUX3', 'AUX4', 'AUX5', 'AUX6', 'AUX7', 'AUX8', 'Cz', 
-				'DC1', 'DC2', 'DC3', 'DC4', 'DIF1', 'DIF2', 'DIF3', 'DIF4', 
-				'ECG1', 'ECG2', 'EKG1', 'EKG2', 'EOG 1', 'EOG 2', 'EOG1', 'EOG2', 
-				'Fp1', 'Fp2', 'Fpz', 'Fz', 'PG1', 'PG2', 'Patient Event', 'Photic', 
-				'Pz', 'Trigger Event', 'X1', 'X2', 'aux1', 'phoic', 'photic']
+		exclude = ["AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8", "DC1", "DC2",
+			     "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",
+			     "", "L SPH", "R SPH",
+			     "aux1", "aux2", "aux3", "aux4", "aux5", "aux6", "aux7", "aux8", "dc1", "dc2",
+			     "dc3",  "dc4",  "dif1", "dif2", "dif3", "dif4",
+			     "l sph", "r sph",
+                             "Patient Event", "Photic", "Trigger Event", "x1", "x2",
+			     "phoic", "Phoic", "photic", 
+			     "PATIENT EVENT", "PHOTIC", "TRIGGER EVENT", "X1", "X2",
+			     "PHOIC", "PHOTIC"]
 
 	# 'raw' takes precedence over 'dsname'; one of them should be present
 	if raw is None:
