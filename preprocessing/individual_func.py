@@ -35,6 +35,67 @@ import re
 
 import warnings
 
+def safe_crop(raw, tmin=0.0, tmax=None, include_tmax=True, *, verbose=None):
+    '''A wrapper for raw.crop() method which properly adjusts timings of
+    annotations.
+
+    In MNE v1.3 at least in some cases annotations in the cropped raw object
+    still have onsets relative to the start of the original (uncropped) data.
+    Such behavior might be by design - see extremely confusing explanations
+    about the `Annotations <https://mne.tools/stable/generated/mne.Annotations.html#mne.Annotations>`_
+    class.
+
+    This function checks if annotation timings were corrected after cropping, 
+    and applies correction if this is necessary. A conservative approach is used:
+    if some onsets were in fact changed by `raw.crop()` - then nothing is done.
+    Corrections are applied if `raw.crop()` left all the annotation timings
+    untouched.
+
+    Args:
+        raw (MNE Raw): an object to be cropped
+        other args: arguments to be passed to the
+            `Raw.crop() <https://mne.tools/stable/generated/mne.io.Raw.html#mne.io.Raw.crop>`_ method.
+
+    Returns:
+        raw (MNE Raw): the modified in place cropped raw object
+    '''
+    old_annot = raw.annotations.copy();
+    raw.crop(tmin=tmin, tmax=tmax, include_tmax=include_tmax, verbose=verbose)
+    new_annot = raw.annotations
+    n_new = len(new_annot.onset)
+
+    if n_new == 0:
+        return raw
+
+    # Find the offset of the start of cropped annotions in the old array:
+    # np.where returns a tuple (row_numbers, column_numbers)
+    idx = np.where(old_annot.description == new_annot.description[0])[0] # List of potential offsets
+
+    # Find an offset where new_annot is a sublist of old_annot
+    found_it = False	# Flag that sublist is found - just to be sure
+    for istart in idx:
+        iend = istart + n_new
+
+        if np.all(old_annot.description[istart:iend] == new_annot.description):
+            found_it = True
+            break
+
+    assert found_it, "Failed to find cropped annotations sublist"
+
+    old_onset = old_annot.onset[istart:iend]
+
+    # Set tolerances generously, assuming that cropping is of order of seconds,
+    # not milliseconds
+    if not np.allclose(old_onset, new_annot.onset, rtol = 1e-3, atol = 1e-2):
+        warnings.warn(
+            "Annotations' onsets were not adjusted when cropping the data\n" + \
+            "and thus refer to the time origin of the uncropped data.")
+        return raw;	# MNE did correct (some) annotations - so we do nothing
+
+    # Shift all annotation onsets by tmin
+    new_annot.onset -= tmin
+    return raw
+
 def save_notch_info(info, notch_freq):
     '''Save notch filter frequency to `raw.info["description"]` string. 
     This may be necessary because MNE does not save the notching info neither with

@@ -2,7 +2,8 @@ import mne
 import os
 import os.path as op
 import glob
-from individual_func import save_notch_info, select_chans, set_channel_types, write_mne_edf
+from individual_func import save_notch_info, select_chans, set_channel_types, write_mne_edf,\
+                            safe_crop
 from mne.preprocessing import annotate_amplitude
 import matplotlib.pyplot as plt 
 import numpy as np
@@ -680,8 +681,7 @@ class PreProcessing:
                 interval_end = self.clean_intervals[i][1]
                 
                 tmp_raw_edf = self.clean_part.copy()
-                
-                tmp_raw_edf.crop(interval_start, interval_end, include_tmax=False)
+                safe_crop(tmp_raw_edf, interval_start, interval_end, include_tmax=False)
                 
                 if i > 0:
                     scan_id = filename.split('.')[0]
@@ -794,11 +794,7 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
                         print('Only the first one is saved')
 
                     hv_int = lst_hv[0]
-                    p.raw.crop(hv_int[0], hv_int[1], include_tmax=False)	# !!! Raw object modified in place !!!
-
-                    # !!! For some reason, MNE raw.crop() (at least in this case) leaves
-                    # annotations' onsets relative to the start of recording unchanged. Fix it:
-                    p.raw.annotations.onset -= hv_int[0]
+                    safe_crop(p.raw, hv_int[0], hv_int[1], include_tmax=False)	# !!! Raw object modified in place !!!
 
                     write_mne_edf(p.raw, fname=target_folder+'/'+f, overwrite=True)
                     print('OK', flush = True)
