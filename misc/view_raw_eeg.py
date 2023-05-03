@@ -10,9 +10,9 @@ BACKEND = 'matplotlib'		# Backend to use: 'matplotlib' or 'qt'
 DURATION = 30			# Time window width
 
 # --- Inputs: ----
-file_name = "2f8ab0f5-08c4-4677-96bc-6d4b48735da2.edf"
-#path = "/data/eegfhabrainage/hv_segments/Abbotsford/"
-path = "/data/eegfhabrainage/processed/Burnaby/"
+file_name = "800c7738-239b-46db-9612-328411369a9d.edf"
+path = "/data/eegfhabrainage/hv_segments/Abbotsford/"
+#path = "/data/eegfhabrainage/Abbotsford/"
 dsname = path + '/' + file_name 
 picks = None
 highpass=None
