@@ -80,7 +80,18 @@ def safe_crop(raw, tmin=0.0, tmax=None, include_tmax=True, *, verbose=None):
             found_it = True
             break
 
-    assert found_it, "Failed to find cropped annotations sublist"
+    if not found_it:
+        # For some reason, sometimes new_annot is not a sublist of
+        # old_annot - some of the original annotations that should
+        # have been kept are missing, and extra are appended at
+        # the end. This looks like an MNE bug.
+        # In this case we simply drop all annotations from the cropped
+        # file, and issue a warning.
+        warnings.warn("\n\nAnnotations were not cropped correctly: they should be a sublist of " + \
+                      "the original annotations list - but are not. " + \
+                      "Cleared all annotations from the cropped record.\n")
+        new_annot.delete(range(n_new))
+        return raw
 
     old_onset = old_annot.onset[istart:iend]
 
@@ -88,8 +99,8 @@ def safe_crop(raw, tmin=0.0, tmax=None, include_tmax=True, *, verbose=None):
     # not milliseconds
     if not np.allclose(old_onset, new_annot.onset, rtol = 1e-3, atol = 1e-2):
         warnings.warn(
-            "Annotations' onsets were not adjusted when cropping the data\n" + \
-            "and thus refer to the time origin of the uncropped data.")
+            "\nAnnotations' onsets were not adjusted when cropping the data\n" + \
+            "and thus refer to the time origin of the uncropped data.\n")
         return raw;	# MNE did correct (some) annotations - so we do nothing
 
     # Shift all annotation onsets by tmin
