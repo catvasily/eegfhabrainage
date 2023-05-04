@@ -64,6 +64,9 @@ if __name__ == '__main__':
     input_dir = data_root + "/" + hospital
     output_dir = out_root + "/" + hospital
 
+    if not path.exists(output_dir):
+        os.makedirs(output_dir)
+
     mne.set_log_level(verbose=verbose)
 
     # When running on the CC cluster, 1st command line argument is a 0-based
