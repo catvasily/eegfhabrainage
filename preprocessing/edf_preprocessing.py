@@ -462,10 +462,15 @@ class PreProcessing:
             print('End of the recording is assumed\n')
 
         # At this point always starts[0] < ends[-1]
+        # Set up padding for any returned intervals
+        pad_int = self.conf_dict["photic_pad_interval"]
+        padd_it = lambda lst: [lst[0]-pad_int, lst[-1]+pad_int]	# Returns a single padded interval
+                                                                # [tstart, tend]
+
         if len(starts) != len(ends):
             print('\nWARNING: Mismatch in numbers of start and end marks for photic stimulation in file ',
                     self.filename, '\n')
-            return [[starts[0], ends[-1]]]
+            return [padd_it([starts[0], ends[-1]])]
 
         # At this point len(starts) == len(ends). Convert starts and ends to arrays now
         starts = np.array(starts); ends = np.array(ends)
@@ -473,7 +478,7 @@ class PreProcessing:
         if any(ends - starts < 0):
             print('\nWARNING: Some photic stim end marks precede start marks in file ',
                     self.filename, '\n')
-            return [[starts[0], ends[-1]]]
+            return [padd_it([starts[0], ends[-1]])]
             
         # Split photic stim into intervals, if there is more than one
         tmp = np.roll(starts, 1); tmp[0] =  starts[0]	# Shift starts to the right
@@ -495,12 +500,12 @@ class PreProcessing:
             # Now numpy arrays ser_starts, ser_ends contain starts and ends of the series
             lst_out = []
             for i in range(len(ser_starts)):
-                lst_out.append([ser_starts[i], ser_ends[i]])
+                lst_out.append(padd_it([ser_starts[i], ser_ends[i]]))
 
             return lst_out
         else:
             # There is just one series
-            return [[starts[0], ends[-1]]]
+            return [padd_it([starts[0], ends[-1]])]
 
     def extract_good(self, target_length = None, target_segments = None):
         """This function calls the functions above to identify "bad" intervals and
