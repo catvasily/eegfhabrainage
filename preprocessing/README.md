@@ -189,11 +189,12 @@ in practice.
 	"HV_regexp":	"H.*V.*\\d+\\s*[MmIiNn]{3}",	# Regular expression to identify HV annotations like "HV 1 Min"
 	"hv_pad_interval": 30,				# Padding interval in seconds around HV series. Final HV boundaries
 							# are set as follows:
-							# HV start = 1st HV mark - pad_interval
+							# HV start = 1st HV mark - 60 - pad_interval
 							# HV end = last HV mark + 60 + pad_interval
 
 	"photic_starts": ["Hz"],	# Keyword in annotation that marks the start of the photic stim
 	"photic_ends": ["Off"],		# !! EXACT WORDING !! of the annotation that marks the end of the photic stim
+	"photic_pad_interval": 30,	# Padding inteval in seconds around photic stim series
 
 	"max_isi": 360,			# Max interval in seconds between photic stimulations to consider those
 					# belonging to the same photic stimulation series

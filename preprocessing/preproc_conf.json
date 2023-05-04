@@ -49,6 +49,7 @@
 
 	"photic_starts": ["Hz"],
 	"photic_ends": ["Off"],
+	"photic_pad_interval": 30,
 
 	"max_isi": 360,
 	"max_rec_length": 3600
