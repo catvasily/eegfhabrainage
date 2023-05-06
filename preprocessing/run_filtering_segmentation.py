@@ -61,9 +61,11 @@ if __name__ == '__main__':
 	#	'81aa06db-db61-45af-965d-71813cf34a81','ffef5962-ed51-45d6-b20a-a95dd1f6ddde',
 	#	'81be60fc-ed17-4f91-a265-c8a9f1770517','fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
 	#	'81c0c60a-8fcc-4aae-beed-87931e582c45','ffff1021-f5ba-49a9-a588-1c4778fb38d3']
+	#source_scan_ids = ['57ea2fa1-66f1-43f9-aa17-981909e3dc96.edf']
 
 	# Abbotsford
 	#source_scan_ids = ["1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5"]	# Here annots not cropped properly in prev version
+
 	source_scan_ids = None
 
 	input_dir = data_root + "/" + hospital

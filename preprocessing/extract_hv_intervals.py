@@ -59,7 +59,7 @@ if __name__ == '__main__':
 	#	'81c0c60a-8fcc-4aae-beed-87931e582c45','ffff1021-f5ba-49a9-a588-1c4778fb38d3']
 
 	# Abbotsford
-	#source_scan_ids = ['fffcedd0-503f-4400-8557-f74b58cff9d9']
+	#source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5.edf']
 	source_scan_ids = None
 
 	input_dir = data_root + "/" + hospital
