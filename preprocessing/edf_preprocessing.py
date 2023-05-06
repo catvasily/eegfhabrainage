@@ -360,6 +360,9 @@ class PreProcessing:
         # hvmins = []		# Minutes count for those time stamps
         ptrn = self.conf_dict["HV_regexp"]
 
+        # Also find the end of HV marker, if any
+        hv_end = None
+
         for ia, a in enumerate(self.raw.annotations.description):
             match = re.findall(ptrn, a)
 
@@ -368,10 +371,16 @@ class PreProcessing:
                 # (dstart, dend) = re.search(r"\d+", a).span()
                 # hvmins.append(int(a[dstart:dend]))
 
+            if a.upper() == self.conf_dict["HV_end"]:
+                hv_end = self.raw.annotations.onset[ia]
+
         if not hvticks:
             return []	# No HV intervals found
 
         hvticks = np.array(hvticks)
+
+        if not (hv_end is None):
+            hvticks = np.append(hvticks, hv_end)
 
         if len(hvticks) > 1:
             incs = hvticks[1:] - hvticks[:-1]
@@ -757,7 +766,8 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
     if source_scan_ids is None:
         scan_files = existing_edf_names
     else:
-        scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
+        scan_files = [scan_id if scan_id[-4:] == '.edf' else scan_id + '.edf' for scan_id in source_scan_ids]
+        # scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
 
     cnt = 0
     print('\nProcessing files:')
@@ -799,6 +809,12 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
                         print('Only the first one is saved')
 
                     hv_int = lst_hv[0]
+
+                    # Remove padding that was applied by hyperventilation() method
+                    pad_int = conf_dict["hv_pad_interval"]
+                    unpadd_it = lambda lst: [lst[0]+pad_int, lst[-1]-59.-pad_int]	# Extra second at the end
+                    hv_int = unpadd_it(hv_int)
+
                     safe_crop(p.raw, hv_int[0], hv_int[1], include_tmax=False)	# !!! Raw object modified in place !!!
 
                     write_mne_edf(p.raw, fname=target_folder+'/'+f, overwrite=True)
