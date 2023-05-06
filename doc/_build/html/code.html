@@ -37,11 +37,11 @@
   <section id="classes-and-functions">
 <h1>Classes and functions<a class="headerlink" href="#classes-and-functions" title="Permalink to this heading">¶</a></h1>
 <p>Python modules, classes and functions used in preprocessing.</p>
-<section id="module-test_preproc">
-<span id="test-preproc-py"></span><h2>test_preproc.py<a class="headerlink" href="#module-test_preproc" title="Permalink to this heading">¶</a></h2>
+<section id="module-run_filtering_segmentation">
+<span id="run-filtering-segmentation-py"></span><h2>run_filtering_segmentation.py<a class="headerlink" href="#module-run_filtering_segmentation" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="test_preproc.get_data_folders">
-<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_preproc.get_data_folders" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="run_filtering_segmentation.get_data_folders">
+<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#run_filtering_segmentation.get_data_folders" title="Permalink to this definition">¶</a></dt>
 <dd><p>Setup input and output data folders depending on the host machine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -330,7 +330,7 @@ It saves each segment into a separate EDF file, with suffixes “[scan_id]_1”,
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>None</strong></p>
+<dd class="field-even"><p><strong>success</strong> (<em>bool</em>) – <cite>True</cite> if clean interval(s) exist and are saved, <cite>False</cite> otherwise</p>
 </dd>
 </dl>
 </dd></dl>
@@ -434,7 +434,7 @@ by either of <em>conf_…</em> arguments.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="edf_preprocessing.slice_edfs">
-<span class="sig-name descname"><span class="pre">slice_edfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_folder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_scan_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.slice_edfs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">slice_edfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_folder</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_scan_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'good'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nfiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#edf_preprocessing.slice_edfs" title="Permalink to this definition">¶</a></dt>
 <dd><p>The function runs a pipeline for preprocessing and extracting
 clean segment(s) of requested length from multiple EDF files.
 It takes in a list of EDF file names and preprocessing parameters,
@@ -459,10 +459,14 @@ the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
 the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
 <li><p><strong>hfreq</strong> (<em>float</em><em> or </em><em>None</em>) – the higher frequency boundary of the EEG signal in Hz; if not specified
 the default for the :class: <cite>PreProcessing</cite> will be used</p></li>
+<li><p><strong>extract</strong> (<em>str</em>) – one of ‘good’ (default) or ‘HV’. In the first case good segments (no artifacts
+stimuli, etc. present). In the 2nd case hyperventilation intervals will be extracted.</p></li>
 <li><p><strong>target_length</strong> (<em>float</em>) – the length of each of the extracted segments in seconds; the value
-from <cite>conf_json</cite> or <cite>conf_dict</cite> will be used if not specified</p></li>
+from <cite>conf_json</cite> or <cite>conf_dict</cite> will be used if not specified. Only applies when
+<cite>extract = ‘good’</cite>. In HV case the length will be equal to that of 1st HV interval.</p></li>
 <li><p><strong>target_segments</strong> (<em>int</em>) – the maximum number of segments to extract from each EDF file; the value
-from <cite>conf_json</cite> or <cite>conf_dict</cite> will be used if not specified</p></li>
+from <cite>conf_json</cite> or <cite>conf_dict</cite> will be used if not specified. Only applies when
+<cite>extract = ‘good’</cite>. In HV case only the 1st HV interval will be extracted.</p></li>
 <li><p><strong>nfiles</strong> (<em>int</em><em> or </em><em>None</em>) – the max number of the source files to preprocess; (default = None = no limit)</p></li>
 </ul>
 </dd>
@@ -525,6 +529,32 @@ saved with the raw.info object using the <a class="reference internal" href="#in
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>notch_freq</strong> (<em>float or None</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="individual_func.safe_crop">
+<span class="sig-name descname"><span class="pre">safe_crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#individual_func.safe_crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper for raw.crop() method which properly adjusts timings of
+annotations.</p>
+<p>In MNE v1.3 at least for EDF recordings we are dealing with the cropped raw object
+annotations still have onsets relative to the start of the original (uncropped) data.
+Such behavior might be by design - see extremely confusing explanations
+about the <a class="reference external" href="https://mne.tools/stable/generated/mne.Annotations.html#mne.Annotations">Annotations</a>
+class.</p>
+<p>This function checks if annotation timings were corrected after cropping,
+and applies correction if they were not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw</strong> (<em>MNE Raw</em>) – an object to be cropped</p></li>
+<li><p><strong>args</strong> (<em>other</em>) – arguments to be passed to the
+<a class="reference external" href="https://mne.tools/stable/generated/mne.io.Raw.html#mne.io.Raw.crop">Raw.crop()</a> method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>raw</strong> (<em>MNE Raw</em>) – the modified in place cropped raw object</p>
 </dd>
 </dl>
 </dd></dl>
@@ -813,7 +843,7 @@ is paused)</p></li>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="README.html">EEG preprocessing pipeline for FHA EDF dataset</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Classes and functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-test_preproc">test_preproc.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-run_filtering_segmentation">run_filtering_segmentation.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-edf_preprocessing">edf_preprocessing.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-individual_func">individual_func.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-do_pyprep">do_pyprep.py</a></li>

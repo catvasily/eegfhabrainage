@@ -222,13 +222,15 @@ in practice.</p>
 		<span class="p">},</span>
 
 	<span class="s2">&quot;HV_regexp&quot;</span><span class="p">:</span>	<span class="s2">&quot;H.*V.*</span><span class="se">\\</span><span class="s2">d+</span><span class="se">\\</span><span class="s2">s*[MmIiNn]</span><span class="si">{3}</span><span class="s2">&quot;</span><span class="p">,</span>	<span class="c1"># Regular expression to identify HV annotations like &quot;HV 1 Min&quot;</span>
+	<span class="s2">&quot;HV_end&quot;</span><span class="p">:</span>	<span class="s2">&quot;END HV&quot;</span><span class="p">,</span>			<span class="c1"># Hyperventilation end annotation, if present</span>
 	<span class="s2">&quot;hv_pad_interval&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>				<span class="c1"># Padding interval in seconds around HV series. Final HV boundaries</span>
 							<span class="c1"># are set as follows:</span>
-							<span class="c1"># HV start = 1st HV mark - pad_interval</span>
+							<span class="c1"># HV start = 1st HV mark - 60 - pad_interval</span>
 							<span class="c1"># HV end = last HV mark + 60 + pad_interval</span>
 
 	<span class="s2">&quot;photic_starts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>	<span class="c1"># Keyword in annotation that marks the start of the photic stim</span>
 	<span class="s2">&quot;photic_ends&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Off&quot;</span><span class="p">],</span>		<span class="c1"># !! EXACT WORDING !! of the annotation that marks the end of the photic stim</span>
+	<span class="s2">&quot;photic_pad_interval&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>	<span class="c1"># Padding inteval in seconds around photic stim series</span>
 
 	<span class="s2">&quot;max_isi&quot;</span><span class="p">:</span> <span class="mi">360</span><span class="p">,</span>			<span class="c1"># Max interval in seconds between photic stimulations to consider those</span>
 					<span class="c1"># belonging to the same photic stimulation series</span>
@@ -387,6 +389,7 @@ the project working folder and perform the following commands:</p></li>
         <span class="n">pip3</span> <span class="n">install</span> <span class="n">pandas</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span>
         <span class="n">pip3</span> <span class="n">install</span> <span class="n">mne</span><span class="o">-</span><span class="n">qt</span><span class="o">-</span><span class="n">browser</span>     <span class="c1"># If one wants to use QT backend</span>
 	<span class="n">pip3</span> <span class="n">install</span> <span class="n">pyprep</span>
+	<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span> <span class="n">scikit</span><span class="o">-</span><span class="n">learn</span>
 	<span class="n">deactivate</span>
 </pre></div>
 </div>
