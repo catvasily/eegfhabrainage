@@ -3,17 +3,26 @@
 #
 # Can be used standalone, or as a function call
 # -----------------------------------------------
+import tkinter as tk
+from tkinter import filedialog
+
 import mne
-from mne.io import read_raw_edf
+from mne.io import read_raw_edf, read_raw_fif
 
 BACKEND = 'matplotlib'		# Backend to use: 'matplotlib' or 'qt'
 DURATION = 30			# Time window width
 
 # --- Inputs: ----
-file_name = "800c7738-239b-46db-9612-328411369a9d.edf"
+# file_name = "800c7738-239b-46db-9612-328411369a9d.edf"
+file_name = None
 path = "/data/eegfhabrainage/hv_segments/Abbotsford/"
 #path = "/data/eegfhabrainage/Abbotsford/"
-dsname = path + '/' + file_name 
+
+if file_name is None:
+	dsname = None
+else:
+	dsname = path + '/' + file_name 
+
 picks = None
 highpass=None
 lowpass=None
@@ -45,14 +54,23 @@ def view_raw_eeg(*, dsname = None, raw = None, picks = None, highpass = None, lo
 		if dsname is None:
 			raise ValueError("Either the 'dsname' or the 'raw' argument should be supplied")
 		else:
-			raw = read_raw_edf(dsname, eog=None, misc=None, stim_channel='auto', 
-				exclude=exclude,
-				infer_types=False,
-				include=None,		# Set exclude to () if include is used
-				preload=True,
-				units=None,		# Those stored in file will be used
-				encoding='utf8',	# Encoding of annotations
-				verbose=None)
+			ext = dsname[-3:].upper()
+
+			if ext == 'EDF':
+				raw = read_raw_edf(dsname, eog=None, misc=None, stim_channel='auto', 
+					exclude=exclude,
+					infer_types=False,
+					include=None,		# Set exclude to () if include is used
+					preload=True,
+					units=None,		# Those stored in file will be used
+					encoding='utf8',	# Encoding of annotations
+					verbose=None)
+			elif ext == 'FIF':
+				raw = read_raw_fif(dsname, preload=True,
+					verbose=None)
+			else:
+				raise ValueError("Only EDF and FIF files are currently supported.")
+
 
 	mne.viz.plot_raw(raw.pick(picks = picks),
 		events=None, duration=DURATION, start=0.0, n_channels=20,
@@ -79,6 +97,10 @@ def view_raw_eeg(*, dsname = None, raw = None, picks = None, highpass = None, lo
 		verbose=None)
 
 if __name__ == '__main__':
+	root = tk.Tk()
+	root.withdraw()
+
+	dsname = filedialog.askopenfilename()
 	view_raw_eeg(dsname = dsname, raw = raw, picks = picks, highpass = highpass, lowpass = lowpass,
 			exclude = exclude, include = include)
 
