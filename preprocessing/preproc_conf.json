@@ -45,6 +45,7 @@
 		},
 
 	"HV_regexp":	"H.*V.*\\d+\\s*[MmIiNn]{3}",
+	"HV_end":	"END HV",
 	"hv_pad_interval": 30,
 
 	"photic_starts": ["Hz"],

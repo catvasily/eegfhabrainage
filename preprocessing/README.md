@@ -187,6 +187,7 @@ in practice.
 		},
 
 	"HV_regexp":	"H.*V.*\\d+\\s*[MmIiNn]{3}",	# Regular expression to identify HV annotations like "HV 1 Min"
+	"HV_end":	"END HV",			# Hyperventilation end annotation, if present
 	"hv_pad_interval": 30,				# Padding interval in seconds around HV series. Final HV boundaries
 							# are set as follows:
 							# HV start = 1st HV mark - 60 - pad_interval
