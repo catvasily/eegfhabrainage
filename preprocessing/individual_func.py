@@ -32,6 +32,7 @@ import mne
 import os
 import numpy as np
 import re
+import sys
 
 import warnings
 
@@ -39,17 +40,14 @@ def safe_crop(raw, tmin=0.0, tmax=None, include_tmax=True, *, verbose=None):
     '''A wrapper for raw.crop() method which properly adjusts timings of
     annotations.
 
-    In MNE v1.3 at least in some cases annotations in the cropped raw object
-    still have onsets relative to the start of the original (uncropped) data.
+    In MNE v1.3 at least for EDF recordings we are dealing with the cropped raw object
+    annotations still have onsets relative to the start of the original (uncropped) data.
     Such behavior might be by design - see extremely confusing explanations
     about the `Annotations <https://mne.tools/stable/generated/mne.Annotations.html#mne.Annotations>`_
     class.
 
     This function checks if annotation timings were corrected after cropping, 
-    and applies correction if this is necessary. A conservative approach is used:
-    if some onsets were in fact changed by `raw.crop()` - then nothing is done.
-    Corrections are applied if `raw.crop()` left all the annotation timings
-    untouched.
+    and applies correction if they were not.
 
     Args:
         raw (MNE Raw): an object to be cropped
@@ -60,6 +58,13 @@ def safe_crop(raw, tmin=0.0, tmax=None, include_tmax=True, *, verbose=None):
         raw (MNE Raw): the modified in place cropped raw object
     '''
     old_annot = raw.annotations.copy();
+
+    # Due to the padding tmin, tmax may be out of the record boundaries, so:
+    tmin = max(tmin, 0.)
+
+    if not (tmax is None):
+        tmax = min(tmax, raw.tmax)
+
     raw.crop(tmin=tmin, tmax=tmax, include_tmax=include_tmax, verbose=verbose)
     new_annot = raw.annotations
     n_new = len(new_annot.onset)
@@ -76,32 +81,29 @@ def safe_crop(raw, tmin=0.0, tmax=None, include_tmax=True, *, verbose=None):
     for istart in idx:
         iend = istart + n_new
 
-        if np.all(old_annot.description[istart:iend] == new_annot.description):
+        # Set tolerances generously, assuming that cropping is of order of seconds,
+        # not milliseconds
+        if np.all(old_annot.description[istart:iend] == new_annot.description) and \
+           np.allclose(old_annot.onset[istart:iend], new_annot.onset, rtol = 1e-3, atol = 1e-2):
             found_it = True
             break
 
     if not found_it:
-        # For some reason, sometimes new_annot is not a sublist of
-        # old_annot - some of the original annotations that should
-        # have been kept are missing, and extra are appended at
-        # the end. This looks like an MNE bug.
+        # Sometimes new_annot is not a sublist of
+        # old_annot if some annotations have onsets before the start of the
+        # target interval but long duration overlapping the interval (those
+        # will be kept), while later annotations that still do not
+        # belong to the target interval but have small durations will be dropped.
         # In this case we simply drop all annotations from the cropped
         # file, and issue a warning.
-        warnings.warn("\n\nAnnotations were not cropped correctly: they should be a sublist of " + \
-                      "the original annotations list - but are not. " + \
+        warnings.warn("\n\nAnnotations were not cropped correctly. Preserved annotations " + \
+                      "should be a sublist of the original ones - but are not. " + \
                       "Cleared all annotations from the cropped record.\n")
+        sys.stderr.flush()	# Otherwise the warning is shown in a random place in the output
         new_annot.delete(range(n_new))
+        new_annot.append(onset = 0.0, duration = 0.0,
+                         description = 'Original annotations removed')
         return raw
-
-    old_onset = old_annot.onset[istart:iend]
-
-    # Set tolerances generously, assuming that cropping is of order of seconds,
-    # not milliseconds
-    if not np.allclose(old_onset, new_annot.onset, rtol = 1e-3, atol = 1e-2):
-        warnings.warn(
-            "\nAnnotations' onsets were not adjusted when cropping the data\n" + \
-            "and thus refer to the time origin of the uncropped data.\n")
-        return raw;	# MNE did correct (some) annotations - so we do nothing
 
     # Shift all annotation onsets by tmin
     new_annot.onset -= tmin
