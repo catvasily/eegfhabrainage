@@ -47,7 +47,9 @@ if __name__ == '__main__':
     #hospital = 'Burnaby'     # Either Burnaby or Abbotsford
     hospital = 'Abbotsford' # Either Burnaby or Abbotsford
 
-    source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
+    # Abbotsford
+    source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
+
     """
     # This is a Burnaby subset:
     source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',
@@ -56,6 +58,9 @@ if __name__ == '__main__':
                        'ffff1021-f5ba-49a9-a588-1c4778fb38d3',
                        '81c0c60a-8fcc-4aae-beed-87931e582c45']
     """
+
+    #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
+
     view_plots = False       # Flag to show interactive plots (lots of those)
     verbose = 'ERROR'     # Can be 'ERROR', 'CRITICAL', or 'WARNING' (default)
     # ------ end of inputs ---------------
@@ -99,7 +104,6 @@ if __name__ == '__main__':
 
     for f in scan_files:
         filepath = input_dir + '/' + f
-        output_path = output_dir + '/' + f
 
         try:
             # Initiate the preprocessing object
@@ -108,12 +112,18 @@ if __name__ == '__main__':
             # Apply PREP and ICA
             p.applyPipeline(applyICA = True, view_plots = view_plots)
      
-            # Gets the resulting mne.Raw object and drop bad channels
+            # Get the resulting mne.Raw object
             raw = p.getRaw()
-            raw.drop_channels(raw.info['bads'])
-     
-            # Save it as EDF
-            write_mne_edf(raw, fname=output_path, overwrite=True)
+
+            # Old version: drop bad channels and save results in 
+            # EDF format
+            # raw.drop_channels(raw.info['bads'])
+            # output_path = output_dir + '/' + f
+            # write_mne_edf(raw, fname=output_path, overwrite=True)
+
+            # Keep the bad channels just in case, and save data in .fif file
+            output_path = output_dir + '/' + f[:-4] + '_raw.fif'
+            raw.save(fname = output_path, proj = False, fmt = 'single', overwrite = True)
             print('\n***** Processing of {} completed\n'.format(f), flush = True)
         except Exception as e:
             print('\n***** Record {} !!! FAILED !!!'.format(f))
