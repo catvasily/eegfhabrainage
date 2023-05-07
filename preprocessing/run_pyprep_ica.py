@@ -28,7 +28,7 @@ def get_data_folders():
         out_root = '/data/eegfhabrainage/after-prep-ica'
         cluster_job = False
     elif 'cedar' in host:
-        data_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed_230424'
+        data_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
         out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/after-prep-ica'
         cluster_job = True
     else:
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     hospital = 'Abbotsford' # Either Burnaby or Abbotsford
 
     # Abbotsford
-    source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
+    #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
 
     """
     # This is a Burnaby subset:
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                        '81c0c60a-8fcc-4aae-beed-87931e582c45']
     """
 
-    #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
+    source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
 
     view_plots = False       # Flag to show interactive plots (lots of those)
     verbose = 'ERROR'     # Can be 'ERROR', 'CRITICAL', or 'WARNING' (default)
@@ -102,6 +102,7 @@ if __name__ == '__main__':
     else:
         scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
 
+    success = True
     for f in scan_files:
         filepath = input_dir + '/' + f
 
@@ -126,7 +127,11 @@ if __name__ == '__main__':
             raw.save(fname = output_path, proj = False, fmt = 'single', overwrite = True)
             print('\n***** Processing of {} completed\n'.format(f), flush = True)
         except Exception as e:
+            success = False
             print('\n***** Record {} !!! FAILED !!!'.format(f))
             print(e, flush = True)
             print('\n')
  
+    print("\n{} files processed {}.".format(len(scan_files), \
+          'successfully' if success else 'with errors'))
+
