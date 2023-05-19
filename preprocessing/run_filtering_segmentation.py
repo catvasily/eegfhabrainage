@@ -31,10 +31,10 @@ def get_data_folders():
 
 	return data_root, out_root, cluster_job
 
-"""A test script
-based on the example code in \":doc:`README`\" section.
+# ------------------------------------------------------------------
+# Main script for filtering, resampling and extracting good segments.
+# ------------------------------------------------------------------
 
-"""
 # The 'if' is needed to prevent running this code when the file is 
 # imported into some other source and is not supposed to run
 if __name__ == '__main__': 
