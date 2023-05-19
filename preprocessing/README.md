@@ -3,127 +3,140 @@
 ## Summary
 
 The code is aimed to preprocess clinical EEG recordings and make them a suitable input for later analyses and ML applications. 
-- **Input**: EDF file
-- **Output**: 
-  - (1) Pandas DataFrame with columns: file name, interval start, interval end, and data - Numpy array of shape (20, 500 * target length) 
-  - (2) new EDF file(s) containing only clean EEG interval of target length
+Code uses the original EEG records in EDF format as input. The following steps (tasks) may be performed:
 
-**Parameters**:
-- number of clean EEG slices to extract from each EDF file
-- target length of each slice, in seconds
+1. **Filtering, resampling and extracting of good data segments** of a target length. The output is the good segments in EDF format.
+2. **Performing EEG PREP procedure and artifact removal**. The input is typically good segments obtained on the 1st step,
+    and the output is the records in **.fif** format.
+3. **Extracting hyperventilation intervals from the original records**. The extracted intervals (segments) are saved in .EDF format.
 
-## Performed operations
-1) resample each recording's signal to a common frequency, since some recordings might have different sampling frequencies. 
-2) bandpass filter to a specified frequency band to avoid unwatned interference, specifically to exclude the electric power grid frequencies and patient's motion related artifacts
-3) identify and remove intervals of special procedures performed on patients during recordings, such as hyperventilation (deep breathing) and photic stimulation (flashing light). Physicians apply these tests to patients in order to detect brain abnormal activity for epilepsy diagnosis. Since these procedures cause abnormal brain activity, and weren't performed for all subjects, we exclude them from the analyses. Also the recordings contain intervals with no signal. This is the results of turned off equipment or disconnected electrodes. So we also have to avoid these flat intervals with zero signal. Thus traget slices acquired only from clean intervals from each EEG, without flat intervals, hyperventilation and photic stimulation. Also a certain time interval at the beginning of the recording is marked as "bad" by default. All types of "bad" intervals are allowed to overlap.
-4) **in case of extracting to Numpy arrays** the signal values are also ZScore noramalized. This doesn't apply when saving output to EDF file(s).
+Either of these tasks requires specifying numerous processing parameters. To separate the code and parameter data, default values
+of parameters are stored in JSON configuration files **`preproc_conf.json`** and **`pyprep_ica_conf.json`**; the latter
+is needed only for step 2. These files are expected to reside in the same folder as the top level Python script files.
 
-All preprocessing parameters may be specified either explicitly, or their default values will be used. The lattter are stored in file **preproc_conf.json** described later in this document.
+Key functions and classes by default import JSON configuration files to set most parameter values. One can always override the defaults
+a) by specifying their own versions of JSON files as arguments to a class or a function call, b) by providing an equivalent Python dictionary, or
+(in some cases) c) by specifying parameters explicitly in a function call. If for some parameter all three options are used at the same time,
+explicitly specified values take precedence, then those coming from the Python dictionary, then those coming from the JSON file.
 
-## Usage
-You need both modules edf_preprocessing.py and individual_func.py. The later contains python routine for saving output in EDF format again.
+More details about each step and configurations files are given below.
 
-This is an example script which uses class **PreProcessing**. 
+## 1. Filtering, resampling and extracting of good data segments
+### Running the code
+This step is executed by a top level script **`run_filtering_segmentation.py`**. It calls functions and classes defined in
+`edf_preprocessing.py` and `individual_func.py`. Most of the logic is encapsulated in class `PreProcessing`; for practical application
+of this class see source code for function `slice_edfs()`. One can find references and full description of both in the 
+auto-generated documentation.
 
-```python
-
-from edf_preprocessing import PreProcessing
-
-file_name = "81c0c60a-8fcc-4aae-beed-87931e582c45.edf"
-path = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby/" + file_name
-output_path = "your_folder"
-
-# Initiate the preprocessing object, filter the data between 0.5 Hz and 55 Hz and resample to 200 Hz.
-p = PreProcessing(path, target_frequency=200, lfreq=0.5, hfreq=55)
-
-# This calls internal functions to detect 'bad intervals' and define 5 'good' ones 60 seconds each
-p.extract_good(target_length=60, target_segments=5)
-
-# Calling the function saves new EDF files to output_folder. In case there are more than 1, it adds suffix "_n" to the file name 
-p.save_edf(folder=output_path, filename=file_name)
-
-# Extract and convert data to Numpy arrays
-p.create_intervals_data()
-df = p.intervals_df
-
+When executing the code locally, use this command in Linux terminal:
+```
+python run_filtering_segmentation.py
+```
+If running as an array job on the cedar cluster, use this command in your sbatch script (see `eeg_array_job.sbatch` for an example):
+```
+python run_filtering_segmentation.py ${SLURM_ARRAY_TASK_ID}
 ```
 
-**NOTE**
-When extracting to Numpy, saving this dataframe to a csv file will damage your data. 
-It converts Numpy arrays to string and truncate it, leaving few values in the beginning and the end.
-    
-To save your data in numpy arrays format for later use, you can use this code:
-```python
-numpy_data = np.stack(df['data'])
+**Before running**, file **`run_filtering_segmentation.py`** may need to be **modified** by the user as follows.
 
-np.save(output_path, numpy_data)
+* **Function `get_data_folders()`** identifies the host computer where the script is executed, and returns `data_root`, `out_root` paths and
+a `cluster_job` flag. **`data_root`** points to the top folder where the input
+EDF files are located. One level down are subfolders corresponding to each hospital (like `Abbotsford`, `Burnaby`); the EDF records themselves are
+located inside the hospital subfolders. Please refer to the file structure in `/project/6019337/databases/eeg_fha/release_001/edf` on cedar as an example. 
+The **`out_root`** defines location where the resulting (processed) records are put and has the same structure. ***User may need to add/edit the host definitions
+and the returned `data_root`, `out_root` paths as appropriate***, by modifying the following code segment:
+```
+	if 'ub20-04' in host:
+		data_root = '/data/eegfhabrainage'
+		out_root = data_root + '/processed'
+		cluster_job = False
+	elif 'cedar' in host:
+		data_root = '/project/6019337/databases/eeg_fha/release_001/edf'
+		out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
+		cluster_job = True
+	else:
+		home_dir = os.getcwd()
+		data_root = home_dir
+		out_root = home_dir + '/processed'
+		cluster_job = False
 ```
 
-As the result, you will get numpy array of shape (number_of_slices, 20, lengths_in_seconds * 500). Following the above example it is (5, 20, 30000).
-You should also save inital df to csv to keep track of scan IDs for later match with target label, like age.
-
-
-## Pipeline for extraction from multiple files
-
-Preprocessing and saving new data to multiple EDF files into target folder
-
-```python
-from edf_preprocessing import slice_edfs
-
-import pandas as pd
-import mne
-import warnings
-warnings.filterwarnings('ignore')
-mne.set_log_level('warning')
-
-source_folder = "/home/mykolakl/projects/rpp-doesburg/databases/eeg_fha/release_001/edf/Burnaby"
-target_folder = "eeg_fragments_10sec"
-
-labels_file = pd.read_csv('age_ScanID.csv')
-scan_ids = labels_file[~(labels_file['AgeYears'].isnull())]['ScanID'] # <- drop records without age
-
-# take scan ids from the list, look for them in the source folder, and apply the preprocessing to at most 100 files;
-# filter the data to the default band specified in preproc_conf.json, resample it to 500 Hz (!!! this overrides the default
-# setting stored in preproc_conf.json file !!!), extract 1 segment of 10 seconds from each EDF file,
-# save new segments as EDFs into the target folder
-
-slice_edfs(source_folder=input_dir, target_folder=output_dir, target_length = 10, source_scan_ids = scan_ids,
-           target_frequency=500, target_segments = 1, nfiles=100)
-           
-# if you don't need files limit - don't specify the parameter "nfiles", default is None
-
+* **User needs to specify which hospital is being processed**, by setting the **`hospital`** variable in the main function of the script:
+```
+	# Inputs
+	...
+	hospital = 'Abbotsford'
+	...
 ```
 
-## Loading data
-
-```python
-from edf_preprocessing import load_edf_data
-
-folder = 'eeg_fragments_10sec'
-label_file = 'age_ScanID.csv'
-
-# X - np_array of shape (n_samples, 20, length is seconds * frequency), 
-# labels - pd.DataFrame with scan_ids and age, same length as X
-X, labels = load_edf_data(folder, label_file)
+* **When running as an array job on the cluster**, the variable **`N_ARRAY_JOBS`** should be consistent with the  
+  **`"--array"`** parameter value in the sbatch script:  
+> File **`run_filtering_segmentation.py`**:
+```
+	# Inputs
+	...
+	N_ARRAY_JOBS = 100	# Number of parallel jobs to run on cluster
+	...
+```
+>> The **sbatch script** (see **`eeg_array_job.sbatch`** as an example):
+```
+	...
+	#SBATCH --array=0-99	# the last job index should be equal to N_ARRAY_JOBS - 1 
+	...
+```
+* **When only some records for the hospital need to be processed**, provide a list of record IDs in the variable
+**`source_scan_ids`**:
+```
+	# Inputs
+	...
+	# Use source_scan_ids = None to process all records
+	source_scan_ids = ["1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5", "fffaab93-e908-4b93-a021-ab580e573585"]
+	...
 ```
 
-## Preprocessing configuration
-All default preprocessing configuration parameters are stored in the JSON file `preproc_conf.json`. Those can
-be changed when instantiating `PreProcess` class or calling its methods by passing a custom JSON configuration
-file or equivalent Python dictionary object, or by specifying some of the parameters explicitly. The parameters
-may be changed in a similar way when processing multiple records with `slice_edfs()` function.
+### Performed operations
+The following operations are performed for each input record.
+* The EDF file is loaded using `mne.io.read_raw_edf()` function, except for the channels specified in the
+`exclude_channels` list. This list, as well as other parameters mentioned here, are read from the `preproc_conf.json`
+file. The record will not be processed if it does not have all channels listed in `target_channels`, or if it is
+too long: longer than `max_rec_length`.
+* Some of the channels may be renamed to ensure they are treated correctly by the MNE Python software - see `rename_channels` key in the 
+`preproc_conf.json`.
+* Based on the channel names, **channel types** are assigned as EEG sensor channels, EOG channels or ECG channels. Channels that
+do not belong to either of the above categories are assigned a `'misc'` (miscellaneous) type.
+* All EEG, EOG and ECG channels are notch-filtered at power line frequencies
+* All EEG channels are additionally band-pass filtered to a `target_band`
+* All channels are resampled to a sampling frequency equal to `target_frequency`
+* Good segments of a `target_length` are extracted. This involves identifying bad segments first. The bad segments may include:   
+    - Flat (no signal) intervals  
+    - Periods when photic (optical) stimulation was delivered  
+    - Hyper ventilation (HV) periods
+
+  Photic stim and HV intervals are padded at the ends by corresponding `xxx_pad_interval` amount of seconds. A starting
+  segment at the beginning of each record is also automatically marked as bad, as specified by the key `discard_at_start_seconds`.
+* If a good segment is found, it is saved as an EDF file to the location determined by the `out_root` variable and the
+hospital name. The output EDF record preserves the channel type information as well as the filtering parameters
+used.  
+
+### JSON configuration file
+All default preprocessing configuration parameters are stored in the JSON file `preproc_conf.json`. Default parameter
+values can be changed when instantiating the `PreProcess` class or while calling its methods, by passing a custom JSON configuration
+file or an equivalent Python dictionary object. Also some of the parameters may be given explicitly as arguments. The same approach applies
+to the `slice_edfs()` and some other top level functions.
 
 Specifically, an alternative configuration file name is passed to `PreProcess` class constructor (or to `slice_edfs()`)
 via an argument `conf_json = <file-pathname>`; an equivalent dictionary object may be passed as `conf_dict = <dictionary-object>`.
-A subset of individual configuration parameters may be given explicitly using corresponding keywords -
+In some cases a subset of individual configuration parameters may be given explicitly using corresponding keywords -
 for example, `target_frequency = 300`.
 
-Note that explicitly supplied parameter values take precedence over those provided in conf_dict; the latter take precedence
+Note that explicitly supplied parameter values take precedence over those provided in `conf_dict`; the latter take precedence
 over values found in `conf_json` file. 
 
+Detailed description of all arguments of each function or method are available in the generated documentation.
+
 The meaning of parameters in the JSON configuration file is explained in the comments in the code below. Comment lines start
-with the `#` character. Mind that **comments are NOT allowed in a real JSON file** - please remove those if using this example
-in practice.
+with the `#` character. IMPORTANTLY, please mind that **comments are NOT allowed in real JSON files**. Please remove them if
+using this example JSON snippet in practice.
 
 ```python
 {
@@ -204,29 +217,48 @@ in practice.
 
 ```
 
-## Running PREP step and ICA artifact removal
-The PREP step implements a EEG preprocessing procedure published in the literature. It performs the following steps:
-- Powerlines removal
+## 2. EEG PREP procedure and artifact removal
+### Running the code
+This step is done by a top level script **`run_pyprep_ica.py`**. Most of related functions and classes are defined in
+the source file `do_pyprep.py`. The main work horse is class `Pipeline`, which in turn uses class `PrepPipeline` imported from a `pyprep` library.
+See more details in the autogenerated documentation.
 
-- Re-referencing
+When executing the code locally, use this command in Linux terminal:
+```
+python run_pyprep_ica.py
+```
+If running as an array job on the cedar cluster, use this command in your sbatch script (see `eeg_array_job.sbatch` for an example):
+```
+python run_pyprep_ica.py ${SLURM_ARRAY_TASK_ID}
+```
 
-- Identifying bad channels
+The main script **`run_pyprep_ica.py`** may need to be **modified** by the user, to set the root input and output folders, hospital name, etc.
+Please refer to section ***"Running the code"*** under the segmentation task
+["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments), because the
+procedure is identical. Note that typically the PREP step is applied to extracted good segments rather than to the original data. 
 
-The ICA artifact removal is applied after PREP has successfully completed. It attemts to identify EOG and 
-ECG artifacts mixed into sensor channels' waveforms, and remove those.
+### Performed operations
+* The **EEG PREP step** executes the "PREP" procedure published in the literature as implemented by the `pyprep` library.
+It performs the following operations:
+    - Powerlines removal (just in case - if the original raw data is supplied on input)
+    - Re-referencing
+    - Identifying bad channels
 
-Please note that during the processing, the EOG and ECG  channels are filtered to different frequency bands
-(the actual channel names corresponding to the EOG, ECG channel types may vary -
-see the `preproc_conf.json` file above). However, no additional filtering of EEG sensor channels is
-performed.
+* The **ICA artifact removal** is applied after the PREP has completed successfully. This is done using the MNE Python `ICA` class and its methods.
+  The procedure attemts to identify EOG and ECG artifacts mixed into the EEG sensor channels using ECG, EOG channel signals as templates, and tries
+  to remove them.
 
-It is assumed that EDF records submitted to the PREP/ICA operations have already passed through the basic preprocessing
-stage described above (see section "*Pipeline for extraction from multiple files*").
+  Importantly, during the ICA processing **the EOG and 1st ECG channels are filtered to different frequency bands** and will be stored like that
+  in the output.
 
-For an example code demonstrating how PREP and ICA artifact removal are performed please refer to the 
-source file `tst_PREP.py`. Parameter values used for PREP/ICA operations are defined in a JSON file
+  The actual channel names of the EOG, ECG channels used may vary from hospital to hospital - see channel type lists in `preproc_conf.json` file.
+  However, **no additional filtering of the EEG sensor channels is done**.
+* The processed records are **saved in .fif file format**.
+
+### JSON configuration file
+Parameter values specific to the PREP/ICA operations are defined in a JSON configuration file
 `pyprep_ica_conf.json`, which is described below. Note again that JSON files can not contain comments;
-therefore comments in the code below should be removed if one wants to use this code in practice.
+therefore comments in the code below should be removed if one wants to use it in practice.
 
 ```python
 {
@@ -333,8 +365,49 @@ therefore comments in the code below should be removed if one wants to use this 
 
 ```
 
-## Setting up Python virtual environment on Compute Canada cluster
-The following steps should be performed to run the code on Compute Canada:
+## 3. Extracting hyperventilation intervals from the original records
+This step is completely independent from steps 1, 2 and is only used to identify and store the HV segments, as the name suggests.
+
+### Running the code
+The top level script to execute is **`extract_hv_intervals.py`**. Internally it calls the same function `slice_edfs()` as the in the
+[first step](#1-filtering-resampling-and-extracting-of-good-data-segments).
+
+When executing the code locally, use this command in Linux terminal:
+```
+python extract_hv_intervals.py
+```
+If running as an array job on the cedar cluster, use this command in your sbatch script (see `eeg_array_job.sbatch` for an example):
+```
+python extract_hv_intervals.py ${SLURM_ARRAY_TASK_ID}
+```
+
+As usual, the main script **`extract_hv_intervals.py`** may need to be **modified** to set the root input and output folders, etc.
+Please refer to section ***"Running the code"*** under the segmentation task
+["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments), for details.
+Note that this step should only be applied to the original EDF records. 
+
+### Performed operations
+* First, the same **basic preprocessing operations as in the task 1 (segmentation) are done**, namely
+    * The EDF file is loaded, except for the channels specified in the `exclude_channels` list.
+    * Some of the channels may be renamed to ensure they are treated correctly by the MNE Python software
+    * Based on the channel names, channel types are assigned.
+    * All EEG, EOG and ECG channels are notch-filtered at power line frequencies
+    * All EEG channels are additionally band-pass filtered to a `target_band`
+    * All channels are resampled to a sampling frequency equal to the `target_frequency`
+
+* **Hyperventilation intervals** identified by markers (annotations) *"HV XX min"* **are extracted**.
+  No padding of the HV segments is applied.
+
+* The resulting records are saved in EDF format.
+
+### JSON configuration file
+All HV-related configuration parameters are stored in the JSON file `preproc_conf.json`.
+
+## Setting up Python virtual environment on Compute Canada (Alliance) cluster
+The following steps should be performed to run the code on Compute Canada. The same setup can
+be used on a local machine, except that commands `module load`, `deactivate` are not required, and
+`--no-index`, `--no-download` flags should **not** be used.
+
 - Create your working folder for the project
 
 - Upload the Python sources and JSON configuration file to your source files location
@@ -351,23 +424,37 @@ the project working folder and perform the following commands:
         pip3 install --no-index --upgrade pip
         pip3 install wheel --no-index
         pip3 install mne[hdf5]
-
+        
         pip3 install pyqt5 --no-index
         pip3 install pyedflib
         pip3 install pandas --no-index
         pip3 install mne-qt-browser     # If one wants to use QT backend
-	pip3 install pyprep
-	python3 -m pip install --no-index scikit-learn
-	deactivate
+        pip3 install pyprep
+        python3 -m pip install --no-index scikit-learn
+        deactivate
 ```
 - In your sbatch scripts, use commands
 ```
         module load python/3.8.10
         module load scipy-stack
-	cd <your working folder>
+        cd <your working folder>
         source mne/bin/activate
 
-	< run your python program >
+        < run your python program >
+        
+        deactivate
+```
+- From time to time you may need to install new modules in your virtual environment or update existing ones.
+  For example to install `mymodule` and to upgrade MNE Python to its latest stable version, use:
+```
+	module load python/3.8.10
+	module load scipy-stack
+	cd <your working folder>
+	source mne/bin/activate
+
+	pip3 install --no-index --upgrade pip
+	python3 -m pip install -U mne[hdf5] 
+	python3 -m pip install mymodule
 
 	deactivate
 ```
