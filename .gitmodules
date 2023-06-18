@@ -1,0 +1,3 @@
+[submodule "beam-python"]
+	path = beam-python
+	url = git@github.com:multi-beam/beam-python.git
