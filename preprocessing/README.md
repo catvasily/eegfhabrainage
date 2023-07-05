@@ -233,7 +233,7 @@ python run_pyprep_ica.py ${SLURM_ARRAY_TASK_ID}
 ```
 
 The main script **`run_pyprep_ica.py`** may need to be **modified** by the user, to set the root input and output folders, hospital name, etc.
-Please refer to section ***"Running the code"*** under the segmentation task
+Please refer to section ["Running the code"](#running-the-code) under the segmentation task
 ["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments), because the
 procedure is identical. Note that typically the PREP step is applied to extracted good segments rather than to the original data. 
 
@@ -369,7 +369,7 @@ therefore comments in the code below should be removed if one wants to use it in
 This step is completely independent from steps 1, 2 and is only used to identify and store the HV segments, as the name suggests.
 
 ### Running the code
-The top level script to execute is **`extract_hv_intervals.py`**. Internally it calls the same function `slice_edfs()` as the in the
+The top level script to execute is **`extract_hv_intervals.py`**. Internally it calls the same function `slice_edfs()` as in the
 [first step](#1-filtering-resampling-and-extracting-of-good-data-segments).
 
 When executing the code locally, use this command in Linux terminal:
@@ -382,7 +382,7 @@ python extract_hv_intervals.py ${SLURM_ARRAY_TASK_ID}
 ```
 
 As usual, the main script **`extract_hv_intervals.py`** may need to be **modified** to set the root input and output folders, etc.
-Please refer to section ***"Running the code"*** under the segmentation task
+Please refer to section ["Running the code"](#running-the-code) under the segmentation task
 ["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments), for details.
 Note that this step should only be applied to the original EDF records. 
 
@@ -402,6 +402,198 @@ Note that this step should only be applied to the original EDF records.
 
 ### JSON configuration file
 All HV-related configuration parameters are stored in the JSON file `preproc_conf.json`.
+
+## 4. Performing source reconstruction
+In this step, we reconstruct the source time courses from a designated set of Regions of Interest (ROIs).
+It's important to note that in the MNE Python software, **ROI**s are referred to as "*labeled brain locations*"
+or simply "**labels**". Therefore, in this document, we use both terms interchangeably to convey the same meaning.
+
+### Running the code
+To perform this step one needs to run a top level script **`run_src_reconstr.py`**. This script depends on source
+files `do_src_reconstr.py`, `nearest_pos_def.py` and file `construct_single_source_weights.py` from `beam-python`
+repository imported as a git submodule. 
+
+When executing the code locally, run this command in Linux terminal from the `.../eegfhabrainage/preprocessing`
+folder:
+```
+python ./run_src_reconstr.py
+```
+Please note the `./` prefix; for some reason the script may fail without it on some systems.
+
+
+If running as an array job on the cedar cluster, use this command in your sbatch script
+(see `eeg_array_job.sbatch` for an example):
+```
+python ./run_src_reconstr.py ${SLURM_ARRAY_TASK_ID}
+```
+
+Typically, the user will need to modify the main script **`run_src_reconstr.py`** as per their requirements.
+This involves setting the root input and output folders by modifying function `get_data_folders()`, the 
+hospital name, and other relevant parameters which are found at the top of the main function following the line
+`if __name__ == '__main__'`. The procedure is similar to the one described in the section 
+["Running the code"](#running-the-code) under the segmentation task
+["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments).
+
+It is important to note that this step expects the input files to be in **`.fif`** format. Normally, the records
+obtained after the PREP/ICA step are used as inputs.
+
+### Performed operations
+To perform the source reconstruction, the subject's MRI data and the EEG sensor locations on the subject's head
+are required. As those are not available in our case, a template MRI for the `fsaverage` subject which comes
+with the `FreeSurfer` software, and standard sensor locations for a given montage are utilized.
+
+When using MNE Python one can easily install the `fsaverage` data by invoking the
+[fetch_fsaverage()](https://mne.tools/stable/generated/mne.datasets.fetch_fsaverage.html) function. Please
+mind to record the returned pathname of the location of the downloaded data. Among other things, this data
+includes pre-calculated BEM models and source spaces. Given that our EEG recordings have 20 or fewer
+channels, the spatial resolution of our source reconstruction is relatively poor. Consequently, we can utilize
+lower density source spaces for the `fsaverage` subject compared to the ones provided by MNE. This choice
+helps improve computational speed and memory efficiency. Specifically, we employ a low-density source space
+named `fsaverage-ico-3-src.fif` with only around twelve hundred sources, which can be generated by executing a
+script `make_fsaverage_bem.py` (this script only needs to be run once).
+
+The `fsaverage` template also comes with two standard brain parcellations which define ROIs (labels) on
+the cortical surface. One needs to specify the parcellation to use in the `src_reconstr_conf.json`
+configuration file described below. A lower resolution parcellation with 34 ROIs per hemisphere is used
+by setting `"parcellation": "aparc"` (default). A higher resolution parcellation with 74 ROIs per hemisphere will
+be utilized with setting: `"parcellation": "aparc.a2009s"`.
+
+The following operations are performed in this step.
+* The labels (parcellation data), BEM model and the source space are read from the designated `fsaverage`
+  data folder.
+
+* Then for each subject:
+    * The input EEG record is read, and based on this record, the number of good EEG sensor
+      channels and their corresponding sensor positions are determined.
+    * Forward solutions for 3 orthogonally oriented dipoles in each source locations are calculated,
+      unless a .fif file with already precalculated forward solutions for this subject is already
+      available.
+    * Spatial filter weights `W` for each source are constructed using a scalar single source
+      minimum variance beamformer. These weights allow finding a time course `s[i](t)` for each
+      source using the expression `s[i](t) = W[i]'*b(t)`, where `b(t)` is a vector of EEG
+      sensor time courses, and "`'`" denotes vector/matrix transposition. By default, the weights
+      are scaled so that reconstructed time course reflects signal's "pseudo-Z" -- that is,
+      the original source amplitude divided by the projected noise. Please refer to the sections
+      ["Beamformer weights calculation"](#beamformer-weights-calculation) and
+      ["Normalizing for group analyses"](#normalizing-for-group-analyses)
+      below regarding **important details** about the beamformer calculations and scaling of
+      the reconstructed source time courses.
+    * For each ROI (label), a single time course is created based on the time courses of all
+      the sources belonging to that ROI. This operation is currently performed using a PCA
+      approach, which is equivalent to `"pca_flip"` mode as defined in MNE package. For details,
+      please refer to the documentation for the function
+      [extract_label_time_course()](https://mne.tools/stable/generated/mne.extract_label_time_course.html).
+      Note that our code uses a different algorithm which gets the same results orders of magnitude
+      faster than the MNE implementation.
+    * All reconstructed **label time courses**, along with corresponding **ROI names**, locations of **ROI
+      centers of mass** in the head coordinates, and **label beamformer weights** `W[l]` are saved in
+      **`.hdf5`** file. The weights `W[l]` are similar to the single source beamformer weights, and
+      enable reconstructing the label time course `l[t]` using the expression `l(t) = W[l]'*b(t)`.
+      The `.hdf5` file togehter with the subject's forward solution `.fif` file are stored in a
+      subfolder named after the subject's scan ID, within the output location.
+
+### Beamformer weights calculation
+Beamformer weights are calculated using functions from `construct_single_source_weights.py`
+source file which should be located in the `../beam-python` folder relative to this file's
+location.
+
+The calculation of the scalar single-source spatial filter begins with determining the source
+orientation vector `u` as the initial step. Note that the sign of `u` is ambiguous and may be
+randomly assigned by the beamformer software. In order to address this, we select the sign of
+`u` in such a way that the angle between `u` and the normal to the cortical surface at the
+source location is less than 180 degrees.
+
+For each source in the source space, corresponding beamformer weight `w` is calculated
+using the following expressions:  
+`w = C R^-1 h; h = H*u`  
+Here, `R^-1` denotes the *pseudo-inverse* of the sensor covariance matrix. The variable `h`represents
+a "scalar" source forward solution, while `H=[h_x, h_y, h_z]` is a triplet of forward solutions for
+dipoles oriented along the coordinate axes at the source location. Finally, `C` is a scaling
+factor which can be chosen as follows.
+
+To obtain source time courses in physical units corresponding to current dipoles (i.e. `A*m`)
+factor `C` should be chosen as  
+`C = (h' R^-1 h)^-1`  
+This scaling is selected by setting `"src_units": "source"` in the `src_reconstr_conf.json`
+configuration file.
+
+However, this approach may lead to deep sources appearing to have disproportionately large
+amplitudes due to the small magnitudes of their corresponding forward solutions `h`. 
+An alternative option is to obtain source time courses in pseudo-Z units, which involves
+normalizing the physical signal amplitudes by the root mean square (RMS) of the noise
+projected by the filter to the source location. This scaling is selected by setting
+`"src_units": "pz"` in the `src_reconstr_conf.json` file. Such normalization removes the
+bias in estimated source magnitudes for deep sources. In this case the scaling factor
+is determined by the formula  
+`C = 1/sqrt(h' * R^-1 * N * R^-1 h)`   
+where `N` represents the *noise covariance* matrix.
+
+In the case of resting state activity, directly measuring the noise covariance `N `is
+not possible because, by definition, there are no 'control' intervals without the
+presence of the 'activity of interest'. To address this issue, various approaches
+have been suggested in the literature. Here we calculate the noise covariance under
+the assumption that the noise field represents an *'uninformed prior,'* meaning the
+lack of any specific prior information about brain sources magnitudes, orientations
+or mutual correlations. Under this uninformed prior assumption for the noise, we
+consider all noise sources in the brain space to be uncorrelated, randomly oriented,
+and possessing equal RMS amplitudes. Any deviations from this distribution reflect
+subject's real brain activity and are therefore considered as the "sources of
+interest." To apply this concept in practice, it is necessary to select a specific
+RMS amplitude for the noise sources, which is accomplished in the following manner.
+
+The measured covariance `R` is the sum of the covariance of the 'signal' (i.e.,
+the brain activity of interest) and the noise (our uninformed prior): `R = S + N`,
+where `S` is some positively defined matrix; `S > 0` . Therefore `R - N` must
+be positively defined, which sets an upper limit on the RMS amplitude of the noise
+sources. In this implementation, the software selects the RMS amplitude of the noise
+sources to match this upper limit. Note that for the beamformer solutions
+**specific setting of the noise amplitude** only affects the reconstructed source
+pseudo-Z values but **does not affect the shape of the source wave forms**.
+
+It is important to acknowledge that the covariance matrix `R` is inherently degenerate.
+Although the number of EEG channels is 20, the rank of `R` typically falls within
+the range of 12 to 18. Consequently, the above expressions involve pseudo-inverses
+of `R`, which are also degenerate. However, when working with degenerate matrices
+in Python using the numpy library, numerical issues may arise.
+
+To mitigate these issues, the current software implementation replaces matrices `R`
+and `R^-1` with the closest positively defined (non-degenerate) matrices.
+This adjustment ensures numerical stability while introducing negligible effects
+on the results, comparable to rounding errors in practice.
+
+### Normalizing for group analyses
+Regardless of the units chosen for the reconstructed source time courses, their
+amplitudes can vary substantially among subjects. To prevent statistical biases
+in group analyses, we take an additional step of **normalizing the weights** (and
+consequently the reconstructed time courses) **by the sensor level pseudo-Z**.
+
+To achieve this normalization, we multiply each source weight `w` by a factor
+`sqrt[trace(N)/trace(R)]`. By doing so, we ensure that all subjects' waveforms
+are adjusted to have the same sensor level pseudo-Z, which is equal to 1. This
+normalization helps to mitigate the amplitude differences among subjects and
+promotes fair comparisons in group analyses.
+
+### JSON configuration file
+Configuration parameters for the source reconstruction step are defined in file
+`src_reconstr_conf.json`. Note that JSON files can not contain comments;
+therefore comments in the code below should be removed for this JSON to be used
+in practice.
+
+```python
+{
+	"bem_sol": "fsaverage-5120-5120-5120-bem-sol.fif",      # Precalculated BEM solution
+	"source_space": "fsaverage-ico-3-src.fif",              # Precalculated source space
+	"parcellation": "aparc",                                # Can be "aparc" or ""aparc.a2009s" 
+	"surface": "white",             # Surface to use for the source space
+	"min_dist_to_skull_mm": 5.0,    # Min allowed distance between a source and the skull
+	"max_condition_number": 1e10,   # Matrices with larger cond numbers considered degenerate
+	"inverse_method": "beam",       # Only "beam" can be set for now
+	"beam_type": "pz",              # Beamformer localizer type; no need to change
+	"src_units": "pz",              # Either "source" or "pz" 
+	"noise_upper_bound_tolerance": 1e-2,    # Accuracy of choosing max allowed noise amp
+	"roi_time_course_method": "pca_flip"    # The way how a single ROI time course is obtained 
+}
+```
 
 ## Setting up Python virtual environment on Compute Canada (Alliance) cluster
 The following steps should be performed to run the code on Compute Canada. The same setup can
@@ -428,9 +620,12 @@ the project working folder and perform the following commands:
         pip3 install pyqt5 --no-index
         pip3 install pyedflib
         pip3 install pandas --no-index
-        pip3 install mne-qt-browser     # If one wants to use QT backend
+        pip3 install mne-qt-browser      # If one wants to use QT backend
         pip3 install pyprep
         python3 -m pip install --no-index scikit-learn
+        python3 -m pip install pyvistaqt # NOTE: only needed to visualize sensor positions 
+        python3 -m pip install nibabel
+
         deactivate
 ```
 - In your sbatch scripts, use commands

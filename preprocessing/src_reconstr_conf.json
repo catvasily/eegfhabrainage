@@ -1,0 +1,14 @@
+{
+	"bem_sol": "fsaverage-5120-5120-5120-bem-sol.fif",
+	"source_space": "fsaverage-ico-3-src.fif",
+	"parcellation": "aparc",
+	"surface": "white",
+	"min_dist_to_skull_mm": 5.0,
+	"max_condition_number": 1e10,
+	"inverse_method": "beam",
+        "beam_type": "pz",
+	"src_units": "pz",
+	"noise_upper_bound_tolerance": 1e-2,
+	"roi_time_course_method": "pca_flip"
+}
+
