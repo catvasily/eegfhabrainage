@@ -820,6 +820,462 @@ is paused)</p></li>
 </dd></dl>
 
 </section>
+<section id="module-extract_hv_intervals">
+<span id="extract-hv-intervals-py"></span><h2>extract_hv_intervals.py<a class="headerlink" href="#module-extract_hv_intervals" title="Permalink to this heading">¶</a></h2>
+<p>A script to perform filtering and extraction of hyperventilation (HV)
+intervals.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="extract_hv_intervals.get_data_folders">
+<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#extract_hv_intervals.get_data_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup input and output data folders depending on the host machine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data_root, out_root, cluster_job</strong> (<em>str, str, bool</em>) – paths to the root input and output
+data folders, and a flag indicating whether host is on CC cluster</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-run_src_reconstr">
+<span id="run-src-reconstr-py"></span><h2>run_src_reconstr.py<a class="headerlink" href="#module-run_src_reconstr" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="run_src_reconstr.JSON_CONFIG_FILE">
+<span class="sig-name descname"><span class="pre">JSON_CONFIG_FILE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'src_reconstr_conf.json'</span></em><a class="headerlink" href="#run_src_reconstr.JSON_CONFIG_FILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default name (without a path) for the JSON file with parameter settings for
+the source reconstruction step. This file is expected
+to reside in the same folder as this file.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="run_src_reconstr.PYPREP_CONFIG_FILE">
+<span class="sig-name descname"><span class="pre">PYPREP_CONFIG_FILE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pyprep_ica_conf.json'</span></em><a class="headerlink" href="#run_src_reconstr.PYPREP_CONFIG_FILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name (without a path) for the JSON file with parameter settings for
+the PYPREP/ICA step. This file is expected to reside in the same folder
+as this script.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_src_reconstr.get_data_folders">
+<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#run_src_reconstr.get_data_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup input and output data folders depending on the host machine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_root</strong> (<em>str</em>) – path to the root input folder</p></li>
+<li><p><strong>out_root</strong> (<em>str</em>) – path to the root output folder</p></li>
+<li><p><strong>fs_dir</strong> (<em>str</em>) – path to the folder with the template subject ‘fsaverage’ data</p></li>
+<li><p><strong>cluster_job</strong> (<em>bool</em>) – a flag indicating whether the host is on CC cluster</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-do_src_reconstr">
+<span id="do-src-reconstr"></span><h2>do_src_reconstr<a class="headerlink" href="#module-do_src_reconstr" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.beam_extract_label_time_course">
+<span class="sig-name descname"><span class="pre">beam_extract_label_time_course</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sensor_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pca_flip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.beam_extract_label_time_course" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute spatial filter weights and time courses for ROIs (labels) using beamformer
+inverse solutions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sensor_data</strong> (<em>ndarray</em>) – nchan x ntimes; EEG channels time courses</p></li>
+<li><p><strong>cov</strong> (<em>ndarray</em>) – nchan x nchan; the sensor time courses covariance matrix</p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – a list of mne.Label objects for the ROIs</p></li>
+<li><p><strong>fwd</strong> (<em>mne.Forward</em>) – forward solutions</p></li>
+<li><p><strong>W</strong> (<em>ndarray</em>) – nchan x nsrc; beamformer weights for the whole (global) source space</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – a method of constructing a single time course for the ROI; see description
+of <cite>mne.extract_label_time_course()</cite> function</p></li>
+<li><p><strong>verbose</strong> (<em>str</em>) – verbose mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>label_tcs</strong> (<em>ndarray</em>) – nlabels x ntimes; ROI time courses</p></li>
+<li><p><strong>label_wts</strong> (<em>ndarray</em>) – nchan x nlabels; spatial filter weights for each label</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.compute_beamformer_stc">
+<span class="sig-name descname"><span class="pre">compute_beamformer_stc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_stc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.compute_beamformer_stc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct source time courses using single source minimum variance
+beamformer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw</strong> (<em>mne.Raw</em>) – the raw data containing only good sensor channels</p></li>
+<li><p><strong>fwd</strong> (<em>mne.Forward</em>) – forward solutions</p></li>
+<li><p><strong>return_stc</strong> (<em>bool</em>) – flag to compute all source time courses and to return
+corresponding SourceEstimate object</p></li>
+<li><p><strong>beam_type</strong> (<em>str</em>) – beamformer type: one of <cite>‘pz’</cite> (pseudo-Z) or <cite>‘ai’</cite> (activity
+index) scalar beamformer can be calculated.</p></li>
+<li><p><strong>tol</strong> (<em>float &gt; 0</em>) – tolerance (relative accuracy) in finding the noise_cov trace.</p></li>
+<li><p><strong>rcond</strong> (<em>float &gt; 0</em>) – condition for determining rank of the covariance matrix:
+singular values less than <cite>max(sing val) * rcond</cite> will be considered zero.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em><em> or </em><em>None</em>) – verbose mode (see MNE docs for details)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>stc</strong> (<em>mne.SourceEstimate or None</em>) – source estimate (reconstructed source time courses) for
+a surfaced based source space, provided return_stc flag is True; None otherwise</p></li>
+<li><p><strong>data_cov</strong> (<em>ndarray</em>) – nchan x nchan, sensor covariance matrix adjusted to a nearest
+positive definite matrix</p></li>
+<li><p><strong>W</strong> (<em>ndarray</em>) – nchan x nsrc array of beamformer weights</p></li>
+<li><p><strong>U</strong> (<em>ndarray</em>) – 3 x nsrc array of source orientations</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.compute_roi_time_courses">
+<span class="sig-name descname"><span class="pre">compute_roi_time_courses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inv_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pca_flip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensor_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cov</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.compute_roi_time_courses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute time courses for ROIs (labels).</p>
+<p>If <cite>inv_method</cite> is ‘beam’ and <cite>mode</cite> is <cite>pca_flip</cite> - <cite>beam_extract_label_time_course()</cite>
+will be used; otherwise a MNE function  mne.extract_label_time_course() will be applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inv_method</strong> (<em>str</em>) – inverse method used to create the <cite>stc</cite></p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – a list of mne.Label objects for the ROIs</p></li>
+<li><p><strong>fwd</strong> (<em>mne.Forward</em>) – forward solutions</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – a method of constructing a single time course for ROI - see description
+of <a href="#id1"><span class="problematic" id="id2">`</span></a>mne.extract_label_time_course() function.</p></li>
+<li><p><strong>stc</strong> (<em>mne.SourceEstimate</em><em> or </em><em>None</em>) – source estimate (reconstructed source time courses) for
+a surfaced based source space; only needed for non-beamformer reconstructions</p></li>
+<li><p><strong>sensor_data</strong> (<em>ndarray</em><em> or </em><em>None</em>) – nchan x ntimes; EEG channels time courses. Must be
+specified for beamformer reconstructions, not needed for others.</p></li>
+<li><p><strong>cov</strong> (<em>ndarray</em><em> or </em><em>None</em>) – nchan x nchan; the sensor time courses covariance matrix. Must be
+specified for beamformer reconstructions, not needed for others.</p></li>
+<li><p><strong>W</strong> (<em>ndarray</em><em> or </em><em>None</em>) – nchan x nsrc; beamformer weights for the whole (global) source space.
+Must be specified for beamformer reconstructions, not needed for others.</p></li>
+<li><p><strong>verbose</strong> (<em>str</em>) – verbose mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>label_tcs</strong> (<em>ndarray</em>) – nlabels x ntimes; ROI time courses</p></li>
+<li><p><strong>label_wts</strong> (<em>ndarray or None</em>) – nchan x nlabels; spatial filter weights for each label for
+beamformer reconstructions, None for other (min norm) reconstructions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.compute_source_timecourses">
+<span class="sig-name descname"><span class="pre">compute_source_timecourses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'beam'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_stc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.compute_source_timecourses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct source time courses for all sources in the source space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw</strong> (<em>mne.Raw</em>) – the raw data containing only good sensor channels</p></li>
+<li><p><strong>fwd</strong> (<em>mne.Forward</em>) – forward solutions</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – source reconstruction method; currently only beamformer
+(method = ‘beam’) is implemented</p></li>
+<li><p><strong>return_stc</strong> (<em>bool</em>) – flag to compute all source time courses and to return
+corresponding SourceEstimate object</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – dictionary with method-specific arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>stc</strong> (<em>mne.SourceEstimate or None</em>) – source estimate (reconstructed source time courses) for
+a surfaced based source space, if <cite>return_stc = True</cite>, or None otherwise.</p></li>
+<li><p><strong>data_cov</strong> (<em>ndarray or None</em>) – nchan x nchan; if <cite>method = ‘beam’</cite>: sensor covariance matrix
+adjusted to a nearest positive definite matrix; None otherwise</p></li>
+<li><p><strong>W</strong> (<em>ndarray or None</em>) – nchan x nsrc; if <cite>method = ‘beam’</cite>:  array of beamformer weights;
+None othewise</p></li>
+<li><p><strong>U</strong> (<em>ndarray or None</em>) – 3 x nsrc; if <cite>method = ‘beam’</cite>: array of source orientations;
+None otherwise</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.construct_noise_and_inv_cov">
+<span class="sig-name descname"><span class="pre">construct_noise_and_inv_cov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_cov</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rcond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.construct_noise_and_inv_cov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Based on the forward solutions, construct sensor-level noise covariance
+matrix assuming white, randomly oriented uncorrelated sources. Also calculate
+pseudo-inverse of the data cov and SNR.</p>
+<p>The basic expression for noise covariance is:</p>
+<p><cite>cov0 = const * SUM(i=1 to Nsrc){Hx Hx’ + Hy Hy’ + Hz Hz’}</cite></p>
+<p>where <cite>Hx,y,z(i)</cite> are forward solutions for i-th source with corresponding
+orientations, and <cite>const</cite> is defined so as data_cov - noise_cov is non-negative.</p>
+<p>For degenerate data_cov the noise_cov should also be degenerate with a
+range subspace coinciding with the range of the data_cov. In this case the
+above expression should be replaced with</p>
+<p><cite>cov = P * cov0 * P</cite></p>
+<p>where <cite>P = data_cov * pinv(data_cov)</cite> is a projector on the <cite>range(data_cov)</cite>.</p>
+<p>The trace of the noise_cov is maximized while keeping the difference
+<cite>data_cov - noise_cov</cite> non-negative. The tol parameter defines how close to
+the upper boundary one should get.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fwd</strong> (<em>Forward</em>) – mne Python forward solutions class</p></li>
+<li><p><strong>data_cov</strong> (<em>ndarray</em>) – nchan x nchan data covariance matrix</p></li>
+<li><p><strong>tol</strong> (<em>float &gt; 0</em>) – tolerance in finding the noise_cov trace.</p></li>
+<li><p><strong>rcond</strong> (<em>float &gt; 0</em>) – singular values less than max(sing val) * rcond will
+be dropped</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>cov</strong> (<em>ndarray</em>) – (nchan x nchan) noise cov matrix, such that the difference
+data_cov - noise_cov is non-negatively defined</p></li>
+<li><p><strong>inv_cov</strong> (<em>ndarray</em>) – (nchan x nchan) (pseudo-) inverse of the data cov</p></li>
+<li><p><strong>rank</strong> (<em>int</em>) – rank of the data covariance</p></li>
+<li><p><strong>pz</strong> (<em>float</em>) – psedo-Z = SNR + 1 of the data; <cite>pz=tr(data_cov)/tr(noise_cov)</cite></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.fwd_file_name">
+<span class="sig-name descname"><span class="pre">fwd_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.fwd_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct forward solution file name base on the source space used</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scan_id</strong> (<em>str</em>) – subject ID (=scan id)</p></li>
+<li><p><strong>src_file</strong> (<em>str</em>) – standard template source space name in the form
+fsaverage-….-src.fif</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>fwd_name</strong> (<em>str</em>) – fwd solutions file name in the form
+scan_id-….-fwd.fif</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.get_beam_weights">
+<span class="sig-name descname"><span class="pre">get_beam_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.get_beam_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get beamformer weights matrix for a set of forward solutions</p>
+<p>For each source, calculate a scalar beamformer weight using a formula</p>
+<p><cite>w = const * R^(-1) h; h = [Hx, Hy, Hz]*u</cite></p>
+<p>where <cite>R</cite> is the data covariance matrix, <cite>h</cite> is a “scalar” lead field corresponding
+to the source orientation <cite>u</cite>. The normalization constant is selected depending
+on the <cite>units</cite> parameter setting:</p>
+<p><cite>units = “source”: const = (h’ R^(-1) h)^(-1)</cite></p>
+<p><cite>units = “pz”:     const = [h’ R^(-1) N R^(-1) h]^(-1/2)</cite></p>
+<p>In the first case absolute current dipole amplitudes (A*m) will be reconstructed.
+In the 2nd case source amplitudes will be normalized on projected noise, effectively
+representing source-level signal to noise ratio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>H</strong> (<em>ndarray</em>) – nchan x (3*n_src) array of FS for a set of n_src sources</p></li>
+<li><p><strong>inv_cov</strong> (<em>ndarray</em>) – nchan x nchan (pseudo-)inverse of sesnor cov matrix</p></li>
+<li><p><strong>noise_cov</strong> (<em>ndarray</em>) – nchan x nchan noise cov matrix</p></li>
+<li><p><strong>units</strong> (<em>str</em>) – either “source” or “pz”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>W</strong> (<em>ndarray</em>) – nchan x nsrc array of beamformer weights</p></li>
+<li><p><strong>U</strong> (<em>ndarray</em>) – 3 x nsrc array of source orientations</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.get_label_fwd">
+<span class="sig-name descname"><span class="pre">get_label_fwd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.get_label_fwd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a subset of forward solutions corresponding to specified Label (ROI)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fwd</strong> (<em>mne.Forward</em>) – the global <cite>Forward</cite> object</p></li>
+<li><p><strong>label</strong> (<em>mne.Label</em>) – the <cite>Label</cite> object for the ROI</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>H</strong> (<em>ndarray</em>) – nchan x (3*n_label_src) array of the ROI forward solutions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.get_label_pca_weight">
+<span class="sig-name descname"><span class="pre">get_label_pca_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.get_label_pca_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a spatial filter vector <cite>w_pca</cite> such that a single label
+(ROI) time course can be found by the expression <cite>w_pca’*b(t)</cite>, where
+<cite>b</cite> is a vector of sensor time courses.</p>
+<p><em>Explanation</em>. Covariance matrix of all signals that belong to a label is
+<cite>R_label = W_label’* R * W_label</cite>, where R is the global sensor covariance and
+<cite>W_label = nchan x n_label_src</cite> are label weights.
+Let <cite>U0 = n_label_src x 1</cite> be the largest normalized eigenvector of R_label.
+Then label time course <cite>s(t)</cite> corresponding to ‘pca_flip’ mode is found as</p>
+<p><cite>s(t) = sign * scale * U0’ * W_label’ * b(t)</cite>,</p>
+<p>where</p>
+<p><cite>scale = sqrt[(trace(R_label)/E0)/n_label_src]</cite>,
+<cite>sign = np.sign(U0’*flip)</cite></p>
+<p>E0 is the largest eigenvalue of R_label and <cite>flip</cite> is a flip-vector returned by
+MNE <cite>label_sign_flip()</cite> function. This scaling assigns the RMS of the powers
+of all ROI sources to the returned single time course amplitude. Then it is
+clear that the expression for <cite>w_pca</cite> is:</p>
+<p><cite>w_pca = sign * scale * W_label * U0, w_pca = nchan x 1</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>R</strong> (<em>ndarray</em>) – nchan x nchan, the global sensor data covariance matrix</p></li>
+<li><p><strong>fwd</strong> (<em>mne.Forward</em>) – the forward solutions object for the whole source space</p></li>
+<li><p><strong>W</strong> (<em>ndarray</em>) – nchan x nsrc, weights matrix for the whole source space</p></li>
+<li><p><strong>label</strong> (<em>mne.Label</em>) – the <cite>Label</cite> object for the ROI</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>w_pca</strong> (<em>ndarray</em>) – nchan x 1 weight vector for the ROI</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.get_label_src_idx">
+<span class="sig-name descname"><span class="pre">get_label_src_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.get_label_src_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get source indecies for a label (ROI)</p>
+<p>Forward solution matrices H and weight matrices W have
+columns (or triplets of columns) corresponding to sources
+in the whole (left + right hemisphere) source space. At the
+same time, the SourceSpaces object has separate source indexing
+for each hemisphere, and so does the ROI (label). This function
+returns a mapping from label vertices to columns of scalar H and
+scalar W.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fwd</strong> (<em>mne.Forward</em>) – the global <cite>Forward</cite> object</p></li>
+<li><p><strong>label</strong> (<em>mne.Label</em>) – the <cite>Label</cite> object for the ROI</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>idx</strong> (<em>1D array of ints</em>) – n_label_src-dimensional vector of indecies</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.get_label_wts">
+<span class="sig-name descname"><span class="pre">get_label_wts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.get_label_wts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a subset of spatial filter weights corresponding to specified Label (ROI)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fwd</strong> (<em>mne.Forward</em>) – the global <cite>Forward</cite> object</p></li>
+<li><p><strong>W</strong> (<em>ndarray</em>) – nchan x nsrc, weights matrix for the whole source space</p></li>
+<li><p><strong>label</strong> (<em>mne.Label</em>) – the <cite>Label</cite> object for the ROI</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>W_label</strong> (<em>ndarray</em>) – nchan x (n_label_src) array of ROI weights</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.get_voxel_coords">
+<span class="sig-name descname"><span class="pre">get_voxel_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.get_voxel_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given vertex numbers, return voxel spatial coordinates for
+a surface source space.</p>
+<p>NOTE: the coordinate system is that of the source space; it may be
+either MRI or head coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src</strong> (<em>mne.SourceSpaces</em>) – as is</p></li>
+<li><p><strong>vertices</strong> (<em>list</em>) – a list <cite>[lh, rh]</cite>, where <cite>lh, rh</cite> are list of integer
+vertex numbers</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>rr</strong> (<em>ndarray</em>) – nvox x 3; coordinates of vertices. <cite>nvox = len(lh) + len)rh)</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.ltc_file_name">
+<span class="sig-name descname"><span class="pre">ltc_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.ltc_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct HDF5 file name for saved ROI time courses based on the source space used</p>
+<p>Note that the names of ROIs themselves depend on the atlas (parcellation) used and
+will be stored inside the generated HDF5 file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scan_id</strong> (<em>str</em>) – subject ID (=scan id)</p></li>
+<li><p><strong>src_file</strong> (<em>str</em>) – standard template source space name in the form
+fsaverage-….-src.fif</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>fwd_name</strong> (<em>str</em>) – fwd solutions file name in the form
+scan_id-….-ltc.hdf5</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.read_roi_time_courses">
+<span class="sig-name descname"><span class="pre">read_roi_time_courses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltc_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.read_roi_time_courses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save ROI (label) time courses and corresponding ROI names in .hdf5
+file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ltc_file</strong> (<em>str</em>) – full pathname of the output .hdf5 file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>label_tcs</strong> (<em>ndarray</em>) – nlabels x ntimes ROI time courses</p></li>
+<li><p><strong>label_names</strong> (<em>ndarray of str</em>) – 1 x nlabels vector of ROI names</p></li>
+<li><p><strong>rr</strong> (<em>ndarray or None</em>) – nlabels x 3; coordinates of ROI reference locations
+in head coordinates</p></li>
+<li><p><strong>W</strong> (<em>ndarray or None</em>) – nchans x nlabels; spatial filter weights for each ROI.
+Those can be used to reconstruct ROI time courses as <cite>W.T &#64; sensor_data</cite></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_src_reconstr.write_roi_time_courses">
+<span class="sig-name descname"><span class="pre">write_roi_time_courses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltc_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_tcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.write_roi_time_courses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save ROI (label) time courses and corresponding ROI names in .hdf5
+file.</p>
+<p>The output file will contain at least two datasets with names ‘label_tcs’ and
+‘label_names’. If provided, ROI coordinates and corresponding spatial filter
+weights will also be saved under names ‘rr’ and ‘W’, respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ltc_file</strong> (<em>str</em>) – full pathname of the output .hdf5 file</p></li>
+<li><p><strong>label_tcs</strong> (<em>ndarray</em>) – nlabels x ntimes ROI time courses</p></li>
+<li><p><strong>label_names</strong> (<em>list</em><em> of </em><em>str</em>) – names of ROIs</p></li>
+<li><p><strong>rr</strong> (<em>ndarray</em><em> or </em><em>None</em>) – nlabels x 3; coordinates of ROI reference locations
+in head coordinates</p></li>
+<li><p><strong>W</strong> (<em>ndarray</em><em> or </em><em>None</em>) – nchans x nlabels; spatial filter weights for each ROI.
+Those can be used to reconstruct ROI time courses as <cite>W.T &#64; sensor_data</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -847,6 +1303,9 @@ is paused)</p></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-edf_preprocessing">edf_preprocessing.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-individual_func">individual_func.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-do_pyprep">do_pyprep.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-extract_hv_intervals">extract_hv_intervals.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-run_src_reconstr">run_src_reconstr.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-do_src_reconstr">do_src_reconstr</a></li>
 </ul>
 </li>
 </ul>

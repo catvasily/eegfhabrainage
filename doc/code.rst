@@ -17,3 +17,16 @@ individual_func.py
 do_pyprep.py
 ------------
 .. automodule:: do_pyprep
+
+extract_hv_intervals.py
+-----------------------
+.. automodule:: extract_hv_intervals
+
+run_src_reconstr.py
+-------------------
+.. automodule:: run_src_reconstr
+
+do_src_reconstr
+---------------
+.. automodule:: do_src_reconstr
+

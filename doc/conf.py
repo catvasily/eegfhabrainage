@@ -34,6 +34,9 @@ autodoc_default_options = {
 }
 napoleon_custom_sections = [('Returns', 'params_style')]	# This allows describing multiple return values
 								# and their types in 'Returns' section
+
+myst_heading_anchors = 3	# To properly convert links to subsections in .md files
+
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 add_module_names = False	# Do not prepend the module name to function descriptions
