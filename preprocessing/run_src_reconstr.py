@@ -10,7 +10,8 @@ import mne
 from nearest_pos_def import nearestPD
 from do_src_reconstr import fwd_file_name, construct_noise_and_inv_cov,\
     compute_source_timecourses, get_beam_weights, compute_roi_time_courses,\
-    get_voxel_coords, write_roi_time_courses, ltc_file_name
+    get_voxel_coords, write_roi_time_courses, ltc_file_name, get_label_coms
+from add_virtual_channels import add_virtual_channels
 
 JSON_CONFIG_FILE = "src_reconstr_conf.json"
 '''Default name (without a path) for the JSON file with parameter settings for
@@ -28,6 +29,9 @@ as this script.
 
 _JSON_CONFIG_PATHNAME = path.dirname(__file__) + "/" + JSON_CONFIG_FILE
 _PYPREP_CONFIG_PATHNAME = path.dirname(__file__) + "/" + PYPREP_CONFIG_FILE
+
+sys.path.append(path.dirname(path.dirname(__file__))+ "/misc")
+from view_raw_eeg import view_raw_eeg
 
 def get_data_folders():
     '''Setup input and output data folders depending on the host machine.
@@ -71,8 +75,8 @@ if __name__ == '__main__':
     # ---------- Inputs ------------------
     N_ARRAY_JOBS = 100       # Number of parallel jobs to run on cluster
 
-    hospital = 'Burnaby'     # Either Burnaby or Abbotsford
-    #hospital = 'Abbotsford' 
+    #hospital = 'Burnaby'     # Either Burnaby or Abbotsford
+    hospital = 'Abbotsford' 
 
     # Abbotsford subset
     #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
@@ -86,9 +90,21 @@ if __name__ == '__main__':
 
     source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
 
+    recalc_forward = False    # Force recalculating forward solutions (even if already exist)
     view_plots = True         # Flag to show interactive plots
     plot_sensors = False      # Flag to plot montage and source space in 3D
-    recalc_forward = False    # Force recalculating forward solutions (even if already exist)
+    plot_waveforms = False    # Flag to plot sensor and source waveforms
+
+    # Channels to plot if plot_waveforms = True. Set to None to plot all
+    # channels
+    #plot_chnames = None
+    plot_chnames = ['O1','O2','P3','P4','Pz','G_occipital_middle-lh', \
+        'G_occipital_middle-rh', 'G_occipital_sup-lh', 'G_occipital_sup-rh', \
+        'Pole_occipital-lh', 'Pole_occipital-rh']
+    # Scale factor for virtual channels for simultaneously plotting EEG and source
+    # waveforms. If the latter are in pseudo-Z units, their magnitudes are typicaly
+    # around 1, while EEGs have magnitudes ~1e-5
+    vc_scale_factor = 1e-5    # Only affects visual display of the virtual channels
 
     verbose = 'INFO'     # Can be ‘DEBUG’, ‘INFO', ERROR', 'CRITICAL', or 'WARNING' (default)
     # ------ end of inputs ---------------
@@ -174,21 +190,7 @@ if __name__ == '__main__':
     # Remove labels (ROIs) that do not have any sources
     labels = [l for l in labels if len(l.vertices)]
     label_names = [label.name for label in labels]
-
-    # Calculate center-of-mass vertices for ROIs assuming
-    # that all vertices have identical weights
-    lcoms = list(); rcoms = list()
-    for l in labels:
-        icom = l.center_of_mass(subject="fsaverage",
-            restrict_vertices=True,    # Assign COM to one of label's vertices
-            subjects_dir=fs_dir, surf='sphere')
-
-        if l.hemi == 'lh':
-            lcoms.append(icom)
-        else:
-            rcoms.append(icom)
-
-    label_coms = [lcoms, rcoms]
+    label_coms = get_label_coms(labels, fs_dir)
 
     # Settings for source time course reconstructions - see a call to
     # compute_source_timecourses() below
@@ -279,7 +281,7 @@ if __name__ == '__main__':
             # compute_source_timecourses() returns stc, data_cov, W, U, but: only stc
             # is needed if standard MNE funcs are used later to extract ROI time courses;
             # stc is NOT needed if beamformer reconstruction of ROI time courses.
-            stc, data_cov, W, _ = compute_source_timecourses(raw, fwd,
+            stc, data_cov, W, _, pz = compute_source_timecourses(raw, fwd,
                 method = inverse_method,
                 return_stc = False,
                 **(stc_args[inverse_method]))
@@ -308,10 +310,16 @@ if __name__ == '__main__':
 
             ltc_file = subject_output_dir + "/" + ltc_file_name(scan_id, conf_dict["source_space"]) 
             label_com_rr = get_voxel_coords(fwd['src'], label_coms)    # rr's will be in head coords
-            write_roi_time_courses(ltc_file, label_tcs, label_names, label_com_rr, label_wts)
+            write_roi_time_courses(ltc_file, label_tcs, label_names,
+                vertno = label_coms, rr = label_com_rr, W = label_wts, pz = pz)
 
             # TO DO:
             #    - (optional) implement source reconstruction with dSPM, for comparison
+
+            if view_plots and plot_waveforms:
+                add_virtual_channels(raw, label_names, label_com_rr,
+                    vc_scale_factor * label_tcs, verbose = verbose)
+                view_raw_eeg(raw = raw, picks = plot_chnames)
 
             print('\n***** Processing of {} completed\n'.format(f), flush = True)
         except Exception as e:

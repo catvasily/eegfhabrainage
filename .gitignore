@@ -17,6 +17,7 @@ mne/
 *.dat
 *.fif
 *.mgz
+*.hdf5
 
 # swap files
 *.swp

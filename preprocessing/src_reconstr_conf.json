@@ -1,7 +1,7 @@
 {
 	"bem_sol": "fsaverage-5120-5120-5120-bem-sol.fif",
 	"source_space": "fsaverage-ico-3-src.fif",
-	"parcellation": "aparc",
+	"parcellation": "aparc.a2009s",
 	"surface": "white",
 	"min_dist_to_skull_mm": 5.0,
 	"max_condition_number": 1e10,

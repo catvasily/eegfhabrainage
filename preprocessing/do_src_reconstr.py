@@ -9,6 +9,10 @@ sys.path.append(path.dirname(path.dirname(__file__))+ "/beam-python")
 from nearest_pos_def import nearestPD
 from construct_mcmv_weights import is_pos_def, construct_single_source_weights
 
+_LEFT_HEMI_ZERO = -1_111_111
+""" This value is interpreted as the vertex #0 of the left hemisphere surface
+"""
+
 def fwd_file_name(scan_id, src_file):
     """Construct forward solution file name base on the source space used 
 
@@ -34,19 +38,25 @@ def get_voxel_coords(src, vertices):
 
     Args:
         src (mne.SourceSpaces): as is
-        vertices (list): a list `[lh, rh]`, where `lh, rh` are list of integer
-           vertex numbers
+        vertices (ndarray): 1D signed integer array for COM vertex numbers, with
+            NEGATIVE numbers referring to the LEFT hemisphere, and non-negative
+            (including 0) - to the right hemisphere. Negative vertex with number
+            _LEFT_HEMI_ZERO is interpreted as vertex 0 of the left hemisphere.
 
     Returns:
-        rr (ndarray): nvox x 3; coordinates of vertices. `nvox = len(lh) + len)rh)`
+        rr (ndarray): nvox x 3; coordinates of vertices. `nvox = len(vertices)`
     """
-    rr = np.append(
-        src[0]['rr'][vertices[0],:],
-        src[1]['rr'][vertices[1],:],
-        axis = 0
-        )
+    ihemi = lambda i: 0 if i < 0 else 1                     # The hemisphere num 
+    lh_vtx = lambda i: 0 if i == _LEFT_HEMI_ZERO else -i    # The actual vtx # in left hemi
 
-    return rr
+    rr = list()
+
+    for i in vertices:
+        hemi = ihemi(i)
+        vtx = i if hemi else lh_vtx(i)
+        rr.append(src[hemi]['rr'][vtx,:])
+
+    return np.array(rr)
 
 def construct_noise_and_inv_cov(fwd, data_cov, *, tol = 1e-2, rcond = 1e-10):
     """Based on the forward solutions, construct sensor-level noise covariance
@@ -356,6 +366,7 @@ def compute_beamformer_stc(raw, fwd, *, return_stc = True, beam_type = 'pz', uni
             positive definite matrix
         W (ndarray): nchan x nsrc array of beamformer weights
         U (ndarray): 3 x nsrc array of source orientations
+        pz (float): data's pseudo-Z found as `pz = trace(R)/tr(N)`, where `N` is the noise covariance
     """
     # Compute sample covariance
     eeg_data = raw.get_data(    # eeg_data is nchannels x ntimes
@@ -425,7 +436,7 @@ def compute_beamformer_stc(raw, fwd, *, return_stc = True, beam_type = 'pz', uni
     else:
         stc = None
 
-    return stc, data_cov, W, U
+    return stc, data_cov, W, U, pz
 
 def compute_source_timecourses(raw, fwd, *, method = "beam", return_stc = True, **kwargs): 
     """ Reconstruct source time courses for all sources in the source space
@@ -448,6 +459,7 @@ def compute_source_timecourses(raw, fwd, *, method = "beam", return_stc = True, 
             None othewise
         U (ndarray or None): 3 x nsrc; if `method = 'beam'`: array of source orientations;
             None otherwise
+        pz (float): data's pseudo-Z found as `pz = trace(R)/tr(N)`, where `N` is the noise covariance
     """
 
     if method == 'beam':
@@ -484,14 +496,24 @@ def read_roi_time_courses(ltc_file):
     Returns:
         label_tcs (ndarray): nlabels x ntimes ROI time courses
         label_names (ndarray of str):  1 x nlabels vector of ROI names
+        vertno (ndarray or None): 1D signed integer array of vertex numbers corresponding
+            to the ROI COMs. See `parse_vertex_list()` function regarding the vertex
+            numbers encoding rules.
         rr (ndarray or None): nlabels x 3; coordinates of ROI reference locations
             in head coordinates
         W (ndarray or None): nchans x nlabels; spatial filter weights for each ROI.
             Those can be used to reconstruct ROI time courses as `W.T @ sensor_data` 
+        pz (float or None): data's pseudo-Z found as `pz = trace(R)/tr(N)`,
+            where `N` is the noise covariance
     """
     with h5py.File(ltc_file, 'r') as f:
         label_tcs = f['label_tcs'][:,:]
         label_names = f['label_names'].asstr()[:]
+
+        if 'vertno' in f:
+            vertno = f['vertno'][:]
+        else:
+            vertno = None
 
         if 'rr' in f:
             rr = f['rr'][:,:]
@@ -503,24 +525,36 @@ def read_roi_time_courses(ltc_file):
         else:
             W = None
 
-    return (label_tcs, label_names, rr, W)  
+        if 'pz' in f:
+            pz = f['pz'][()]
+        else:
+            pz = None
+
+    return (label_tcs, label_names, vertno, rr, W, pz)  
  
-def write_roi_time_courses(ltc_file, label_tcs, label_names, rr = None, W = None):
-    """Save ROI (label) time courses and corresponding ROI names in .hdf5
+def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr = None, W = None,
+                           pz = None):
+    """Save ROI (label) time courses and related data in .hdf5
     file.
 
     The output file will contain at least two datasets with names 'label_tcs' and
-    'label_names'. If provided, ROI coordinates and corresponding spatial filter
-    weights will also be saved under names 'rr' and 'W', respectively.
+    'label_names'. If provided, ROI centers of mass (COMs) vertex numbers
+    on the FreeSurface's `fsaverage` cortex surface, ROI COMs in MRI coordinates,
+    ROI spatial filter weights and the EEG record overall pseudo-Z will also be saved.
 
     Args:
         ltc_file (str): full pathname of the output .hdf5 file
         label_tcs (ndarray): nlabels x ntimes ROI time courses
         label_names (list of str): names of ROIs
+        vertno (ndarray or None): 1D signed integer array of vertex numbers corresponding
+            to the ROI COMs. See `parse_vertex_list()` function regarding the vertex
+            numbers encoding rules.
         rr (ndarray or None): nlabels x 3; coordinates of ROI reference locations
             in head coordinates
         W (ndarray or None): nchans x nlabels; spatial filter weights for each ROI.
             Those can be used to reconstruct ROI time courses as `W.T @ sensor_data` 
+        pz (float or None): data's pseudo-Z found as `pz = trace(R)/tr(N)`,
+            where `N` is the noise covariance
 
     Returns:
         None
@@ -529,11 +563,17 @@ def write_roi_time_courses(ltc_file, label_tcs, label_names, rr = None, W = None
         f.create_dataset('label_tcs', data=label_tcs)
         f.create_dataset('label_names', data=label_names)
 
+        if not (vertno is None):
+            f.create_dataset('vertno', data=vertno)
+
         if not (rr is None):
             f.create_dataset('rr', data=rr)
 
         if not (W is None):
             f.create_dataset('W', data=W)
+
+        if not (pz is None):
+            f.create_dataset('pz', data=pz)
 
 def beam_extract_label_time_course(sensor_data, cov, labels, fwd, W, mode = 'pca_flip',
         verbose = None):
@@ -618,4 +658,103 @@ def compute_roi_time_courses(inv_method, labels, fwd, mode = 'pca_flip',
         label_wts = None
 
     return label_tcs, label_wts
+
+def get_label_coms(labels, fs_dir):
+    """ Calculate center-of-mass vertices for ROIs
+    assuming that all vertices in ROI have identical weights.
+
+    The ROIs are defined on the 'fsaverage' subject's original
+    (that is - dense) cortical surface. So are the returned
+    COM vertex numbers.
+
+    Note:
+        If the labels were restricted to a source space using
+        a coarser surface than the original FreeSurfer surface, the
+        returned COMs will also be vertices of this coarser surface.
+        Still the vertex numbers themselves refer to the original
+        dense surface. Importantly, "restricted" labels may sometimes
+        have their `vertices` lists empty. In this case, **an exception
+        will be thrown**.
+
+    Args:
+        labels (list of Label): list of MNE Label objects
+        fs_dir (str): pathname to the subject's directory that contains
+            the 'fsaverage' subject 
+
+    Returns:
+        label_coms (ndarray): 1D signed integer array for COM vertex numbers, with
+            NEGATIVE numbers referring to the LEFT hemisphere, and non-negative
+            (including 0) - to the right hemisphere. Negative vertex with number
+            _LEFT_HEMI_ZERO is interpreted as vertex 0 of the left hemisphere.
+    """
+    lcoms = list()
+
+    for l in labels:
+        if not len(l.vertices):
+            raise ValueError('Label {} has an empty vertices list; COM cannot be computed.'.\
+                format(l.name))     # Happens for labels restricted to a coarse surface
+
+        icom = l.center_of_mass(subject="fsaverage",
+            restrict_vertices=True,    # Assign COM to one of label's vertices
+            subjects_dir=fs_dir, surf='sphere')
+
+        # Make left hemi voxels negative, replace zero with _LEFT_HEMI_ZERO
+        if l.hemi == 'lh':
+            icom = -icom if icom else _LEFT_HEMI_ZERO
+
+        lcoms.append(icom)
+
+    return np.array(lcoms)
+
+def parse_vertex_list(vertno):
+    """Parse a mixed list of vertices referring to left and right hemispheres.
+
+    The vertex list is in the format described in `get_label_coms()` is split
+    into separate lists for left and right hemispheres.
+
+    Args:
+        vertno (ndarray): 1D signed integer array of vertex numbers, with
+            NEGATIVE numbers referring to the LEFT hemisphere, and non-negative
+            (including 0) - to the right hemisphere. Negative vertex with number
+            _LEFT_HEMI_ZERO is interpreted as vertex 0 of the left hemisphere.
+
+    Returns:
+        lh, rh, lh_idx, rh_idx (tuple): 1D integer arrays `lh, rh` of left and right
+            hemisphere vertex numbers; 1D boolean arrays `lh_idx, rh_idx` indicating
+            locations of left and right vertices in the input list `vertno`.
+
+    """
+    lh_idx = vertno < 0
+    rh_idx = np.logical_not(lh_idx)
+
+    lh = -vertno[lh_idx]
+    rh = vertno[rh_idx]
+
+    # Special treatment of _LEFT_HEMI_ZERO value
+    izero = np.flatnonzero(lh == -_LEFT_HEMI_ZERO)
+
+    if len(izero):
+        lh[izero[0]] = 0
+
+    return lh, rh, lh_idx, rh_idx
+
+def encode_vertex_list(vertno, is_left):
+    """Make left hemi vertex numbers negative or equal to _LEFT_HEMI_ZERO
+     as appropriate.
+
+    Args:
+        vertno (ndarray): 1D array of vertex numbers >=0
+        is_left (bool): `True` for left hemisphere, `False` for right hemisphere
+
+    Returns:
+        vtx (ndarray): new vertex list; there are no changes for right hemi vertices.
+    """
+    if not is_left:
+        return vertno
+
+    l = -vertno
+    lz = (l == 0)
+    l[lz] = _LEFT_HEMI_ZERO
+
+    return l
 
