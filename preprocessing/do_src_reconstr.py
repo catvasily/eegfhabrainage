@@ -4,6 +4,7 @@ import numpy as np
 import h5py        # Needed to save/load files in .hdf5 format
 import mne
 
+__file__ = path.realpath(__file__)    # expand potentially relative path to a full one
 sys.path.append(path.dirname(path.dirname(__file__))+ "/beam-python")
 
 from nearest_pos_def import nearestPD

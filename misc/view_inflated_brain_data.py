@@ -146,7 +146,6 @@ def view_inflated_brain_data(
         colormap = 'auto',
         alpha_data = 0.25,
         smoothing_steps = None,
-        expand_values_to_roi = False,
         rois_to_mark = None,
         vertno = None,
         show_vertices = False,
@@ -188,8 +187,6 @@ def view_inflated_brain_data(
             value explicitly sets the number of vertices for smoothing. For other
             settings see
             *https://mne.tools/stable/generated/mne.viz.Brain.html#mne.viz.Brain.add_data*
-        expand_values_to_roi (bool): If `True` then all ROI vertices will be assigned
-            the same data value as that of the reference vertex. Default is `False`.
         rois_to_mark (list or None): if supplied, a list of names of ROIs (labels)
             or a list of Label objects. In the first case `atlas` cannot be `None`,
             and the name should belong to this atlas. In the 2nd case a ROI from
@@ -213,7 +210,8 @@ def view_inflated_brain_data(
         map_to_cortex (bool): flag whether rr's will be mapped to the closest vertex
             on the cortical surface, of left as is. 
         subjects_dir (str): a pathname to the folder containing the
-            FreeSurfer subjects reconstructions.
+            FreeSurfer results for a subject whose brain surface is used for display.
+            Typically this is the `fsaverage` subject template data folder.
         scale_factor (float): size of plotted dots relative to 1 cm
         color_dots (color): color of plotted spheres (dots) for vertices (if shown)
             or rr's, in any matplotlib form: string, RGB, hex, etc

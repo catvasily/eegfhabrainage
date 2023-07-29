@@ -30,3 +30,11 @@ do_src_reconstr
 ---------------
 .. automodule:: do_src_reconstr
 
+view_raw_eeg
+------------
+.. automodule:: view_raw_eeg
+
+view_inflated_brain_data
+------------------------
+.. automodule:: view_inflated_brain_data
+

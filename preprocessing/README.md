@@ -416,15 +416,13 @@ repository imported as a git submodule.
 When executing the code locally, run this command in Linux terminal from the `.../eegfhabrainage/preprocessing`
 folder:
 ```
-python ./run_src_reconstr.py
+python run_src_reconstr.py
 ```
-Please note the `./` prefix; for some reason the script may fail without it on some systems.
-
 
 If running as an array job on the cedar cluster, use this command in your sbatch script
 (see `eeg_array_job.sbatch` for an example):
 ```
-python ./run_src_reconstr.py ${SLURM_ARRAY_TASK_ID}
+python run_src_reconstr.py ${SLURM_ARRAY_TASK_ID}
 ```
 
 Typically, the user will need to modify the main script **`run_src_reconstr.py`** as per their requirements.
@@ -488,10 +486,15 @@ The following operations are performed in this step.
       Note that our code uses a different algorithm which gets the same results orders of magnitude
       faster than the MNE implementation.
     * All reconstructed **label time courses** are saved in a **`.hdf5`** file. Additionally
-      this file contains: the **ROI names**, locations of the **ROI centers of mass**
-      in the head coordinates, **label beamformer weights** `W[l]` and the sensor-level **pseudo-Z**
-      of the data. The weights `W[l]` are similar to the single source beamformer weights, and
-      enable reconstructing the ROI (label) time course `l[t]` via an expression `l(t) = W[l]'*b(t)`.
+      this file contains: the **ROI names**, the **vertex numbers** corresponding to the **ROI centers of
+      mass (COMs)** on the FreeSurfer cortex/white matter boundary surface, **3D locations** of the 
+      ROI COMs in the **head** coordinates, **label beamformer weights** `W[l]` and the sensor-level
+      **pseudo-Z** of the data.   
+      The vertex numbers are encoded so that negative ones refer to the left hemisphere, and 
+      non-negative - to the right hemisphere; see function `get_label_coms()` in `do_src_reconstr.py`
+      for details.   
+      The weights `W[l]` are similar to the single source beamformer weights,
+      and enable reconstructing the ROI (label) time course `l[t]` via an expression `l(t) = W[l]'*b(t)`.
       The sensor-level pseudo-Z is defined as `pz = trace(R)/trace(N)`, where `R` and `N` are
       the EEG data and the noise covariance, respectively (see section ["Beamformer weights
       calculation"](#beamformer-weights-calculation) for details).  
@@ -602,6 +605,20 @@ in practice.
 }
 ```
 
+## Miscellaneous functions
+Some utility scripts are located in the folder `.../eegfhabrainage/misc`. 
+
+* `view_raw_eeg.py`: a simple EEG file viewer
+* `view_inflated_brain_data.py`: function to plot user data over an inflated cortex
+  surface and display cortex parcellation. In the same file -  
+  `expand_data_to_rois()`: a helper function for expanding single data values referring
+  to a set of *Regions Of Interest* (ROIs) to every surface vertex belonging to corresponding
+  ROI.
+* `plot_alpha_power.py`: an example of applying `view_inlfated_brain_data()` to plot
+    distribution of alpha band spectral density over the cortex surface
+
+Please refer to ["auto-generated documentation"](file://../doc/_build/html/index.html) for more details.
+
 ## Setting up Python virtual environment on Compute Canada (Alliance) cluster
 The following steps should be performed to run the code on Compute Canada. The same setup can
 be used on a local machine, except that commands `module load`, `deactivate` are not required, and
@@ -630,7 +647,7 @@ the project working folder and perform the following commands:
         pip3 install mne-qt-browser      # If one wants to use QT backend
         pip3 install pyprep
         python3 -m pip install --no-index scikit-learn
-        python3 -m pip install pyvistaqt # NOTE: only needed to visualize sensor positions 
+        python3 -m pip install pyvistaqt # NOTE: only needed for interactive 3D graphics 
         python3 -m pip install nibabel
 
         deactivate

@@ -27,6 +27,7 @@ as this script.
 
 '''
 
+__file__ = path.realpath(__file__)    # expand potentially relative path to a full one
 _JSON_CONFIG_PATHNAME = path.dirname(__file__) + "/" + JSON_CONFIG_FILE
 _PYPREP_CONFIG_PATHNAME = path.dirname(__file__) + "/" + PYPREP_CONFIG_FILE
 
@@ -75,8 +76,9 @@ if __name__ == '__main__':
     # ---------- Inputs ------------------
     N_ARRAY_JOBS = 100       # Number of parallel jobs to run on cluster
 
-    #hospital = 'Burnaby'     # Either Burnaby or Abbotsford
-    hospital = 'Abbotsford' 
+    #hospital = 'Burnaby'     # Burnaby, Abbotsford, RCH, etc.
+    #hospital = 'Abbotsford' 
+    hospital = 'RCH' 
 
     # Abbotsford subset
     #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']

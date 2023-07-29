@@ -12,6 +12,8 @@ import sys
 # Add paths to the code to the sphinx system path here
 # Assume that the root of the python code is one level up from this file location
 sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('preprocessing').resolve().as_posix())
+sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('misc').resolve().as_posix())
+sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('beam-python').resolve().as_posix())
 sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('mne/lib/python3.8/site-packages').resolve().as_posix())
 sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('mne/lib64/python3.8/site-packages').resolve().as_posix())
 print(sys.path)

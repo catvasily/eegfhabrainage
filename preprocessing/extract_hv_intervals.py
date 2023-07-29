@@ -44,8 +44,9 @@ def get_data_folders():
 if __name__ == '__main__': 
 	# Inputs
 	N_ARRAY_JOBS = 100	# Number of parrallel jobs to run on cluster
-	#hospital = 'Burnaby'	# Either Burnaby or Abbotsford
-	hospital = 'Abbotsford'	# Either Burnaby or Abbotsford
+	#hospital = 'Burnaby'	# Burnaby, Abbotsford, RCH, etc.
+	#hospital = 'Abbotsford'
+	hospital = 'RCH'
 
 	data_root, out_root, cluster_job = get_data_folders()
 
