@@ -58,7 +58,7 @@ class Pipeline:
     #   getRaw: returns the preprocessed EEG segment in raw format
 
     def __init__(self, file_name, *, conf_json = None, conf_dict = None,
-                 view_plots = False) -> None:
+                 view_plots = False, ts_plot_file = None, psd_plot_file = None) -> None:
         """
         Args:
             file_name (str): EDF file pathname
@@ -68,6 +68,10 @@ class Pipeline:
                 If both `conf_json` and `conf_dict` are given, the latter is used.
             view_plots (bool): If `True`, various interactive data plots will be shown.
                 Set it to False (default) if processing multiple files. 
+            ts_plot_file (str or None): if not None, file to save the plot of the original EDF
+                time series.
+            psd_plot_file (str or None): if not None, file to save the plot of the original EDF
+                PSD.
 
         """
         # Load configuration settings
@@ -89,7 +93,21 @@ class Pipeline:
         self.ch_groups = assign_known_channel_types(self.raw, conf_json = first_step_json)
 
         if (view_plots):
-            self.showplot(title = "Original EDF", show = False)	# Do not pause until processing results are shown too
+            dpi = conf_dict["plot_dpi"]
+            self.showplot(title = "Original EDF", time_series = True, show = False,
+                            savefile = ts_plot_file, dpi = dpi)	# Do not pause until processing results are shown too
+            self.showplot(title = "Original EDF", psd = True, show = False,
+                            savefile = psd_plot_file, dpi = dpi)# Do not pause until processing results are shown too
+            '''
+            # Plots for the protocol paper: subject 2f8ab0f5-08c4-4677-96bc-6d4b48735da2
+            # Exclude unused channels from plotting original time series
+            picks = ["C3", "C4", "CZ", "F3", "F4", "F7", "F8", "FZ", "FP1", "FP2", "O1", "O2", "P3", "P4", "PZ", \
+                "T3", "T4", "T5", "T6", "EOG1", "EOG2", "EKG1", "EKG2", "A1", "A2"] 
+            self.showplot(title = "Original EDF", time_series = True, picks = picks, show = False,
+                            savefile = ts_plot_file, dpi = dpi)	# Do not pause until processing results are shown too
+            self.showplot(title = "Original EDF", psd = True, picks = None, show = False,
+                            savefile = psd_plot_file, dpi = dpi)# Do not pause until processing results are shown too
+            '''
         
     def filter_group(self, *, what = "eog", view_plots = False) -> None:
         """Filters specified channel group to be used as templates for ICA artifact removal
@@ -112,7 +130,7 @@ class Pipeline:
         ch_lst = self.ch_groups[what]
 
         if view_plots:
-            self.showplot(title = "Original {}s".format(what.upper()), psd = False, picks = ch_lst,
+            self.showplot(title = "Original {}s".format(what.upper()), time_series = True, picks = ch_lst,
                           show = False)
 
         filter_picks = self.conf_dict[what + "_filter_kwargs"]["picks"]
@@ -121,14 +139,18 @@ class Pipeline:
         self.conf_dict[what + "_filter_kwargs"]["picks"] = filter_picks
 
         if (view_plots):
-            self.showplot(title = "Filtered {}s".format(what.upper()), psd = False, picks = ch_lst,
-                          show = True)
+            self.showplot(title = "Filtered {}s".format(what.upper()), time_series = True, picks = ch_lst,
+                          show = False)
 
-    def prep(self, *, view_plots = False) -> None:
+    def prep(self, *, view_plots = False, ts_plot_file = None, psd_plot_file = None) -> None:
         """Applies the PREP pipeline to the EEG segment to mark the bad channels
 
         Args:
             view_plots: boolean value to denote if we want to view plots
+            ts_plot_file (str or None): if not None, file to save the plot of the processed EDF
+                time series.
+            psd_plot_file (str or None): if not None, file to save the plot of the processed EDF
+                PSD.
 
         Returns:
             None
@@ -167,8 +189,11 @@ class Pipeline:
         print("DONE PREP Pipeline to re-reference and remove bad channels")
 
         if (view_plots):
-            self.showplot(title = "After PREP applied", time_series = True, psd = True)
-
+            dpi = self.conf_dict["plot_dpi"]
+            self.showplot(title = "After PREP applied", time_series = True, show = False,
+                            savefile = ts_plot_file, dpi = dpi)
+            self.showplot(title = "After PREP applied", psd = True, show = False,
+                            savefile = psd_plot_file, dpi = dpi)
 
     def ica(self, *, view_plots = False) -> None:
         """Performs ICA on the given EEG segment for both EOG and ECG channels
@@ -179,6 +204,13 @@ class Pipeline:
         Returns:
             None
         """
+
+        if not self.conf_dict["ica"]["applyICA"]:
+            print("ICA step skipped: applyICA flag was set to False")
+            return
+
+        self.plot_final_psd = False	# Flag to replot PSD, if some ICs were actually removed
+
         init_args = self.conf_dict["ica"]["init"]
         # NOTE: Was: n_components = number of EEG channels
         # However often using n_components = None or 0.99999 results in smaller
@@ -209,9 +241,6 @@ class Pipeline:
                 reject_by_annotation=True
                 )
 
-        # Flag to actually apply ICA cleaning to the data
-        applyICA = self.conf_dict["ica"]["applyICA"]
-        
         if len(self.ch_groups["eog"]) > 0:
             eog_args = self.conf_dict["ica"]["find_bads_eog"]
             eog_indices, eog_scores = ica.find_bads_eog(self.raw,
@@ -228,6 +257,7 @@ class Pipeline:
                                                         )
             ica.exclude = eog_indices
 
+            ''' Uncomment this to plot detailed ICA diagnostices
             if (view_plots) and eog_indices != []:
                 ica.plot_scores(eog_scores)
             
@@ -236,20 +266,25 @@ class Pipeline:
 
                 # plot ICs applied to raw data, with EOG matches highlighted
                 ica.plot_sources(self.raw, show_scrollbars=True)
-
-                self.showplot(title = "Before removing EOG artifacts", psd = False,
+            '''
+            if len(ica.exclude) > 0:
+                '''
+                # This is the same plot as "after PREP", so we can skip it
+                if view_plots:
+                    self.showplot(title = "Before removing EOG artifacts", time_series = True,
                               show = False)
+                '''
 
-            if applyICA:
-                if len(ica.exclude) > 0:
-                    ica.apply(self.raw)     # All defautl args look good forever - so
-                                            # keeping the call simple
-                    print("Removed EOG Artifacts using ICA")
+                ica.apply(self.raw)     # All defautl args look good forever - so
+                                        # keeping the call simple
+                print("Removed EOG Artifacts using ICA")
 
-                    if view_plots:
-                        self.showplot(title = "After removing EOG artifacts", psd = False)
-                else:
-                    print("No clear EOG ICs to remove were found")
+                if view_plots:
+                    self.showplot(title = "After removing EOG artifacts", time_series = True,
+                              show = False)
+                    self.plot_final_psd = True
+            else:
+                print("No clear EOG ICs to remove were found")
 
         if len(self.ch_groups["ecg"]) > 0:
             ica.exclude = []	# Clear indicies of already excluded EOG ICAs
@@ -269,6 +304,7 @@ class Pipeline:
                                                         reject_by_annotation=True)
             ica.exclude = ecg_indices
 
+            ''' Uncomment this to plot detailed ICA diagnostices
             if (view_plots) and ecg_indices != []:
                 # barplot of ICA component "ECG match" scores
                 ica.plot_scores(ecg_scores)
@@ -277,21 +313,27 @@ class Pipeline:
                 ica.plot_sources(self.raw, show_scrollbars=False)
 
                 # ica.apply(self.raw)                
-                self.showplot(title = "Before removing ECG artifacts", psd = False,
+            '''    
+            if len(ica.exclude) > 0:
+                '''
+                # This is the same plot as "after PREP" or afte EOG removed, so we can skip it
+                if view_plots:
+                    self.showplot(title = "Before removing ECG artifacts", time_series = True,
                               show = False)
-                
-            if applyICA:
-                if len(ica.exclude) > 0:
-                    ica.apply(self.raw)
-                    print("Removed ECG Artifacts using ICA")
+                '''
 
-                    if view_plots:
-                        self.showplot(title = "After removing ECG artifacts", psd = False)
-                else:
-                    print("No clear ECG ICs to remove were found")
+                ica.apply(self.raw)
+                print("Removed ECG Artifacts using ICA")
 
-    def showplot(self, *, title = None, time_series = True, psd = True,
-                 picks = None, show = True) -> None:
+                if view_plots:
+                    self.showplot(title = "After removing ECG artifacts", time_series = True,
+                              show = False)
+                    self.plot_final_psd = True
+            else:
+                print("No clear ECG ICs to remove were found")
+
+    def showplot(self, *, title = None, time_series = False, psd = False,
+                 picks = None, show = True, savefile=None, dpi = None) -> None:
         """Plot the time courses and / or power spectrum  of the data
 
         Args:
@@ -302,11 +344,24 @@ class Pipeline:
                 all channels will be plotted
             show (bool): flag to show the plot interactively (execution
                 is paused)
+            savefile(str or None): if not None, the name of the file to save
+                the plot to.
+            dpi (int or None): if not None, the DPI setting for the saved plot.
+                Ignored if savefile is None.
+
+        Note:
+            Only one of `time_series` or `psd` should be `True`.
 
         Returns:
             None
 
         """
+        if time_series and psd:
+            raise ValueError("'time_series' and 'psd' cannot both be True")
+
+        if (not time_series) and (not psd):
+            return      # Nothing to do
+
         cfg = self.conf_dict
 
         if picks is None:
@@ -317,54 +372,62 @@ class Pipeline:
             delete_raw = True
 
         if time_series:
+            cfg["plot_time_series"]["show"] = show
             fig = raw.plot(title = title, n_channels=len(self.raw.ch_names),
-                          show_scrollbars=True,
-                          start = 0,
-                          duration = cfg["plot"]["time_window"], 
-                          block=False, 
-                          scalings = cfg["plot"]["scalings"])
+                          **cfg["plot_time_series"])
 
             fig.axes[0].set_title(title)
         
         if psd:
-            xscale = 'log' if cfg["plot"]["spect_log_x"] \
+            xscale = 'log' if cfg["plot_psd"]["spect_log_x"] \
                      else 'linear'
-            fmin = cfg["plot"]["fmin"]
-            fmax= cfg["plot"]["fmax"]
+            cfg["plot_psd"]["kwargs"]["xscale"] = xscale
+
+            fmin = cfg["plot_psd"]["fmin"]
+            fmax= cfg["plot_psd"]["fmax"]
 
             fig = raw.compute_psd(method='welch',
                                   fmin = fmin,
                                   fmax= fmax,
-                                  n_fft = cfg["plot"]["n_fft"]
+                                  n_fft = cfg["plot_psd"]["n_fft"]
                                   ).plot(
                                          picks = picks,
-                                         amplitude = True,
-                                         dB = False,
-                                         xscale = xscale,
-                                         show = False)
-            fig.axes[0].set_title(title)
+                                         **cfg["plot_psd"]["kwargs"])
 
-            if cfg["plot"]["spect_log_x"]:
+            fig.axes[0].set_title(title)
+            fig.canvas.manager.set_window_title(title)
+
+            if cfg["plot_psd"]["spect_log_x"]:
                 first_tick = 1. if np.isclose(fmin, 0) else fmin
             else:
                 first_tick = fmin
 
-            fstep = cfg["plot"]["fstep"]
+            fstep = cfg["plot_psd"]["fstep"]
             ticks = [first_tick]
             ticks.extend(np.arange(fstep, fmax, fstep))
 
-            if cfg["plot"]["spect_log_y"]:
+            psd_lim = [cfg["plot_psd"]["ymin"], cfg["plot_psd"]["ymax"]]
+
+            if any([y is not None for y in psd_lim]):
+                fig.axes[0].set_ylim(psd_lim)
+
+            if cfg["plot_psd"]["spect_log_y"]:
                 fig.axes[0].set_yscale('log')
 
             fig.axes[0].xaxis.set_ticks(ticks)
 
-            if delete_raw:
-                del raw
+        if delete_raw:
+            del raw
 
-            if show:
-                plt.show()
+        if savefile is not None:
+            dpi = dpi if dpi is not None else 'figure'
+            plt.savefig(savefile, dpi = dpi, bbox_inches = 'tight')
 
-    def applyPipeline(self, applyICA = False, view_plots = False) -> None:
+        if show:
+            plt.show()
+
+    def applyPipeline(self, applyICA = False, view_plots = False, ts_postprep_png = None,
+            psd_postprep_png = None, psd_postica_png = None) -> None:
         """Applies the pipeline (resampling, filtering, applying PREP, performing ICA)
             on the given EEG segment
 
@@ -372,14 +435,30 @@ class Pipeline:
             applyICA (bool): flag to remove EOG, ECG - related ICs from the signals
             view_plots (bool): flag to show tons of plots; execution will be paused
                 each time a plot is shown 
+            ts_postprep_png (str or None): if not None, file to save the plot of the 
+                time series after PREP is done.
+            psd_postprep_png (str or None): if not None, file to save the plot of the 
+                PSD after PREP is done.
+            psd_postica_png (str or None): if not None, file to save the plot of the 
+                PSD after PREP and ICA are both done.
 
         Returns:
             None
         """
         self.filter_group(what = 'eog', view_plots = False)
         self.filter_group(what = 'ecg', view_plots = False)
-        self.prep(view_plots = view_plots)
+        self.prep(view_plots = view_plots, ts_plot_file = ts_postprep_png,
+            psd_plot_file = psd_postprep_png)
         self.ica(view_plots = view_plots) 
+
+        if view_plots:
+            if self.plot_final_psd:
+                self.showplot(title = "After PREP and ICA", psd = True, show = False,
+                    savefile = psd_postica_png, dpi = self.conf_dict["plot_dpi"])
+
+            plt.show()
+            print("", flush = True)
+            #input("Press ENTER to continue.")
 
     def getRaw(self):
         """

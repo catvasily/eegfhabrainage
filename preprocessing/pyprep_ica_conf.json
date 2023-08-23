@@ -81,17 +81,62 @@
 		}
 	},
 
-	"plot":
+	"plot_dpi": null,
+
+	"plot_time_series":
 	{
-		"time_window": 40.0,
-		"scalings": "auto",
+		"duration": 20.0,
+		"start": 150.0,
+		"color": null,
+		"bad_color": "lightgray",
+		"events": null,
+		"event_color": "cyan",
+		"scalings": {
+			"eeg": 50e-6,
+			"eog": 50e-6,
+			"ecg": 200e-6,
+			"misc": 500e-6,
+    		 	"emg": 1e-3
+			},
+		"remove_dc": true,
+		"order": null,
+		"show": true,
+		"block": false,
+		"clipping": 1.5,
+		"show_first_samp": false,
+		"group_by": "type",
+		"butterfly": false,
+		"event_id": null,
+		"show_scrollbars": false,
+		"show_scalebars": true,
+		"time_format": "float"
+	},
+
+	"plot_psd":
+	{
 		"fmin": 0.0,
 		"fmax": 100.0,
+		"ymin": 1e-1,
+		"ymax": 2e1,
                 "fstep": 10.0,
 		"spect_log_x": true,
 		"spect_log_y": true,
-		"n_fft": 1024
+		"n_fft": 1024,
+		"kwargs": {
+			"average": false,
+			"dB": false,
+			"amplitude": true,
+			"xscale": "linear",
+			"ci": "sd",
+			"ci_alpha": 0.3,
+			"color": "black",
+			"alpha": null,
+			"spatial_colors": false,
+			"sphere": null,
+			"exclude": null,
+			"axes": null,
+			"show": false
+			}
 	}
-	
 }
 

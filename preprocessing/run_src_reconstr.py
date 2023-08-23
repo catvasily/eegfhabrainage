@@ -76,21 +76,23 @@ if __name__ == '__main__':
     # ---------- Inputs ------------------
     N_ARRAY_JOBS = 100       # Number of parallel jobs to run on cluster
 
-    #hospital = 'Burnaby'     # Burnaby, Abbotsford, RCH, etc.
+    hospital = 'Burnaby'     # Burnaby, Abbotsford, RCH, etc.
     #hospital = 'Abbotsford' 
-    hospital = 'RCH' 
+    #hospital = 'RCH' 
 
     # Abbotsford subset
     #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
 
     # Burnaby subset:
-    #source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',
-    #                   'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
-    #                   '81be60fc-ed17-4f91-a265-c8a9f1770517',
-    #                   'ffff1021-f5ba-49a9-a588-1c4778fb38d3',
-    #                   '81c0c60a-8fcc-4aae-beed-87931e582c45']
+    source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',		# Interesting spectrum
+                       #'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
+                       #'81be60fc-ed17-4f91-a265-c8a9f1770517',
+                       #'ffff1021-f5ba-49a9-a588-1c4778fb38d3',
+                       #'81c0c60a-8fcc-4aae-beed-87931e582c45',
+                       #'57ea2fa1-66f1-43f9-aa17-981909e3dc96',
+                    ]
 
-    source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
+    #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
 
     recalc_forward = False    # Force recalculating forward solutions (even if already exist)
     view_plots = True         # Flag to show interactive plots

@@ -81,28 +81,28 @@ located inside the hospital subfolders. Please refer to the file structure in <c
 The <strong><code class="docutils literal notranslate"><span class="pre">out_root</span></code></strong> defines location where the resulting (processed) records are put and has the same structure. <em><strong>User may need to add/edit the host definitions
 and the returned <code class="docutils literal notranslate"><span class="pre">data_root</span></code>, <code class="docutils literal notranslate"><span class="pre">out_root</span></code> paths as appropriate</strong></em>, by modifying the following code segment:</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>	<span class="k">if</span> <span class="s1">&#39;ub20-04&#39;</span> <span class="ow">in</span> <span class="n">host</span><span class="p">:</span>
-		<span class="n">data_root</span> <span class="o">=</span> <span class="s1">&#39;/data/eegfhabrainage&#39;</span>
-		<span class="n">out_root</span> <span class="o">=</span> <span class="n">data_root</span> <span class="o">+</span> <span class="s1">&#39;/processed&#39;</span>
-		<span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">False</span>
-	<span class="k">elif</span> <span class="s1">&#39;cedar&#39;</span> <span class="ow">in</span> <span class="n">host</span><span class="p">:</span>
-		<span class="n">data_root</span> <span class="o">=</span> <span class="s1">&#39;/project/6019337/databases/eeg_fha/release_001/edf&#39;</span>
-		<span class="n">out_root</span> <span class="o">=</span> <span class="n">user_home</span> <span class="o">+</span> <span class="s1">&#39;/projects/rpp-doesburg/&#39;</span> <span class="o">+</span> <span class="n">user</span> <span class="o">+</span> <span class="s1">&#39;/data/eegfhabrainage/processed&#39;</span>
-		<span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">True</span>
-	<span class="k">else</span><span class="p">:</span>
-		<span class="n">home_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-		<span class="n">data_root</span> <span class="o">=</span> <span class="n">home_dir</span>
-		<span class="n">out_root</span> <span class="o">=</span> <span class="n">home_dir</span> <span class="o">+</span> <span class="s1">&#39;/processed&#39;</span>
-		<span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">False</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="s1">&#39;ub20-04&#39;</span> <span class="ow">in</span> <span class="n">host</span><span class="p">:</span>
+                <span class="n">data_root</span> <span class="o">=</span> <span class="s1">&#39;/data/eegfhabrainage&#39;</span>
+                <span class="n">out_root</span> <span class="o">=</span> <span class="n">data_root</span> <span class="o">+</span> <span class="s1">&#39;/processed&#39;</span>
+                <span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="s1">&#39;cedar&#39;</span> <span class="ow">in</span> <span class="n">host</span><span class="p">:</span>
+                <span class="n">data_root</span> <span class="o">=</span> <span class="s1">&#39;/project/6019337/databases/eeg_fha/release_001/edf&#39;</span>
+                <span class="n">out_root</span> <span class="o">=</span> <span class="n">user_home</span> <span class="o">+</span> <span class="s1">&#39;/projects/rpp-doesburg/&#39;</span> <span class="o">+</span> <span class="n">user</span> <span class="o">+</span> <span class="s1">&#39;/data/eegfhabrainage/processed&#39;</span>
+                <span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+                <span class="n">home_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+                <span class="n">data_root</span> <span class="o">=</span> <span class="n">home_dir</span>
+                <span class="n">out_root</span> <span class="o">=</span> <span class="n">home_dir</span> <span class="o">+</span> <span class="s1">&#39;/processed&#39;</span>
+                <span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p><strong>User needs to specify which hospital is being processed</strong>, by setting the <strong><code class="docutils literal notranslate"><span class="pre">hospital</span></code></strong> variable in the main function of the script:</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>	<span class="c1"># Inputs</span>
-	<span class="o">...</span>
-	<span class="n">hospital</span> <span class="o">=</span> <span class="s1">&#39;Abbotsford&#39;</span>
-	<span class="o">...</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="c1"># Inputs</span>
+        <span class="o">...</span>
+        <span class="n">hospital</span> <span class="o">=</span> <span class="s1">&#39;Abbotsford&#39;</span>
+        <span class="o">...</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -112,10 +112,10 @@ and the returned <code class="docutils literal notranslate"><span class="pre">da
 <blockquote>
 <div><p>File <strong><code class="docutils literal notranslate"><span class="pre">run_filtering_segmentation.py</span></code></strong>:</p>
 </div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>	<span class="c1"># Inputs</span>
-	<span class="o">...</span>
-	<span class="n">N_ARRAY_JOBS</span> <span class="o">=</span> <span class="mi">100</span>	<span class="c1"># Number of parallel jobs to run on cluster</span>
-	<span class="o">...</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="c1"># Inputs</span>
+        <span class="o">...</span>
+        <span class="n">N_ARRAY_JOBS</span> <span class="o">=</span> <span class="mi">100</span>      <span class="c1"># Number of parallel jobs to run on cluster</span>
+        <span class="o">...</span>
 </pre></div>
 </div>
 <blockquote>
@@ -123,20 +123,20 @@ and the returned <code class="docutils literal notranslate"><span class="pre">da
 <div><p>The <strong>sbatch script</strong> (see <strong><code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code></strong> as an example):</p>
 </div></blockquote>
 </div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>	<span class="o">...</span>
-	<span class="c1">#SBATCH --array=0-99	# the last job index should be equal to N_ARRAY_JOBS - 1 </span>
-	<span class="o">...</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="o">...</span>
+        <span class="c1">#SBATCH --array=0-99    # the last job index should be equal to N_ARRAY_JOBS - 1 </span>
+        <span class="o">...</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p><strong>When only some records for the hospital need to be processed</strong>, provide a list of record IDs in the variable
 <strong><code class="docutils literal notranslate"><span class="pre">source_scan_ids</span></code></strong>:</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>	<span class="c1"># Inputs</span>
-	<span class="o">...</span>
-	<span class="c1"># Use source_scan_ids = None to process all records</span>
-	<span class="n">source_scan_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5&quot;</span><span class="p">,</span> <span class="s2">&quot;fffaab93-e908-4b93-a021-ab580e573585&quot;</span><span class="p">]</span>
-	<span class="o">...</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="c1"># Inputs</span>
+        <span class="o">...</span>
+        <span class="c1"># Use source_scan_ids = None to process all records</span>
+        <span class="n">source_scan_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5&quot;</span><span class="p">,</span> <span class="s2">&quot;fffaab93-e908-4b93-a021-ab580e573585&quot;</span><span class="p">]</span>
+        <span class="o">...</span>
 </pre></div>
 </div>
 </section>
@@ -186,79 +186,79 @@ over values found in <code class="docutils literal notranslate"><span class="pre
 with the <code class="docutils literal notranslate"><span class="pre">#</span></code> character. IMPORTANTLY, please mind that <strong>comments are NOT allowed in real JSON files</strong>. Please remove them if
 using this example JSON snippet in practice.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-	<span class="c1"># A list of mandatory EEG channels. An input recording is discarded if any of those is missing</span>
-	<span class="c1"># (case-insensitive)</span>
-	<span class="s2">&quot;target_channels&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;FP1&quot;</span><span class="p">,</span> <span class="s2">&quot;FPZ&quot;</span><span class="p">,</span> <span class="s2">&quot;FP2&quot;</span><span class="p">,</span> <span class="s2">&quot;F3&quot;</span><span class="p">,</span> <span class="s2">&quot;F4&quot;</span><span class="p">,</span> <span class="s2">&quot;F7&quot;</span><span class="p">,</span> <span class="s2">&quot;F8&quot;</span><span class="p">,</span> <span class="s2">&quot;FZ&quot;</span><span class="p">,</span> <span class="s2">&quot;T3&quot;</span><span class="p">,</span> <span class="s2">&quot;T4&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;T5&quot;</span><span class="p">,</span>  <span class="s2">&quot;T6&quot;</span><span class="p">,</span>  <span class="s2">&quot;C3&quot;</span><span class="p">,</span>  <span class="s2">&quot;C4&quot;</span><span class="p">,</span> <span class="s2">&quot;CZ&quot;</span><span class="p">,</span> <span class="s2">&quot;P3&quot;</span><span class="p">,</span> <span class="s2">&quot;P4&quot;</span><span class="p">,</span> <span class="s2">&quot;PZ&quot;</span><span class="p">,</span> <span class="s2">&quot;O1&quot;</span><span class="p">,</span> <span class="s2">&quot;O2&quot;</span><span class="p">],</span>
+        <span class="c1"># A list of mandatory EEG channels. An input recording is discarded if any of those is missing</span>
+        <span class="c1"># (case-insensitive)</span>
+        <span class="s2">&quot;target_channels&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="s2">&quot;FP1&quot;</span><span class="p">,</span> <span class="s2">&quot;FPZ&quot;</span><span class="p">,</span> <span class="s2">&quot;FP2&quot;</span><span class="p">,</span> <span class="s2">&quot;F3&quot;</span><span class="p">,</span> <span class="s2">&quot;F4&quot;</span><span class="p">,</span> <span class="s2">&quot;F7&quot;</span><span class="p">,</span> <span class="s2">&quot;F8&quot;</span><span class="p">,</span> <span class="s2">&quot;FZ&quot;</span><span class="p">,</span> <span class="s2">&quot;T3&quot;</span><span class="p">,</span> <span class="s2">&quot;T4&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;T5&quot;</span><span class="p">,</span>  <span class="s2">&quot;T6&quot;</span><span class="p">,</span>  <span class="s2">&quot;C3&quot;</span><span class="p">,</span>  <span class="s2">&quot;C4&quot;</span><span class="p">,</span> <span class="s2">&quot;CZ&quot;</span><span class="p">,</span> <span class="s2">&quot;P3&quot;</span><span class="p">,</span> <span class="s2">&quot;P4&quot;</span><span class="p">,</span> <span class="s2">&quot;PZ&quot;</span><span class="p">,</span> <span class="s2">&quot;O1&quot;</span><span class="p">,</span> <span class="s2">&quot;O2&quot;</span><span class="p">],</span>
 
-	<span class="c1"># A list of optional non-EEG channels that will be included in the output EDF, if present</span>
-	<span class="c1"># (case-insensitive)</span>
-	<span class="s2">&quot;opt_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;ECG1&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span> <span class="s2">&quot;L EOG&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;R EOG&quot;</span><span class="p">,</span><span class="s2">&quot;PG1&quot;</span><span class="p">,</span>  <span class="s2">&quot;PG2&quot;</span><span class="p">,</span> <span class="s2">&quot;A1&quot;</span><span class="p">,</span>   <span class="s2">&quot;A2&quot;</span><span class="p">],</span>
+        <span class="c1"># A list of optional non-EEG channels that will be included in the output EDF, if present</span>
+        <span class="c1"># (case-insensitive)</span>
+        <span class="s2">&quot;opt_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;ECG1&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span> <span class="s2">&quot;L EOG&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;R EOG&quot;</span><span class="p">,</span><span class="s2">&quot;PG1&quot;</span><span class="p">,</span>  <span class="s2">&quot;PG2&quot;</span><span class="p">,</span> <span class="s2">&quot;A1&quot;</span><span class="p">,</span>   <span class="s2">&quot;A2&quot;</span><span class="p">],</span>
 
-	<span class="c1"># Known EOG channel names</span>
-	<span class="s2">&quot;eog_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;EOG 1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span> <span class="s2">&quot;L EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;R EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;PG1&quot;</span><span class="p">,</span> <span class="s2">&quot;PG2&quot;</span><span class="p">],</span>
+        <span class="c1"># Known EOG channel names</span>
+        <span class="s2">&quot;eog_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;EOG 1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG 2&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span> <span class="s2">&quot;L EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;R EOG&quot;</span><span class="p">,</span> <span class="s2">&quot;PG1&quot;</span><span class="p">,</span> <span class="s2">&quot;PG2&quot;</span><span class="p">],</span>
 
-	<span class="c1"># Known ECG channel names</span>
-	<span class="s2">&quot;ecg_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;ECG1&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG2&quot;</span><span class="p">],</span>
+        <span class="c1"># Known ECG channel names</span>
+        <span class="s2">&quot;ecg_channels&quot;</span><span class="p">:</span>     <span class="p">[</span><span class="s2">&quot;ECG1&quot;</span><span class="p">,</span> <span class="s2">&quot;ECG2&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG1&quot;</span><span class="p">,</span> <span class="s2">&quot;EKG2&quot;</span><span class="p">],</span>
 
-	<span class="c1"># A list of channels that will be removed from the output recording, if present</span>
-	<span class="c1"># Note that this list is treated as !!! CASE-SENSITIVE  !!! by MNE</span>
-	<span class="s2">&quot;exclude_channels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AUX1&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX2&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX3&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX4&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX5&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX6&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX7&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX8&quot;</span><span class="p">,</span> <span class="s2">&quot;DC1&quot;</span><span class="p">,</span> <span class="s2">&quot;DC2&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;DC3&quot;</span><span class="p">,</span>  <span class="s2">&quot;DC4&quot;</span><span class="p">,</span>  <span class="s2">&quot;DIF1&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF2&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF3&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF4&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;L SPH&quot;</span><span class="p">,</span> <span class="s2">&quot;R SPH&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;aux1&quot;</span><span class="p">,</span> <span class="s2">&quot;aux2&quot;</span><span class="p">,</span> <span class="s2">&quot;aux3&quot;</span><span class="p">,</span> <span class="s2">&quot;aux4&quot;</span><span class="p">,</span> <span class="s2">&quot;aux5&quot;</span><span class="p">,</span> <span class="s2">&quot;aux6&quot;</span><span class="p">,</span> <span class="s2">&quot;aux7&quot;</span><span class="p">,</span> <span class="s2">&quot;aux8&quot;</span><span class="p">,</span> <span class="s2">&quot;dc1&quot;</span><span class="p">,</span> <span class="s2">&quot;dc2&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;dc3&quot;</span><span class="p">,</span>  <span class="s2">&quot;dc4&quot;</span><span class="p">,</span>  <span class="s2">&quot;dif1&quot;</span><span class="p">,</span> <span class="s2">&quot;dif2&quot;</span><span class="p">,</span> <span class="s2">&quot;dif3&quot;</span><span class="p">,</span> <span class="s2">&quot;dif4&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;l sph&quot;</span><span class="p">,</span> <span class="s2">&quot;r sph&quot;</span><span class="p">,</span>
+        <span class="c1"># A list of channels that will be removed from the output recording, if present</span>
+        <span class="c1"># Note that this list is treated as !!! CASE-SENSITIVE  !!! by MNE</span>
+        <span class="s2">&quot;exclude_channels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AUX1&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX2&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX3&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX4&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX5&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX6&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX7&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX8&quot;</span><span class="p">,</span> <span class="s2">&quot;DC1&quot;</span><span class="p">,</span> <span class="s2">&quot;DC2&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;DC3&quot;</span><span class="p">,</span>  <span class="s2">&quot;DC4&quot;</span><span class="p">,</span>  <span class="s2">&quot;DIF1&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF2&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF3&quot;</span><span class="p">,</span> <span class="s2">&quot;DIF4&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;L SPH&quot;</span><span class="p">,</span> <span class="s2">&quot;R SPH&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;aux1&quot;</span><span class="p">,</span> <span class="s2">&quot;aux2&quot;</span><span class="p">,</span> <span class="s2">&quot;aux3&quot;</span><span class="p">,</span> <span class="s2">&quot;aux4&quot;</span><span class="p">,</span> <span class="s2">&quot;aux5&quot;</span><span class="p">,</span> <span class="s2">&quot;aux6&quot;</span><span class="p">,</span> <span class="s2">&quot;aux7&quot;</span><span class="p">,</span> <span class="s2">&quot;aux8&quot;</span><span class="p">,</span> <span class="s2">&quot;dc1&quot;</span><span class="p">,</span> <span class="s2">&quot;dc2&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;dc3&quot;</span><span class="p">,</span>  <span class="s2">&quot;dc4&quot;</span><span class="p">,</span>  <span class="s2">&quot;dif1&quot;</span><span class="p">,</span> <span class="s2">&quot;dif2&quot;</span><span class="p">,</span> <span class="s2">&quot;dif3&quot;</span><span class="p">,</span> <span class="s2">&quot;dif4&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;l sph&quot;</span><span class="p">,</span> <span class="s2">&quot;r sph&quot;</span><span class="p">,</span>
                              <span class="s2">&quot;Patient Event&quot;</span><span class="p">,</span> <span class="s2">&quot;Photic&quot;</span><span class="p">,</span> <span class="s2">&quot;Trigger Event&quot;</span><span class="p">,</span> <span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;phoic&quot;</span><span class="p">,</span> <span class="s2">&quot;Phoic&quot;</span><span class="p">,</span> <span class="s2">&quot;photic&quot;</span><span class="p">,</span> 
-			     <span class="s2">&quot;PATIENT EVENT&quot;</span><span class="p">,</span> <span class="s2">&quot;PHOTIC&quot;</span><span class="p">,</span> <span class="s2">&quot;TRIGGER EVENT&quot;</span><span class="p">,</span> <span class="s2">&quot;X1&quot;</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">,</span>
-			     <span class="s2">&quot;PHOIC&quot;</span><span class="p">,</span> <span class="s2">&quot;PHOTIC&quot;</span><span class="p">],</span>
-	<span class="c1"># A list of channels that if encountered, will be renamed to standard 1020 names</span>
-	<span class="s2">&quot;rename_channels&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="s2">&quot;L EOG&quot;</span><span class="p">:</span> <span class="s2">&quot;EOG1&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;R EOG&quot;</span><span class="p">:</span> <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;EKG&quot;</span><span class="p">:</span> <span class="s2">&quot;EKG1&quot;</span>
-		<span class="p">},</span>
+                             <span class="s2">&quot;phoic&quot;</span><span class="p">,</span> <span class="s2">&quot;Phoic&quot;</span><span class="p">,</span> <span class="s2">&quot;photic&quot;</span><span class="p">,</span> 
+                             <span class="s2">&quot;PATIENT EVENT&quot;</span><span class="p">,</span> <span class="s2">&quot;PHOTIC&quot;</span><span class="p">,</span> <span class="s2">&quot;TRIGGER EVENT&quot;</span><span class="p">,</span> <span class="s2">&quot;X1&quot;</span><span class="p">,</span> <span class="s2">&quot;X2&quot;</span><span class="p">,</span>
+                             <span class="s2">&quot;PHOIC&quot;</span><span class="p">,</span> <span class="s2">&quot;PHOTIC&quot;</span><span class="p">],</span>
+        <span class="c1"># A list of channels that if encountered, will be renamed to standard 1020 names</span>
+        <span class="s2">&quot;rename_channels&quot;</span><span class="p">:</span>
+                <span class="p">{</span>
+                        <span class="s2">&quot;L EOG&quot;</span><span class="p">:</span> <span class="s2">&quot;EOG1&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;R EOG&quot;</span><span class="p">:</span> <span class="s2">&quot;EOG2&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;EKG&quot;</span><span class="p">:</span> <span class="s2">&quot;EKG1&quot;</span>
+                <span class="p">},</span>
 
-	<span class="c1"># A flag to print out the auxiliary channels included in the output EDF (true or false, lower case)</span>
-	<span class="s2">&quot;print_opt_channels&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+        <span class="c1"># A flag to print out the auxiliary channels included in the output EDF (true or false, lower case)</span>
+        <span class="s2">&quot;print_opt_channels&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
 
-	<span class="s2">&quot;discard_at_start_seconds&quot;</span><span class="p">:</span> <span class="mi">420</span><span class="p">,</span>	<span class="c1"># time interval removed from the begining of the input record</span>
-	<span class="s2">&quot;target_frequency&quot;</span><span class="p">:</span>	    <span class="mi">256</span><span class="p">,</span>	<span class="c1"># the sampling frequency of the output record</span>
-	<span class="s2">&quot;target_band&quot;</span><span class="p">:</span>              <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">55</span><span class="p">],</span>	<span class="c1"># the frequency band of the output record</span>
-	<span class="s2">&quot;target_segments&quot;</span><span class="p">:</span>	    <span class="mi">1</span><span class="p">,</span>		<span class="c1"># Max number of good continuous segments to extract</span>
-	<span class="s2">&quot;target_length&quot;</span><span class="p">:</span>	    <span class="mi">360</span><span class="p">,</span>	<span class="c1"># The good segment length in seconds</span>
-	<span class="s2">&quot;powerline_frq&quot;</span><span class="p">:</span> 	    <span class="mf">60.0</span><span class="p">,</span>	<span class="c1"># Power line main frequency, Hz</span>
-	<span class="s2">&quot;allow_upsampling&quot;</span><span class="p">:</span> 	    <span class="n">false</span><span class="p">,</span>	<span class="c1"># Allow upsampling a record if its sampling rate</span>
-						<span class="c1"># is smaller than requested</span>
+        <span class="s2">&quot;discard_at_start_seconds&quot;</span><span class="p">:</span> <span class="mi">420</span><span class="p">,</span>        <span class="c1"># time interval removed from the begining of the input record</span>
+        <span class="s2">&quot;target_frequency&quot;</span><span class="p">:</span>         <span class="mi">256</span><span class="p">,</span>        <span class="c1"># the sampling frequency of the output record</span>
+        <span class="s2">&quot;target_band&quot;</span><span class="p">:</span>              <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">55</span><span class="p">],</span>  <span class="c1"># the frequency band of the output record</span>
+        <span class="s2">&quot;target_segments&quot;</span><span class="p">:</span>          <span class="mi">1</span><span class="p">,</span>          <span class="c1"># Max number of good continuous segments to extract</span>
+        <span class="s2">&quot;target_length&quot;</span><span class="p">:</span>            <span class="mi">360</span><span class="p">,</span>        <span class="c1"># The good segment length in seconds</span>
+        <span class="s2">&quot;powerline_frq&quot;</span><span class="p">:</span>            <span class="mf">60.0</span><span class="p">,</span>       <span class="c1"># Power line main frequency, Hz</span>
+        <span class="s2">&quot;allow_upsampling&quot;</span><span class="p">:</span>         <span class="n">false</span><span class="p">,</span>      <span class="c1"># Allow upsampling a record if its sampling rate</span>
+                                                <span class="c1"># is smaller than requested</span>
 
-	<span class="c1"># Parameters to identify flat intervals</span>
-	<span class="s2">&quot;flat_parms&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="s2">&quot;flat_max_ptp&quot;</span><span class="p">:</span> <span class="mf">1e-06</span><span class="p">,</span>	<span class="c1"># max amplitude peak-to-peak value for the flat interval</span>
-			<span class="s2">&quot;bad_percent&quot;</span><span class="p">:</span> <span class="mf">50.0</span><span class="p">,</span>	<span class="c1"># min percentage of the time the channel&#39;s peak</span>
-            					<span class="c1"># to peak is below the &#39;flat_max_ptp&#39; threshold</span>
-						<span class="c1"># to be considered flat</span>
-			<span class="s2">&quot;min_duration&quot;</span><span class="p">:</span> <span class="mf">10.0</span>	<span class="c1"># minimum interval in seconds for all consecutive samples to</span>
-            					<span class="c1"># be below the &#39;flat_max_ptp&#39; to indicate a flat interval</span>
-		<span class="p">},</span>
+        <span class="c1"># Parameters to identify flat intervals</span>
+        <span class="s2">&quot;flat_parms&quot;</span><span class="p">:</span>
+                <span class="p">{</span>
+                        <span class="s2">&quot;flat_max_ptp&quot;</span><span class="p">:</span> <span class="mf">1e-06</span><span class="p">,</span>  <span class="c1"># max amplitude peak-to-peak value for the flat interval</span>
+                        <span class="s2">&quot;bad_percent&quot;</span><span class="p">:</span> <span class="mf">50.0</span><span class="p">,</span>    <span class="c1"># min percentage of the time the channel&#39;s peak</span>
+                                                <span class="c1"># to peak is below the &#39;flat_max_ptp&#39; threshold</span>
+                                                <span class="c1"># to be considered flat</span>
+                        <span class="s2">&quot;min_duration&quot;</span><span class="p">:</span> <span class="mf">10.0</span>    <span class="c1"># minimum interval in seconds for all consecutive samples to</span>
+                                                <span class="c1"># be below the &#39;flat_max_ptp&#39; to indicate a flat interval</span>
+                <span class="p">},</span>
 
-	<span class="s2">&quot;HV_regexp&quot;</span><span class="p">:</span>	<span class="s2">&quot;H.*V.*</span><span class="se">\\</span><span class="s2">d+</span><span class="se">\\</span><span class="s2">s*[MmIiNn]</span><span class="si">{3}</span><span class="s2">&quot;</span><span class="p">,</span>	<span class="c1"># Regular expression to identify HV annotations like &quot;HV 1 Min&quot;</span>
-	<span class="s2">&quot;HV_end&quot;</span><span class="p">:</span>	<span class="s2">&quot;END HV&quot;</span><span class="p">,</span>			<span class="c1"># Hyperventilation end annotation, if present</span>
-	<span class="s2">&quot;hv_pad_interval&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>				<span class="c1"># Padding interval in seconds around HV series. Final HV boundaries</span>
-							<span class="c1"># are set as follows:</span>
-							<span class="c1"># HV start = 1st HV mark - 60 - pad_interval</span>
-							<span class="c1"># HV end = last HV mark + 60 + pad_interval</span>
+        <span class="s2">&quot;HV_regexp&quot;</span><span class="p">:</span>    <span class="s2">&quot;H.*V.*</span><span class="se">\\</span><span class="s2">d+</span><span class="se">\\</span><span class="s2">s*[MmIiNn]</span><span class="si">{3}</span><span class="s2">&quot;</span><span class="p">,</span>    <span class="c1"># Regular expression to identify HV annotations like &quot;HV 1 Min&quot;</span>
+        <span class="s2">&quot;HV_end&quot;</span><span class="p">:</span>       <span class="s2">&quot;END HV&quot;</span><span class="p">,</span>                       <span class="c1"># Hyperventilation end annotation, if present</span>
+        <span class="s2">&quot;hv_pad_interval&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>                          <span class="c1"># Padding interval in seconds around HV series. Final HV boundaries</span>
+                                                        <span class="c1"># are set as follows:</span>
+                                                        <span class="c1"># HV start = 1st HV mark - 60 - pad_interval</span>
+                                                        <span class="c1"># HV end = last HV mark + 60 + pad_interval</span>
 
-	<span class="s2">&quot;photic_starts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>	<span class="c1"># Keyword in annotation that marks the start of the photic stim</span>
-	<span class="s2">&quot;photic_ends&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Off&quot;</span><span class="p">],</span>		<span class="c1"># !! EXACT WORDING !! of the annotation that marks the end of the photic stim</span>
-	<span class="s2">&quot;photic_pad_interval&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>	<span class="c1"># Padding inteval in seconds around photic stim series</span>
+        <span class="s2">&quot;photic_starts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Hz&quot;</span><span class="p">],</span>        <span class="c1"># Keyword in annotation that marks the start of the photic stim</span>
+        <span class="s2">&quot;photic_ends&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Off&quot;</span><span class="p">],</span>         <span class="c1"># !! EXACT WORDING !! of the annotation that marks the end of the photic stim</span>
+        <span class="s2">&quot;photic_pad_interval&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>      <span class="c1"># Padding inteval in seconds around photic stim series</span>
 
-	<span class="s2">&quot;max_isi&quot;</span><span class="p">:</span> <span class="mi">360</span><span class="p">,</span>			<span class="c1"># Max interval in seconds between photic stimulations to consider those</span>
-					<span class="c1"># belonging to the same photic stimulation series</span>
-	<span class="s2">&quot;max_rec_length&quot;</span><span class="p">:</span> <span class="mi">3600</span>		<span class="c1"># Max allowed EDF file length in seconds (skip longer files)</span>
+        <span class="s2">&quot;max_isi&quot;</span><span class="p">:</span> <span class="mi">360</span><span class="p">,</span>                 <span class="c1"># Max interval in seconds between photic stimulations to consider those</span>
+                                        <span class="c1"># belonging to the same photic stimulation series</span>
+        <span class="s2">&quot;max_rec_length&quot;</span><span class="p">:</span> <span class="mi">3600</span>          <span class="c1"># Max allowed EDF file length in seconds (skip longer files)</span>
 <span class="p">}</span>
 
 </pre></div>
@@ -313,105 +313,150 @@ However, <strong>no additional filtering of the EEG sensor channels is done</str
 <code class="docutils literal notranslate"><span class="pre">pyprep_ica_conf.json</span></code>, which is described below. Note again that JSON files can not contain comments;
 therefore comments in the code below should be removed if one wants to use it in practice.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-	<span class="s2">&quot;montage&quot;</span><span class="p">:</span> <span class="s2">&quot;standard_1020&quot;</span><span class="p">,</span>	<span class="c1"># As is</span>
-	<span class="s2">&quot;powerline_frq&quot;</span><span class="p">:</span> <span class="mf">60.0</span><span class="p">,</span>		<span class="c1"># Powerline frq, Hz</span>
+        <span class="s2">&quot;montage&quot;</span><span class="p">:</span> <span class="s2">&quot;standard_1020&quot;</span><span class="p">,</span>     <span class="c1"># As is</span>
+        <span class="s2">&quot;powerline_frq&quot;</span><span class="p">:</span> <span class="mf">60.0</span><span class="p">,</span>          <span class="c1"># Powerline frq, Hz</span>
 
-	<span class="c1"># Arguments passed to mne.raw.filter() for EOG channels</span>
-	<span class="s2">&quot;eog_filter_kwargs&quot;</span><span class="p">:</span>
-	<span class="p">{</span>
-		<span class="s2">&quot;l_freq&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;h_freq&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span> 
-		<span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;filter_length&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;l_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-		<span class="s2">&quot;h_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span><span class="p">,</span> <span class="s2">&quot;iir_params&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
-		<span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_window&quot;</span><span class="p">:</span> <span class="s2">&quot;hamming&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_design&quot;</span><span class="p">:</span> <span class="s2">&quot;firwin&quot;</span><span class="p">,</span>
-		<span class="s2">&quot;skip_by_annotation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;bad_acq_skip&quot;</span><span class="p">],</span> <span class="s2">&quot;pad&quot;</span><span class="p">:</span> <span class="s2">&quot;reflect_limited&quot;</span><span class="p">,</span>
-		<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
-	<span class="p">},</span>
+        <span class="c1"># Arguments passed to mne.raw.filter() for EOG channels</span>
+        <span class="s2">&quot;eog_filter_kwargs&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+                <span class="s2">&quot;l_freq&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;h_freq&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span> 
+                <span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;filter_length&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;l_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;h_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span><span class="p">,</span> <span class="s2">&quot;iir_params&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_window&quot;</span><span class="p">:</span> <span class="s2">&quot;hamming&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_design&quot;</span><span class="p">:</span> <span class="s2">&quot;firwin&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;skip_by_annotation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;bad_acq_skip&quot;</span><span class="p">],</span> <span class="s2">&quot;pad&quot;</span><span class="p">:</span> <span class="s2">&quot;reflect_limited&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+        <span class="p">},</span>
 
-	<span class="c1"># Arguments passed to mne.raw.filter() for ECG channels</span>
-	<span class="s2">&quot;ecg_filter_kwargs&quot;</span><span class="p">:</span>
-	<span class="p">{</span>
-		<span class="s2">&quot;l_freq&quot;</span><span class="p">:</span> <span class="mf">8.0</span><span class="p">,</span> <span class="s2">&quot;h_freq&quot;</span><span class="p">:</span> <span class="mf">16.0</span><span class="p">,</span> 
-		<span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;filter_length&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;l_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-		<span class="s2">&quot;h_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span><span class="p">,</span> <span class="s2">&quot;iir_params&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
-		<span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_window&quot;</span><span class="p">:</span> <span class="s2">&quot;hamming&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_design&quot;</span><span class="p">:</span> <span class="s2">&quot;firwin&quot;</span><span class="p">,</span>
-		<span class="s2">&quot;skip_by_annotation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;bad_acq_skip&quot;</span><span class="p">],</span> <span class="s2">&quot;pad&quot;</span><span class="p">:</span> <span class="s2">&quot;reflect_limited&quot;</span><span class="p">,</span>
-		<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
-	<span class="p">},</span>
+        <span class="c1"># Arguments passed to mne.raw.filter() for ECG channels</span>
+        <span class="s2">&quot;ecg_filter_kwargs&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+                <span class="s2">&quot;l_freq&quot;</span><span class="p">:</span> <span class="mf">8.0</span><span class="p">,</span> <span class="s2">&quot;h_freq&quot;</span><span class="p">:</span> <span class="mf">16.0</span><span class="p">,</span> 
+                <span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;filter_length&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;l_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;h_trans_bandwidth&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span><span class="p">,</span> <span class="s2">&quot;iir_params&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                <span class="s2">&quot;phase&quot;</span><span class="p">:</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_window&quot;</span><span class="p">:</span> <span class="s2">&quot;hamming&quot;</span><span class="p">,</span> <span class="s2">&quot;fir_design&quot;</span><span class="p">:</span> <span class="s2">&quot;firwin&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;skip_by_annotation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;bad_acq_skip&quot;</span><span class="p">],</span> <span class="s2">&quot;pad&quot;</span><span class="p">:</span> <span class="s2">&quot;reflect_limited&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+        <span class="p">},</span>
 
-	<span class="c1"># Parameter set for the PREP step</span>
-	<span class="s2">&quot;prep&quot;</span><span class="p">:</span>
-	<span class="p">{</span>
-		<span class="s2">&quot;prep_params&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="s2">&quot;ref_chs&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;reref_chs&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;line_freqs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">60.0</span><span class="p">],</span> 
-			<span class="s2">&quot;max_iterations&quot;</span><span class="p">:</span> <span class="mi">4</span>			
-		<span class="p">},</span>
-		<span class="s2">&quot;other_kwargs&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="s2">&quot;ransac&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
-			<span class="s2">&quot;channel_wise&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
-			<span class="s2">&quot;max_chunk_size&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
-			<span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
-			<span class="s2">&quot;filter_kwargs&quot;</span><span class="p">:</span>
-			<span class="p">{</span>
-				<span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span>
-			<span class="p">},</span>
-			<span class="s2">&quot;matlab_strict&quot;</span><span class="p">:</span> <span class="n">false</span>
-		<span class="p">}</span>
-	<span class="p">},</span>
+        <span class="c1"># Parameter set for the PREP step</span>
+        <span class="s2">&quot;prep&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+                <span class="s2">&quot;prep_params&quot;</span><span class="p">:</span>
+                <span class="p">{</span>
+                        <span class="s2">&quot;ref_chs&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;reref_chs&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;line_freqs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">60.0</span><span class="p">],</span> 
+                        <span class="s2">&quot;max_iterations&quot;</span><span class="p">:</span> <span class="mi">4</span>                     
+                <span class="p">},</span>
+                <span class="s2">&quot;other_kwargs&quot;</span><span class="p">:</span>
+                <span class="p">{</span>
+                        <span class="s2">&quot;ransac&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                        <span class="s2">&quot;channel_wise&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+                        <span class="s2">&quot;max_chunk_size&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                        <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
+                        <span class="s2">&quot;filter_kwargs&quot;</span><span class="p">:</span>
+                        <span class="p">{</span>
+                                <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fir&quot;</span>
+                        <span class="p">},</span>
+                        <span class="s2">&quot;matlab_strict&quot;</span><span class="p">:</span> <span class="n">false</span>
+                <span class="p">}</span>
+        <span class="p">},</span>
 
-	<span class="c1"># Parameter set for the ICA artifact removal step</span>
-	<span class="s2">&quot;ica&quot;</span><span class="p">:</span>
-	<span class="p">{</span>
-		<span class="s2">&quot;applyICA&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+        <span class="c1"># Parameter set for the ICA artifact removal step</span>
+        <span class="s2">&quot;ica&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+                <span class="s2">&quot;applyICA&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
 
-		<span class="s2">&quot;init&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="s2">&quot;n_components&quot;</span><span class="p">:</span>  <span class="mf">0.99999</span><span class="p">,</span>
-			<span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
-			<span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fastica&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;max_iter&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
-		<span class="p">},</span>
+                <span class="s2">&quot;init&quot;</span><span class="p">:</span>
+                <span class="p">{</span>
+                        <span class="s2">&quot;n_components&quot;</span><span class="p">:</span>  <span class="mf">0.99999</span><span class="p">,</span>
+                        <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="mi">12345</span><span class="p">,</span>
+                        <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;fastica&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;max_iter&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+                <span class="p">},</span>
 
-		<span class="s2">&quot;fit&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;tstep&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
-			<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
-		<span class="p">},</span>
+                <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
+                <span class="p">{</span>
+                        <span class="s2">&quot;picks&quot;</span><span class="p">:</span> <span class="s2">&quot;eeg&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;tstep&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
+                        <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+                <span class="p">},</span>
 
-		<span class="s2">&quot;find_bads_eog&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="s2">&quot;measure&quot;</span><span class="p">:</span> <span class="s2">&quot;zscore&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
-			<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
-		<span class="p">},</span>
+                <span class="s2">&quot;find_bads_eog&quot;</span><span class="p">:</span>
+                <span class="p">{</span>
+                        <span class="s2">&quot;measure&quot;</span><span class="p">:</span> <span class="s2">&quot;zscore&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+                        <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+                <span class="p">},</span>
 
-		<span class="s2">&quot;find_bads_ecg&quot;</span><span class="p">:</span>
-		<span class="p">{</span>
-			<span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;correlation&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;measure&quot;</span><span class="p">:</span> <span class="s2">&quot;zscore&quot;</span><span class="p">,</span>
-			<span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
-			<span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
-		<span class="p">}</span>
-	<span class="p">},</span>
+                <span class="s2">&quot;find_bads_ecg&quot;</span><span class="p">:</span>
+                <span class="p">{</span>
+                        <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;correlation&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;measure&quot;</span><span class="p">:</span> <span class="s2">&quot;zscore&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+                        <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">null</span>
+                <span class="p">}</span>
+        <span class="p">},</span>
 
-	<span class="c1"># Parameters used for plotting EEG waveforms and spectra</span>
-	<span class="s2">&quot;plot&quot;</span><span class="p">:</span>
-	<span class="p">{</span>
-		<span class="s2">&quot;time_window&quot;</span><span class="p">:</span> <span class="mf">40.0</span><span class="p">,</span>
-		<span class="s2">&quot;scalings&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-		<span class="s2">&quot;fmin&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
-		<span class="s2">&quot;fmax&quot;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">,</span>
-                <span class="s2">&quot;fstep&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
-		<span class="s2">&quot;spect_log_x&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
-		<span class="s2">&quot;spect_log_y&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
-		<span class="s2">&quot;n_fft&quot;</span><span class="p">:</span> <span class="mi">1024</span>
-	<span class="p">}</span>
-	
+        <span class="c1"># Parameters used for plotting EEG waveforms and spectra</span>
+        <span class="s2">&quot;plot_dpi&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>       <span class="c1"># DPI for the plots saved as .PNG</span>
+                                <span class="c1"># null will set DPI = screen resolution</span>
+        <span class="s2">&quot;plot_time_series&quot;</span><span class="p">:</span>                     <span class="c1"># Arguments to the call to raw.plot(); see</span>
+        <span class="p">{</span>                                       <span class="c1"># MNE Python docs for details   </span>
+                <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="mf">20.0</span><span class="p">,</span>               <span class="c1"># Time interval to plot, s</span>
+                <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="mf">150.0</span><span class="p">,</span>                 <span class="c1"># Start of the plotted interval, s</span>
+                <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                <span class="s2">&quot;bad_color&quot;</span><span class="p">:</span> <span class="s2">&quot;lightgray&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;events&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                <span class="s2">&quot;event_color&quot;</span><span class="p">:</span> <span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;scalings&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;eeg&quot;</span><span class="p">:</span> <span class="mf">50e-6</span><span class="p">,</span>
+                        <span class="s2">&quot;eog&quot;</span><span class="p">:</span> <span class="mf">50e-6</span><span class="p">,</span>
+                        <span class="s2">&quot;ecg&quot;</span><span class="p">:</span> <span class="mf">200e-6</span><span class="p">,</span>
+                        <span class="s2">&quot;misc&quot;</span><span class="p">:</span> <span class="mf">500e-6</span><span class="p">,</span>
+                        <span class="s2">&quot;emg&quot;</span><span class="p">:</span> <span class="mf">1e-3</span>
+                        <span class="p">},</span>
+                <span class="s2">&quot;remove_dc&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                <span class="s2">&quot;show&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                <span class="s2">&quot;block&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+                <span class="s2">&quot;clipping&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>
+                <span class="s2">&quot;show_first_samp&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+                <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;butterfly&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+                <span class="s2">&quot;event_id&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                <span class="s2">&quot;show_scrollbars&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+                <span class="s2">&quot;show_scalebars&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                <span class="s2">&quot;time_format&quot;</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span>
+        <span class="p">},</span>
+
+        <span class="s2">&quot;plot_psd&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+                <span class="s2">&quot;fmin&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>                    <span class="c1"># PSD frequency limits</span>
+                <span class="s2">&quot;fmax&quot;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">,</span>
+                <span class="s2">&quot;ymin&quot;</span><span class="p">:</span> <span class="mf">1e-1</span><span class="p">,</span>                   <span class="c1"># PSD values limits</span>
+                <span class="s2">&quot;ymax&quot;</span><span class="p">:</span> <span class="mf">2e1</span><span class="p">,</span>
+                <span class="s2">&quot;fstep&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>                  <span class="c1"># Ticks step for X-axis</span>
+                <span class="s2">&quot;spect_log_x&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>            <span class="c1"># Flags to use log scale</span>
+                <span class="s2">&quot;spect_log_y&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                <span class="s2">&quot;n_fft&quot;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>                  <span class="c1"># FFT size for welch() function</span>
+                <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{</span>                     <span class="c1"># Parameters for MNE Python</span>
+                        <span class="s2">&quot;average&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>       <span class="c1"># Spectrum.plot() function</span>
+                        <span class="s2">&quot;dB&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+                        <span class="s2">&quot;amplitude&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                        <span class="s2">&quot;xscale&quot;</span><span class="p">:</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;ci&quot;</span><span class="p">:</span> <span class="s2">&quot;sd&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;ci_alpha&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+                        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                        <span class="s2">&quot;spatial_colors&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+                        <span class="s2">&quot;sphere&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                        <span class="s2">&quot;exclude&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                        <span class="s2">&quot;axes&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+                        <span class="s2">&quot;show&quot;</span><span class="p">:</span> <span class="n">false</span>
+                        <span class="p">}</span>
+        <span class="p">}</span>
 <span class="p">}</span>
 
 </pre></div>
@@ -640,17 +685,17 @@ promotes fair comparisons in group analyses.</p>
 therefore comments in the code below should be removed for this JSON to be used
 in practice.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-	<span class="s2">&quot;bem_sol&quot;</span><span class="p">:</span> <span class="s2">&quot;fsaverage-5120-5120-5120-bem-sol.fif&quot;</span><span class="p">,</span>      <span class="c1"># Precalculated BEM solution</span>
-	<span class="s2">&quot;source_space&quot;</span><span class="p">:</span> <span class="s2">&quot;fsaverage-ico-3-src.fif&quot;</span><span class="p">,</span>              <span class="c1"># Precalculated source space</span>
-	<span class="s2">&quot;parcellation&quot;</span><span class="p">:</span> <span class="s2">&quot;aparc&quot;</span><span class="p">,</span>                                <span class="c1"># Can be &quot;aparc&quot; or &quot;aparc.a2009s&quot; </span>
-	<span class="s2">&quot;surface&quot;</span><span class="p">:</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span>             <span class="c1"># Surface to use for the source space</span>
-	<span class="s2">&quot;min_dist_to_skull_mm&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>    <span class="c1"># Min allowed distance between a source and the skull</span>
-	<span class="s2">&quot;max_condition_number&quot;</span><span class="p">:</span> <span class="mf">1e10</span><span class="p">,</span>   <span class="c1"># Matrices with larger cond numbers considered degenerate</span>
-	<span class="s2">&quot;inverse_method&quot;</span><span class="p">:</span> <span class="s2">&quot;beam&quot;</span><span class="p">,</span>       <span class="c1"># &quot;beam&quot; is THE ONLY choice for now</span>
-	<span class="s2">&quot;beam_type&quot;</span><span class="p">:</span> <span class="s2">&quot;pz&quot;</span><span class="p">,</span>              <span class="c1"># Beamformer localizer type; no need to change</span>
-	<span class="s2">&quot;src_units&quot;</span><span class="p">:</span> <span class="s2">&quot;pz&quot;</span><span class="p">,</span>              <span class="c1"># Either &quot;source&quot; or &quot;pz&quot; </span>
-	<span class="s2">&quot;noise_upper_bound_tolerance&quot;</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">,</span>    <span class="c1"># Accuracy of choosing max allowed noise amp</span>
-	<span class="s2">&quot;roi_time_course_method&quot;</span><span class="p">:</span> <span class="s2">&quot;pca_flip&quot;</span>    <span class="c1"># The way how a single ROI time course is obtained </span>
+        <span class="s2">&quot;bem_sol&quot;</span><span class="p">:</span> <span class="s2">&quot;fsaverage-5120-5120-5120-bem-sol.fif&quot;</span><span class="p">,</span>      <span class="c1"># Precalculated BEM solution</span>
+        <span class="s2">&quot;source_space&quot;</span><span class="p">:</span> <span class="s2">&quot;fsaverage-ico-3-src.fif&quot;</span><span class="p">,</span>              <span class="c1"># Precalculated source space</span>
+        <span class="s2">&quot;parcellation&quot;</span><span class="p">:</span> <span class="s2">&quot;aparc&quot;</span><span class="p">,</span>                                <span class="c1"># Can be &quot;aparc&quot; or &quot;aparc.a2009s&quot; </span>
+        <span class="s2">&quot;surface&quot;</span><span class="p">:</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span>             <span class="c1"># Surface to use for the source space</span>
+        <span class="s2">&quot;min_dist_to_skull_mm&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>    <span class="c1"># Min allowed distance between a source and the skull</span>
+        <span class="s2">&quot;max_condition_number&quot;</span><span class="p">:</span> <span class="mf">1e10</span><span class="p">,</span>   <span class="c1"># Matrices with larger cond numbers considered degenerate</span>
+        <span class="s2">&quot;inverse_method&quot;</span><span class="p">:</span> <span class="s2">&quot;beam&quot;</span><span class="p">,</span>       <span class="c1"># &quot;beam&quot; is THE ONLY choice for now</span>
+        <span class="s2">&quot;beam_type&quot;</span><span class="p">:</span> <span class="s2">&quot;pz&quot;</span><span class="p">,</span>              <span class="c1"># Beamformer localizer type; no need to change</span>
+        <span class="s2">&quot;src_units&quot;</span><span class="p">:</span> <span class="s2">&quot;pz&quot;</span><span class="p">,</span>              <span class="c1"># Either &quot;source&quot; or &quot;pz&quot; </span>
+        <span class="s2">&quot;noise_upper_bound_tolerance&quot;</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">,</span>    <span class="c1"># Accuracy of choosing max allowed noise amp</span>
+        <span class="s2">&quot;roi_time_course_method&quot;</span><span class="p">:</span> <span class="s2">&quot;pca_flip&quot;</span>    <span class="c1"># The way how a single ROI time course is obtained </span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -721,16 +766,16 @@ the project working folder and perform the following commands:</p></li>
 <li><p>From time to time you may need to install new modules in your virtual environment or update existing ones.
 For example to install <code class="docutils literal notranslate"><span class="pre">mymodule</span></code> and to upgrade MNE Python to its latest stable version, use:</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>	<span class="n">module</span> <span class="n">load</span> <span class="n">python</span><span class="o">/</span><span class="mf">3.8.10</span>
-	<span class="n">module</span> <span class="n">load</span> <span class="n">scipy</span><span class="o">-</span><span class="n">stack</span>
-	<span class="n">cd</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">working</span> <span class="n">folder</span><span class="o">&gt;</span>
-	<span class="n">source</span> <span class="n">mne</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">module</span> <span class="n">load</span> <span class="n">python</span><span class="o">/</span><span class="mf">3.8.10</span>
+        <span class="n">module</span> <span class="n">load</span> <span class="n">scipy</span><span class="o">-</span><span class="n">stack</span>
+        <span class="n">cd</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">working</span> <span class="n">folder</span><span class="o">&gt;</span>
+        <span class="n">source</span> <span class="n">mne</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 
-	<span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">pip</span>
-	<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">mne</span><span class="p">[</span><span class="n">hdf5</span><span class="p">]</span> 
-	<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">mymodule</span>
+        <span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">index</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">pip</span>
+        <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">mne</span><span class="p">[</span><span class="n">hdf5</span><span class="p">]</span> 
+        <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">mymodule</span>
 
-	<span class="n">deactivate</span>
+        <span class="n">deactivate</span>
 </pre></div>
 </div>
 </section>

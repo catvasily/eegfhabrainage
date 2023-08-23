@@ -46,52 +46,52 @@ located inside the hospital subfolders. Please refer to the file structure in `/
 The **`out_root`** defines location where the resulting (processed) records are put and has the same structure. ***User may need to add/edit the host definitions
 and the returned `data_root`, `out_root` paths as appropriate***, by modifying the following code segment:
 ```
-	if 'ub20-04' in host:
-		data_root = '/data/eegfhabrainage'
-		out_root = data_root + '/processed'
-		cluster_job = False
-	elif 'cedar' in host:
-		data_root = '/project/6019337/databases/eeg_fha/release_001/edf'
-		out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
-		cluster_job = True
-	else:
-		home_dir = os.getcwd()
-		data_root = home_dir
-		out_root = home_dir + '/processed'
-		cluster_job = False
+        if 'ub20-04' in host:
+                data_root = '/data/eegfhabrainage'
+                out_root = data_root + '/processed'
+                cluster_job = False
+        elif 'cedar' in host:
+                data_root = '/project/6019337/databases/eeg_fha/release_001/edf'
+                out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
+                cluster_job = True
+        else:
+                home_dir = os.getcwd()
+                data_root = home_dir
+                out_root = home_dir + '/processed'
+                cluster_job = False
 ```
 
 * **User needs to specify which hospital is being processed**, by setting the **`hospital`** variable in the main function of the script:
 ```
-	# Inputs
-	...
-	hospital = 'Abbotsford'
-	...
+        # Inputs
+        ...
+        hospital = 'Abbotsford'
+        ...
 ```
 
 * **When running as an array job on the cluster**, the variable **`N_ARRAY_JOBS`** should be consistent with the  
   **`"--array"`** parameter value in the sbatch script:  
 > File **`run_filtering_segmentation.py`**:
 ```
-	# Inputs
-	...
-	N_ARRAY_JOBS = 100	# Number of parallel jobs to run on cluster
-	...
+        # Inputs
+        ...
+        N_ARRAY_JOBS = 100      # Number of parallel jobs to run on cluster
+        ...
 ```
 >> The **sbatch script** (see **`eeg_array_job.sbatch`** as an example):
 ```
-	...
-	#SBATCH --array=0-99	# the last job index should be equal to N_ARRAY_JOBS - 1 
-	...
+        ...
+        #SBATCH --array=0-99    # the last job index should be equal to N_ARRAY_JOBS - 1 
+        ...
 ```
 * **When only some records for the hospital need to be processed**, provide a list of record IDs in the variable
 **`source_scan_ids`**:
 ```
-	# Inputs
-	...
-	# Use source_scan_ids = None to process all records
-	source_scan_ids = ["1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5", "fffaab93-e908-4b93-a021-ab580e573585"]
-	...
+        # Inputs
+        ...
+        # Use source_scan_ids = None to process all records
+        source_scan_ids = ["1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5", "fffaab93-e908-4b93-a021-ab580e573585"]
+        ...
 ```
 
 ### Performed operations
@@ -140,79 +140,79 @@ using this example JSON snippet in practice.
 
 ```python
 {
-	# A list of mandatory EEG channels. An input recording is discarded if any of those is missing
-	# (case-insensitive)
-	"target_channels":  ["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4",
-			     "T5",  "T6",  "C3",  "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"],
+        # A list of mandatory EEG channels. An input recording is discarded if any of those is missing
+        # (case-insensitive)
+        "target_channels":  ["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4",
+                             "T5",  "T6",  "C3",  "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"],
 
-	# A list of optional non-EEG channels that will be included in the output EDF, if present
-	# (case-insensitive)
-	"opt_channels":     ["ECG1", "ECG2", "EKG", "EKG1", "EKG2", "EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG",
-			     "R EOG","PG1",  "PG2", "A1",   "A2"],
+        # A list of optional non-EEG channels that will be included in the output EDF, if present
+        # (case-insensitive)
+        "opt_channels":     ["ECG1", "ECG2", "EKG", "EKG1", "EKG2", "EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG",
+                             "R EOG","PG1",  "PG2", "A1",   "A2"],
 
-	# Known EOG channel names
-	"eog_channels":     ["EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG", "R EOG", "PG1", "PG2"],
+        # Known EOG channel names
+        "eog_channels":     ["EOG 1", "EOG 2", "EOG1", "EOG2", "L EOG", "R EOG", "PG1", "PG2"],
 
-	# Known ECG channel names
-	"ecg_channels":     ["ECG1", "ECG2", "EKG", "EKG1", "EKG2"],
+        # Known ECG channel names
+        "ecg_channels":     ["ECG1", "ECG2", "EKG", "EKG1", "EKG2"],
 
-	# A list of channels that will be removed from the output recording, if present
-	# Note that this list is treated as !!! CASE-SENSITIVE  !!! by MNE
-	"exclude_channels": ["AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8", "DC1", "DC2",
-			     "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",
-			     "", "L SPH", "R SPH",
-			     "aux1", "aux2", "aux3", "aux4", "aux5", "aux6", "aux7", "aux8", "dc1", "dc2",
-			     "dc3",  "dc4",  "dif1", "dif2", "dif3", "dif4",
-			     "l sph", "r sph",
+        # A list of channels that will be removed from the output recording, if present
+        # Note that this list is treated as !!! CASE-SENSITIVE  !!! by MNE
+        "exclude_channels": ["AUX1", "AUX2", "AUX3", "AUX4", "AUX5", "AUX6", "AUX7", "AUX8", "DC1", "DC2",
+                             "DC3",  "DC4",  "DIF1", "DIF2", "DIF3", "DIF4",
+                             "", "L SPH", "R SPH",
+                             "aux1", "aux2", "aux3", "aux4", "aux5", "aux6", "aux7", "aux8", "dc1", "dc2",
+                             "dc3",  "dc4",  "dif1", "dif2", "dif3", "dif4",
+                             "l sph", "r sph",
                              "Patient Event", "Photic", "Trigger Event", "x1", "x2",
-			     "phoic", "Phoic", "photic", 
-			     "PATIENT EVENT", "PHOTIC", "TRIGGER EVENT", "X1", "X2",
-			     "PHOIC", "PHOTIC"],
-	# A list of channels that if encountered, will be renamed to standard 1020 names
-	"rename_channels":
-		{
-			"L EOG": "EOG1",
-			"R EOG": "EOG2",
-			"EKG": "EKG1"
-		},
+                             "phoic", "Phoic", "photic", 
+                             "PATIENT EVENT", "PHOTIC", "TRIGGER EVENT", "X1", "X2",
+                             "PHOIC", "PHOTIC"],
+        # A list of channels that if encountered, will be renamed to standard 1020 names
+        "rename_channels":
+                {
+                        "L EOG": "EOG1",
+                        "R EOG": "EOG2",
+                        "EKG": "EKG1"
+                },
 
-	# A flag to print out the auxiliary channels included in the output EDF (true or false, lower case)
-	"print_opt_channels": false,
+        # A flag to print out the auxiliary channels included in the output EDF (true or false, lower case)
+        "print_opt_channels": false,
 
-	"discard_at_start_seconds": 420,	# time interval removed from the begining of the input record
-	"target_frequency":	    256,	# the sampling frequency of the output record
-	"target_band":              [0.5, 55],	# the frequency band of the output record
-	"target_segments":	    1,		# Max number of good continuous segments to extract
-	"target_length":	    360,	# The good segment length in seconds
-	"powerline_frq": 	    60.0,	# Power line main frequency, Hz
-	"allow_upsampling": 	    false,	# Allow upsampling a record if its sampling rate
-						# is smaller than requested
+        "discard_at_start_seconds": 420,        # time interval removed from the begining of the input record
+        "target_frequency":         256,        # the sampling frequency of the output record
+        "target_band":              [0.5, 55],  # the frequency band of the output record
+        "target_segments":          1,          # Max number of good continuous segments to extract
+        "target_length":            360,        # The good segment length in seconds
+        "powerline_frq":            60.0,       # Power line main frequency, Hz
+        "allow_upsampling":         false,      # Allow upsampling a record if its sampling rate
+                                                # is smaller than requested
 
-	# Parameters to identify flat intervals
-	"flat_parms":
-		{
-			"flat_max_ptp": 1e-06,	# max amplitude peak-to-peak value for the flat interval
-			"bad_percent": 50.0,	# min percentage of the time the channel's peak
-            					# to peak is below the 'flat_max_ptp' threshold
-						# to be considered flat
-			"min_duration": 10.0	# minimum interval in seconds for all consecutive samples to
-            					# be below the 'flat_max_ptp' to indicate a flat interval
-		},
+        # Parameters to identify flat intervals
+        "flat_parms":
+                {
+                        "flat_max_ptp": 1e-06,  # max amplitude peak-to-peak value for the flat interval
+                        "bad_percent": 50.0,    # min percentage of the time the channel's peak
+                                                # to peak is below the 'flat_max_ptp' threshold
+                                                # to be considered flat
+                        "min_duration": 10.0    # minimum interval in seconds for all consecutive samples to
+                                                # be below the 'flat_max_ptp' to indicate a flat interval
+                },
 
-	"HV_regexp":	"H.*V.*\\d+\\s*[MmIiNn]{3}",	# Regular expression to identify HV annotations like "HV 1 Min"
-	"HV_end":	"END HV",			# Hyperventilation end annotation, if present
-	"hv_pad_interval": 30,				# Padding interval in seconds around HV series. Final HV boundaries
-							# are set as follows:
-							# HV start = 1st HV mark - 60 - pad_interval
-							# HV end = last HV mark + 60 + pad_interval
+        "HV_regexp":    "H.*V.*\\d+\\s*[MmIiNn]{3}",    # Regular expression to identify HV annotations like "HV 1 Min"
+        "HV_end":       "END HV",                       # Hyperventilation end annotation, if present
+        "hv_pad_interval": 30,                          # Padding interval in seconds around HV series. Final HV boundaries
+                                                        # are set as follows:
+                                                        # HV start = 1st HV mark - 60 - pad_interval
+                                                        # HV end = last HV mark + 60 + pad_interval
 
-	"photic_starts": ["Hz"],	# Keyword in annotation that marks the start of the photic stim
-	"photic_ends": ["Off"],		# !! EXACT WORDING !! of the annotation that marks the end of the photic stim
-	"photic_pad_interval": 30,	# Padding inteval in seconds around photic stim series
+        "photic_starts": ["Hz"],        # Keyword in annotation that marks the start of the photic stim
+        "photic_ends": ["Off"],         # !! EXACT WORDING !! of the annotation that marks the end of the photic stim
+        "photic_pad_interval": 30,      # Padding inteval in seconds around photic stim series
 
-	"max_isi": 360,			# Max interval in seconds between photic stimulations to consider those
-					# belonging to the same photic stimulation series
-	"max_rec_length": 3600		# Max allowed EDF file length in seconds (skip longer files)
+        "max_isi": 360,                 # Max interval in seconds between photic stimulations to consider those
+                                        # belonging to the same photic stimulation series
+        "max_rec_length": 3600          # Max allowed EDF file length in seconds (skip longer files)
 }
 
 ```
@@ -262,105 +262,150 @@ therefore comments in the code below should be removed if one wants to use it in
 
 ```python
 {
-	"montage": "standard_1020",	# As is
-	"powerline_frq": 60.0,		# Powerline frq, Hz
+        "montage": "standard_1020",     # As is
+        "powerline_frq": 60.0,          # Powerline frq, Hz
 
-	# Arguments passed to mne.raw.filter() for EOG channels
-	"eog_filter_kwargs":
-	{
-		"l_freq": 1.0, "h_freq": 5.0, 
-		"picks": null, "filter_length": "auto", "l_trans_bandwidth": "auto",
-		"h_trans_bandwidth": "auto", "n_jobs": null, "method": "fir", "iir_params": null,
-		"phase": "zero", "fir_window": "hamming", "fir_design": "firwin",
-		"skip_by_annotation": ["edge", "bad_acq_skip"], "pad": "reflect_limited",
-		"verbose": null
-	},
+        # Arguments passed to mne.raw.filter() for EOG channels
+        "eog_filter_kwargs":
+        {
+                "l_freq": 1.0, "h_freq": 5.0, 
+                "picks": null, "filter_length": "auto", "l_trans_bandwidth": "auto",
+                "h_trans_bandwidth": "auto", "n_jobs": null, "method": "fir", "iir_params": null,
+                "phase": "zero", "fir_window": "hamming", "fir_design": "firwin",
+                "skip_by_annotation": ["edge", "bad_acq_skip"], "pad": "reflect_limited",
+                "verbose": null
+        },
 
-	# Arguments passed to mne.raw.filter() for ECG channels
-	"ecg_filter_kwargs":
-	{
-		"l_freq": 8.0, "h_freq": 16.0, 
-		"picks": null, "filter_length": "auto", "l_trans_bandwidth": "auto",
-		"h_trans_bandwidth": "auto", "n_jobs": null, "method": "fir", "iir_params": null,
-		"phase": "zero", "fir_window": "hamming", "fir_design": "firwin",
-		"skip_by_annotation": ["edge", "bad_acq_skip"], "pad": "reflect_limited",
-		"verbose": null
-	},
+        # Arguments passed to mne.raw.filter() for ECG channels
+        "ecg_filter_kwargs":
+        {
+                "l_freq": 8.0, "h_freq": 16.0, 
+                "picks": null, "filter_length": "auto", "l_trans_bandwidth": "auto",
+                "h_trans_bandwidth": "auto", "n_jobs": null, "method": "fir", "iir_params": null,
+                "phase": "zero", "fir_window": "hamming", "fir_design": "firwin",
+                "skip_by_annotation": ["edge", "bad_acq_skip"], "pad": "reflect_limited",
+                "verbose": null
+        },
 
-	# Parameter set for the PREP step
-	"prep":
-	{
-		"prep_params":
-		{
-			"ref_chs": "eeg",
-			"reref_chs": "eeg",
-			"line_freqs": [60.0], 
-			"max_iterations": 4			
-		},
-		"other_kwargs":
-		{
-			"ransac": true,
-			"channel_wise": false,
-			"max_chunk_size": null,
-			"random_state": 12345,
-			"filter_kwargs":
-			{
-				"method": "fir"
-			},
-			"matlab_strict": false
-		}
-	},
+        # Parameter set for the PREP step
+        "prep":
+        {
+                "prep_params":
+                {
+                        "ref_chs": "eeg",
+                        "reref_chs": "eeg",
+                        "line_freqs": [60.0], 
+                        "max_iterations": 4                     
+                },
+                "other_kwargs":
+                {
+                        "ransac": true,
+                        "channel_wise": false,
+                        "max_chunk_size": null,
+                        "random_state": 12345,
+                        "filter_kwargs":
+                        {
+                                "method": "fir"
+                        },
+                        "matlab_strict": false
+                }
+        },
 
-	# Parameter set for the ICA artifact removal step
-	"ica":
-	{
-		"applyICA": true,
+        # Parameter set for the ICA artifact removal step
+        "ica":
+        {
+                "applyICA": true,
 
-		"init":
-		{
-			"n_components":  0.99999,
-			"random_state": 12345,
-			"method": "fastica",
-			"max_iter": "auto",
-			"verbose": null
-		},
+                "init":
+                {
+                        "n_components":  0.99999,
+                        "random_state": 12345,
+                        "method": "fastica",
+                        "max_iter": "auto",
+                        "verbose": null
+                },
 
-		"fit":
-		{
-			"picks": "eeg",
-			"tstep": 2.0,
-			"verbose": null
-		},
+                "fit":
+                {
+                        "picks": "eeg",
+                        "tstep": 2.0,
+                        "verbose": null
+                },
 
-		"find_bads_eog":
-		{
-			"measure": "zscore",
-			"threshold": 3.0,
-			"verbose": null
-		},
+                "find_bads_eog":
+                {
+                        "measure": "zscore",
+                        "threshold": 3.0,
+                        "verbose": null
+                },
 
-		"find_bads_ecg":
-		{
-			"method": "correlation",
-			"measure": "zscore",
-			"threshold": 3.0,
-			"verbose": null
-		}
-	},
+                "find_bads_ecg":
+                {
+                        "method": "correlation",
+                        "measure": "zscore",
+                        "threshold": 3.0,
+                        "verbose": null
+                }
+        },
 
-	# Parameters used for plotting EEG waveforms and spectra
-	"plot":
-	{
-		"time_window": 40.0,
-		"scalings": "auto",
-		"fmin": 0.0,
-		"fmax": 100.0,
-                "fstep": 10.0,
-		"spect_log_x": true,
-		"spect_log_y": true,
-		"n_fft": 1024
-	}
-	
+        # Parameters used for plotting EEG waveforms and spectra
+        "plot_dpi": null,       # DPI for the plots saved as .PNG
+                                # null will set DPI = screen resolution
+        "plot_time_series":                     # Arguments to the call to raw.plot(); see
+        {                                       # MNE Python docs for details   
+                "duration": 20.0,               # Time interval to plot, s
+                "start": 150.0,                 # Start of the plotted interval, s
+                "color": null,
+                "bad_color": "lightgray",
+                "events": null,
+                "event_color": "cyan",
+                "scalings": {
+                        "eeg": 50e-6,
+                        "eog": 50e-6,
+                        "ecg": 200e-6,
+                        "misc": 500e-6,
+                        "emg": 1e-3
+                        },
+                "remove_dc": true,
+                "order": null,
+                "show": true,
+                "block": false,
+                "clipping": 1.5,
+                "show_first_samp": false,
+                "group_by": "type",
+                "butterfly": false,
+                "event_id": null,
+                "show_scrollbars": false,
+                "show_scalebars": true,
+                "time_format": "float"
+        },
+
+        "plot_psd":
+        {
+                "fmin": 0.0,                    # PSD frequency limits
+                "fmax": 100.0,
+                "ymin": 1e-1,                   # PSD values limits
+                "ymax": 2e1,
+                "fstep": 10.0,                  # Ticks step for X-axis
+                "spect_log_x": true,            # Flags to use log scale
+                "spect_log_y": true,
+                "n_fft": 1024,                  # FFT size for welch() function
+                "kwargs": {                     # Parameters for MNE Python
+                        "average": false,       # Spectrum.plot() function
+                        "dB": false,
+                        "amplitude": true,
+                        "xscale": "linear",
+                        "ci": "sd",
+                        "ci_alpha": 0.3,
+                        "color": "black",
+                        "alpha": null,
+                        "spatial_colors": false,
+                        "sphere": null,
+                        "exclude": null,
+                        "axes": null,
+                        "show": false
+                        }
+        }
 }
 
 ```
@@ -591,17 +636,17 @@ in practice.
 
 ```python
 {
-	"bem_sol": "fsaverage-5120-5120-5120-bem-sol.fif",      # Precalculated BEM solution
-	"source_space": "fsaverage-ico-3-src.fif",              # Precalculated source space
-	"parcellation": "aparc",                                # Can be "aparc" or "aparc.a2009s" 
-	"surface": "white",             # Surface to use for the source space
-	"min_dist_to_skull_mm": 5.0,    # Min allowed distance between a source and the skull
-	"max_condition_number": 1e10,   # Matrices with larger cond numbers considered degenerate
-	"inverse_method": "beam",       # "beam" is THE ONLY choice for now
-	"beam_type": "pz",              # Beamformer localizer type; no need to change
-	"src_units": "pz",              # Either "source" or "pz" 
-	"noise_upper_bound_tolerance": 1e-2,    # Accuracy of choosing max allowed noise amp
-	"roi_time_course_method": "pca_flip"    # The way how a single ROI time course is obtained 
+        "bem_sol": "fsaverage-5120-5120-5120-bem-sol.fif",      # Precalculated BEM solution
+        "source_space": "fsaverage-ico-3-src.fif",              # Precalculated source space
+        "parcellation": "aparc",                                # Can be "aparc" or "aparc.a2009s" 
+        "surface": "white",             # Surface to use for the source space
+        "min_dist_to_skull_mm": 5.0,    # Min allowed distance between a source and the skull
+        "max_condition_number": 1e10,   # Matrices with larger cond numbers considered degenerate
+        "inverse_method": "beam",       # "beam" is THE ONLY choice for now
+        "beam_type": "pz",              # Beamformer localizer type; no need to change
+        "src_units": "pz",              # Either "source" or "pz" 
+        "noise_upper_bound_tolerance": 1e-2,    # Accuracy of choosing max allowed noise amp
+        "roi_time_course_method": "pca_flip"    # The way how a single ROI time course is obtained 
 }
 ```
 
@@ -615,7 +660,7 @@ Some utility scripts are located in the folder `.../eegfhabrainage/misc`.
   to a set of *Regions Of Interest* (ROIs) to every surface vertex belonging to corresponding
   ROI.
 * `plot_alpha_power.py`: an example of applying `view_inlfated_brain_data()` to plot
-    distribution of alpha band spectral density over the cortex surface
+   distribution of alpha band spectral density over the cortex surface
 
 Please refer to ["auto-generated documentation"](file://../doc/_build/html/index.html) for more details.
 
@@ -666,14 +711,14 @@ the project working folder and perform the following commands:
 - From time to time you may need to install new modules in your virtual environment or update existing ones.
   For example to install `mymodule` and to upgrade MNE Python to its latest stable version, use:
 ```
-	module load python/3.8.10
-	module load scipy-stack
-	cd <your working folder>
-	source mne/bin/activate
+        module load python/3.8.10
+        module load scipy-stack
+        cd <your working folder>
+        source mne/bin/activate
 
-	pip3 install --no-index --upgrade pip
-	python3 -m pip install -U mne[hdf5] 
-	python3 -m pip install mymodule
+        pip3 install --no-index --upgrade pip
+        python3 -m pip install -U mne[hdf5] 
+        python3 -m pip install mymodule
 
-	deactivate
+        deactivate
 ```

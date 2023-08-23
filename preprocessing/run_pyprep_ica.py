@@ -28,6 +28,7 @@ def get_data_folders():
         out_root = '/data/eegfhabrainage/after-prep-ica'
         cluster_job = False
     elif 'cedar' in host:
+        mne.viz.set_browser_backend('matplotlib')
         data_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
         out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/after-prep-ica'
         cluster_job = True
@@ -44,31 +45,35 @@ if __name__ == '__main__':
     # ---------- Inputs ------------------
     N_ARRAY_JOBS = 100       # Number of parallel jobs to run on cluster
 
-    #hospital = 'Burnaby'   # Burnaby, Abbotsford, RCH, etc.
+    hospital = 'Burnaby'   # Burnaby, Abbotsford, RCH, etc.
     #hospital = 'Abbotsford'
-    hospital = 'RCH'
+    #hospital = 'RCH'
 
     # Abbotsford
     #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
 
-    """
+    #"""
     # This is a Burnaby subset:
-    source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',
-                       'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
-                       '81be60fc-ed17-4f91-a265-c8a9f1770517',
-                       'ffff1021-f5ba-49a9-a588-1c4778fb38d3',
-                       '81c0c60a-8fcc-4aae-beed-87931e582c45']
-    """
+    source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',		# Interesting spectrum
+                       #'57ea2fa1-66f1-43f9-aa17-981909e3dc96',
+                       #'81be60fc-ed17-4f91-a265-c8a9f1770517',
+                       #'81c0c60a-8fcc-4aae-beed-87931e582c45',
+                       #'ae9ffd8c-4b10-4dd4-a8db-14c88194f689',
+                       #'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
+                       #'ffff1021-f5ba-49a9-a588-1c4778fb38d3',		# FPZ not flat
+                    ]
+    #"""
 
-    source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
+    #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
 
-    view_plots = False       # Flag to show interactive plots (lots of those)
+    view_plots = True       # Flag to show interactive plots (lots of those)
     verbose = 'ERROR'     # Can be 'ERROR', 'CRITICAL', or 'WARNING' (default)
     # ------ end of inputs ---------------
 
     data_root, out_root, cluster_job = get_data_folders()
     input_dir = data_root + "/" + hospital
     output_dir = out_root + "/" + hospital
+    png_path = output_dir + "/"
 
     if not path.exists(output_dir):
         os.makedirs(output_dir)
@@ -104,15 +109,26 @@ if __name__ == '__main__':
         scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
 
     success = True
-    for f in scan_files:
+    for i, f in enumerate(scan_files):
         filepath = input_dir + '/' + f
+        scan_id = source_scan_ids[i]
+        png_prefix = png_path + scan_id
+
+        ts_org_png = png_prefix + "_ts_org.png"
+        psd_org_png = png_prefix + "_psd_org.png"
+        ts_postprep_png = png_prefix + "_ts_postprep.png"
+        psd_postprep_png = png_prefix + "_psd_postprep.png"
+        psd_postica_png = png_prefix + "_psd_postica.png"
 
         try:
             # Initiate the preprocessing object
-            p = Pipeline(filepath, view_plots = view_plots)
+            p = Pipeline(filepath, view_plots = view_plots, ts_plot_file = ts_org_png,
+                            psd_plot_file = psd_org_png)
      
             # Apply PREP and ICA
-            p.applyPipeline(applyICA = True, view_plots = view_plots)
+            p.applyPipeline(applyICA = True, view_plots = view_plots, 
+                ts_postprep_png = ts_postprep_png, psd_postprep_png = psd_postprep_png,
+                psd_postica_png = psd_postica_png)
      
             # Get the resulting mne.Raw object
             raw = p.getRaw()

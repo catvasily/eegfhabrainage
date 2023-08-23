@@ -38,3 +38,7 @@ view_inflated_brain_data
 ------------------------
 .. automodule:: view_inflated_brain_data
 
+plot_alpha_power
+----------------
+.. automodule:: plot_alpha_power
+
