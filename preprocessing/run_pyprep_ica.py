@@ -29,8 +29,13 @@ def get_data_folders():
         cluster_job = False
     elif 'cedar' in host:
         mne.viz.set_browser_backend('matplotlib')
-        data_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
-        out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/after-prep-ica'
+        # Settings for initial processing of normal "good" segments
+        #data_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
+        #out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/after-prep-ica'
+
+        # Settings for processing HV segments already moved to the public project folder
+        data_root = '/project/6019337/databases/eeg_fha/hyperventilation/001_h01'
+        out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/hv-after-prep-ica'
         cluster_job = True
     else:
         mne.viz.set_browser_backend('matplotlib')
@@ -52,7 +57,7 @@ if __name__ == '__main__':
     # Abbotsford
     #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
 
-    #"""
+    """
     # This is a Burnaby subset:
     source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',		# Interesting spectrum
                        #'57ea2fa1-66f1-43f9-aa17-981909e3dc96',
@@ -62,9 +67,9 @@ if __name__ == '__main__':
                        #'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
                        #'ffff1021-f5ba-49a9-a588-1c4778fb38d3',		# FPZ not flat
                     ]
-    #"""
+    """
 
-    #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
+    source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
 
     view_plots = True       # Flag to show interactive plots (lots of those)
     verbose = 'ERROR'     # Can be 'ERROR', 'CRITICAL', or 'WARNING' (default)

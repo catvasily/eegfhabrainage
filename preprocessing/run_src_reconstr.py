@@ -57,8 +57,14 @@ def get_data_folders():
         fs_dir = user_home + '/mne_data/MNE-fsaverage-data'
         cluster_job = False
     elif 'cedar' in host:
-        data_root = '/project/6019337/databases/eeg_fha/preprocessed/001_a01_01/'
-        out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/src-reconstr'
+        # Settings for source reconstruction for normal "good" segments
+        #data_root = '/project/6019337/databases/eeg_fha/preprocessed/001_a01_01/'
+        #out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/src-reconstr'
+
+        # Settings for source reconstruction of HV segs after PREP/ICA
+        data_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/hv-after-prep-ica'
+        out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/hv-src-reconstr'
+
         fs_dir = user_home + '/projects/rpp-doesburg/' + user + '/data/mne_data/MNE-fsaverage-data'
         cluster_job = True
     else:
@@ -84,6 +90,7 @@ if __name__ == '__main__':
     #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
 
     # Burnaby subset:
+    '''
     source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',		# Interesting spectrum
                        #'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
                        #'81be60fc-ed17-4f91-a265-c8a9f1770517',
@@ -91,8 +98,8 @@ if __name__ == '__main__':
                        #'81c0c60a-8fcc-4aae-beed-87931e582c45',
                        #'57ea2fa1-66f1-43f9-aa17-981909e3dc96',
                     ]
-
-    #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
+    '''
+    source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
 
     recalc_forward = False    # Force recalculating forward solutions (even if already exist)
     view_plots = True         # Flag to show interactive plots
