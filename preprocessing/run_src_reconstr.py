@@ -1,3 +1,6 @@
+'''
+**A top level script for running the source reconstruction step.**
+'''
 import sys
 import glob
 import os

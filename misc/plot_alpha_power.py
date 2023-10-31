@@ -1,5 +1,5 @@
 """
-Display alpha-band source power distribution on the cortex surface
+**A top level script to display alpha-band source power distribution on the cortex surface.**
 """
 import os.path as path
 import sys

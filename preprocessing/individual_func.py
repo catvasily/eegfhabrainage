@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-saving the file as .edf
+***Functions related to EDF files manipulations.***
 
 Created on Wed Dec  5 12:56:31 2018
 @author: skjerns

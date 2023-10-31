@@ -1,3 +1,6 @@
+'''
+**A top level script to perform the PyPREP and ICA artifact removal step.**
+'''
 import sys
 import glob
 import os

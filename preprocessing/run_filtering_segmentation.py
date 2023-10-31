@@ -1,3 +1,8 @@
+'''
+**A top level script for filtering, resampling and extracting good segments
+from the EEG recordings.**
+'''
+
 def get_data_folders():
 	'''Setup input and output data folders depending on the host machine.
 
@@ -50,7 +55,8 @@ if __name__ == '__main__':
 	N_ARRAY_JOBS = 100	# Number of parrallel jobs to run on cluster
 	#hospital = 'Burnaby'	# Burnaby, Abbotsford, RCH, etc.
 	#hospital = 'Abbotsford'
-	hospital = 'RCH'
+	#hospital = 'RCH'
+	hospital = 'Surrey'
 
 	data_root, out_root, cluster_job = get_data_folders()
 
@@ -66,6 +72,9 @@ if __name__ == '__main__':
 
 	# Abbotsford
 	#source_scan_ids = ["1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5"]	# Here annots not cropped properly in prev version
+
+	# Surrey
+	#source_scan_ids = ["00141ed0-783f-48e7-847e-5d3d80de0829"]
 
 	source_scan_ids = None
 

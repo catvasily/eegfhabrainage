@@ -1,3 +1,7 @@
+'''
+**A function to create the BEM model, BEM solution and to generate a source space for the standard
+`fsaverage` MRI template. May also be used as a standalone script.**
+'''
 import os.path as path
 from warnings import warn
 import mne

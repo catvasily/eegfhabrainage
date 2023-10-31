@@ -1,3 +1,6 @@
+'''
+**Functions and classes used in the filtering and segmentation step.**
+'''
 import mne
 import os
 import os.path as op

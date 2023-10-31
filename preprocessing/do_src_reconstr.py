@@ -1,3 +1,6 @@
+'''
+**Functions used by the source reconstruction step.**
+'''
 import sys
 import os.path as path
 import numpy as np
@@ -488,7 +491,7 @@ def ltc_file_name(scan_id, src_file):
     return f 
 
 def read_roi_time_courses(ltc_file):
-    """Save ROI (label) time courses and corresponding ROI names in .hdf5
+    """Read ROI (label) time courses and corresponding ROI names from .hdf5
     file.
 
     Args:

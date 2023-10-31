@@ -1,0 +1,46 @@
+# ----------------------------------------------------------------------
+# NOTE: this is a JSON file with comments. It requires using commentjson
+# module to process, instead of a standard python json library
+# ----------------------------------------------------------------------
+# Configuration file for run_cwt.py
+{
+    "freq_range": [1.0, 55.0],
+    "freq_points": 50,      # Number of log-spaced frequencies, including the end points
+
+    "fit_distribution": "exponweib",
+
+    # Parameters of spectral amplitude distribution to calculate for each frequency
+    # and keyword arguments to pass to corresponding methods
+    "spect_parms":
+    {
+        "mean": {"axis": 1},
+        "median": {"axis": 1},
+        "std": {"axis": 1, "ddof": 1},
+        "skew": {"axis": 1, "bias": false},
+        "kurtosis": {"axis": 1, "fisher": true, "bias": false, "nan_policy": "raise"},
+
+        # The distribution and fit parameters. The kwarg passed should be 
+        # "parm": <parameter-name-tself>
+        "ew_a": {"parm": "ew_a"}, "ew_c": {"parm": "ew_c"}, "ew_loc": {"parm": "ew_loc"},
+        "ew_scale": {"parm": "ew_scale"},
+        "ew_fit_stat": {"parm": "ew_fit_stat"}, "ew_fit_pval": {"parm": "ew_fit_pval"}
+    },
+
+    "zscore":   # Additional optional arguments for the call scipy.stats.zscore(data, axis = 1, **kwargs])
+    {           # See scipy.stats.zscore() docs for the meaning of those
+        "ddof": 0,
+        "nan_policy": "propagate"
+    },
+
+    "welch":
+    {
+        "window": "hann",
+        "noverlap": null,
+        "nfft": null,
+        "detrend": "constant", 
+        "return_onesided": true,
+        "scaling": "density",
+        "axis": -1,
+        "average": "mean"
+    }
+}

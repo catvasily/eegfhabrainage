@@ -1,0 +1,104 @@
+# ----------------------------------------------------------------------
+# NOTE: this is a JSON file with comments. It requires using commentjson
+# module to process, instead of a standard python json library
+# ----------------------------------------------------------------------
+# Input parameters for run_cwt.py                  
+# ----------------------------------------------------------------------
+{
+    "what": "sources",          # sensors' or 'sources' - which CWT to calculate
+    "hospital": "Abbotsford",          # Burnaby, Abbotsford, RCH, Surrey
+    #"source_scan_ids": null,    # null or a list of specific record IDs
+    "source_scan_ids": ["99a27a66-4e90-41d9-8139-2094b562b277"],
+    "view_plots": false,         # Flag to show interactive plots
+    "plot_only": false,         # Flag to only plot already precalculated spectra",
+
+    # IDs of channels to plot if view_plots = true, or null, or []
+    
+    #"plot_ids": [ "80cbae5d-625b-473b-bf17-f5352cbf3c0c",   # RCH
+    #        "799d4cae-40e0-449e-9119-793c91b3305c",
+    #        "7cd8be05-5286-4d65-bb5d-42031f131db8",
+    #        "fc34d5f0-dd6a-4e65-8f87-95ef5b452681"
+    #        ],
+    
+    "plot_ids": ["57ea2fa1-66f1-43f9-aa17-981909e3dc96"
+     #           "2f8ab0f5-08c4-4677-96bc-6d4b48735da2",    # Burnaby
+     #           "ffff1021-f5ba-49a9-a588-1c4778fb38d3",
+     #           "81c0c60a-8fcc-4aae-beed-87931e582c45",
+     #           "81be60fc-ed17-4f91-a265-c8a9f1770517",
+     #           "fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2"
+            ],
+
+    # Channels/ROIs to plot in distribution plots if view_plots = true
+    "plot_chnames": {
+            "sensors": ["O1","O2","P3","P4","Pz"],
+            "sources": ["G_occipital_middle-lh", "G_occipital_middle-rh", "G_occipital_sup-lh",
+                "G_occipital_sup-rh", "Pole_occipital-lh", "Pole_occipital-rh"]
+            },
+
+    # X, Y limits for distribution plots, or null
+    "plot_xlim": {
+            #"sensors": [0.0, 5.0],
+            "sensors": null,
+            "sources": null 
+            },
+
+    "plot_ylim": {
+            "sensors": null,
+            "sources": null 
+            },
+
+    "plot_nx": 200,     # Number of x-points for the amplitude distribution plots
+
+    # Frequencies to plot in distribution plots if view_plots = true
+    #"plot_freqs": [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 43.0, 55.0],
+    "plot_freqs": [1.0, 2.0, 3.0, 4.0, 5.0],
+
+    #"print_id": null, # Single scan ID to print out the results, or null
+    "print_id": "99a27a66-4e90-41d9-8139-2094b562b277",
+    #"print_chan": "O1",         # Channel name for printing single channel results, or null
+    "print_chan": "G_occipital_sup-lh",         # Channel name for printing single channel results, or null
+    "print_freq": 10.0,         # Frequency value for printing single frequency results, or null
+
+    "N_ARRAY_JOBS": 100,        # Num of parallel jobs to run on cluster; should match
+                                # corresponding value in .sbatch file
+    "verbose": "INFO",          # Can be ‘DEBUG’, ‘INFO", ERROR", "CRITICAL", or "WARNING" (default)
+
+    # Input and output root folders depending on the host computer
+    "hosts": {
+        "ub20-04": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "/data/eegfhabrainage/after-prep-ica", # input time courses here
+                "out_root": "/data/eegfhabrainage/cwt",             # output CWT results here
+            },
+            "sources": {
+                "data_root": "/data/eegfhabrainage/src-reconstr",
+                "out_root": "/data/eegfhabrainage/src-cwt"
+            }
+        },
+        "cedar": {
+            "cluster_job": true,
+
+            "sensors": {
+                "data_root": "/project/6019337/databases/eeg_fha/preprocessed/001_a01_01",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/cwt"
+            },
+            "sources": {
+                "data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-cwt"
+            }
+        },
+        "other": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "after-prep-ica", # input time courses here
+                "out_root": "cwt",           # output PSDs here
+            },
+            "sources": {
+                "data_root": "src-reconstr",
+                "out_root": "src-cwt"
+            }
+        }
+    }   # end of "hosts"
+}
+

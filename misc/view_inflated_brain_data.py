@@ -1,3 +1,9 @@
+"""
+**A utility for displaying functional data on a brain surface.**
+
+May be called as a function, or run standalone (see the unit test
+code at the end of the file).
+"""
 import os.path as path
 import sys
 import numpy as np

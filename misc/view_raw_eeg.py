@@ -1,8 +1,7 @@
-# -----------------------------------------------
-# A helper to view a plot of the raw data
-#
-# Can be used standalone, or as a function call
-# -----------------------------------------------
+"""
+**A simple viewer of the MNE Python raw data. Can be used both standalone and
+as a function call.**
+"""
 import tkinter as tk
 from tkinter import filedialog
 

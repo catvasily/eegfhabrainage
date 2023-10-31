@@ -14,6 +14,10 @@ individual_func.py
 ------------------
 .. automodule:: individual_func
 
+run_pyprep_ica.py
+-----------------
+.. automodule:: run_pyprep_ica
+
 do_pyprep.py
 ------------
 .. automodule:: do_pyprep
@@ -26,19 +30,43 @@ run_src_reconstr.py
 -------------------
 .. automodule:: run_src_reconstr
 
-do_src_reconstr
----------------
+add_virtual_channels.py
+-----------------------
+.. automodule:: add_virtual_channels
+
+do_src_reconstr.py
+------------------
 .. automodule:: do_src_reconstr
 
-view_raw_eeg
+make_fsaverage_bem.py
+---------------------
+.. automodule:: make_fsaverage_bem
+
+nearest_pos_def.py
+------------------
+.. automodule:: nearest_pos_def
+
+run_welch.py
 ------------
+.. automodule:: run_welch
+
+run_cwt.py
+----------
+.. automodule:: run_cwt
+
+tfdata.py
+----------
+.. automodule:: tfdata
+
+view_raw_eeg.py
+---------------
 .. automodule:: view_raw_eeg
 
-view_inflated_brain_data
-------------------------
+view_inflated_brain_data.py
+---------------------------
 .. automodule:: view_inflated_brain_data
 
-plot_alpha_power
-----------------
+plot_alpha_power.py
+-------------------
 .. automodule:: plot_alpha_power
 

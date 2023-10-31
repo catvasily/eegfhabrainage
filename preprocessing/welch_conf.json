@@ -1,0 +1,16 @@
+{
+    "freq_range": [1.0, 55.0],
+    "freq_points": 109,
+
+    "welch":
+    {
+        "window": "hann",
+        "noverlap": null,
+        "nfft": null,
+        "detrend": "constant", 
+        "return_onesided": true,
+        "scaling": "density",
+        "axis": -1,
+        "average": "mean"
+    }
+}

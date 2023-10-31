@@ -1,3 +1,7 @@
+'''
+**A utility function to add virtual (source-reconstructed) channels to the raw dataset. This may be useful
+for viewing/processing the EEG data using standard MNE Python routines.**
+'''
 import numpy as np
 import mne
 from mne.transforms import apply_trans, invert_transform

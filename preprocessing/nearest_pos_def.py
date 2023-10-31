@@ -1,8 +1,11 @@
-# ---------------------------------------------------------------------
-# This code by Ahmed Fasih was downloaded from:
-#	https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd
-# on Oct 17, 2021
-# ---------------------------------------------------------------------
+'''
+**A function to find a positive definite matrix which is most close to
+a given matrix.**
+
+This code by Ahmed Fasih was downloaded from  
+	https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd  
+on Oct 17, 2021
+'''
 from numpy import linalg as la
 import numpy as np
 

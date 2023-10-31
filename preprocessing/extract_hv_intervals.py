@@ -1,5 +1,6 @@
-'''A script to perform filtering and extraction of hyperventilation (HV)
-intervals.
+'''
+**A top level script to perform filtering and extraction of hyperventilation (HV)
+intervals.**
 '''
 import sys
 import glob

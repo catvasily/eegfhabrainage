@@ -46,7 +46,24 @@ add_module_names = False	# Do not prepend the module name to function descriptio
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# - solution "31"
 
-html_theme = 'alabaster'
+#html_theme = 'alabaster'
+html_theme = "sphinx_rtd_theme"
 html_static_path = ['_static']
+
+# To generate docs for __init__() functions (skipped by default):
+# https://stackoverflow.com/questions/5599254/how-to-use-sphinxs-autodoc-to-document-a-classs-init-self-method
+def skip(app, what, name, obj, would_skip, options):
+    if name == "__init__":
+        return False
+    return would_skip
+
+def setup(app):
+    # Special processing of the __init__():
+    app.connect("autodoc-skip-member", skip)
+
+    # Change the width of the generated docs
+    # See https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphinx-theme-read-the-docs
+    app.add_css_file('custom.css')
 

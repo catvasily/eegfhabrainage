@@ -1,3 +1,6 @@
+'''
+**Classes and functions used in the  PyPREP/ICA step.**
+'''
 import mne
 import numpy as np
 import os
@@ -28,7 +31,8 @@ class Pipeline:
     and ML applications.
 
     The class instantiates a preprocessing object which 
-    carries a Raw EDF file through the following operations: 
+    carries a Raw EDF file through the following operations:   
+
     1. Removes power lines, re-references the channels and identifies bad channels
     as per the PREP pipeline.
 
