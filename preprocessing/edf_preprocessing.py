@@ -739,8 +739,9 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
             the default for the :class: `PreProcessing` will be used
         hfreq (float or None): the higher frequency boundary of the EEG signal in Hz; if not specified
             the default for the :class: `PreProcessing` will be used
-        extract (str): one of 'good' (default) or 'HV'. In the first case good segments (no artifacts
+        extract (str): one of 'good' (default), 'HV' or 'PS'. In the first case good segments (no artifacts
             stimuli, etc. present). In the 2nd case hyperventilation intervals will be extracted.
+            In the 3d case photic stimulation intervals will be extracted.
         target_length (float): the length of each of the extracted segments in seconds; the value
             from `conf_json` or `conf_dict` will be used if not specified. Only applies when 
             `extract = 'good'`. In HV case the length will be equal to that of 1st HV interval.
@@ -761,7 +762,7 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
         with open(conf_json, "r") as fp:
             conf_dict = json.loads(fp.read())
 
-    if not (extract in ['good', 'HV']):
+    if not (extract in ['good', 'HV', 'PS']):
         raise ValueError("Unrecognized value for the 'extract' argument specified: extract = '{}'".format(extract))
 
     existing_edf_names = [op.basename(f) for f in glob.glob(source_folder + '/*.edf')]
@@ -819,6 +820,34 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
                     hv_int = unpadd_it(hv_int)
 
                     safe_crop(p.raw, hv_int[0], hv_int[1], include_tmax=False)	# !!! Raw object modified in place !!!
+
+                    write_mne_edf(p.raw, fname=target_folder+'/'+f, overwrite=True)
+                    print('OK', flush = True)
+                #-------------------
+                elif extract == 'PS':
+                #-------------------
+                    lst_ps = p.photic_stimulation()
+
+                    if not lst_ps:
+                        print('\nNo PS intervals found in the record\n')
+                        continue
+
+                    if len(lst_ps) > 1:
+                        print('\nWarning: {} PS intervals found in the record.'.format(len(lst_ps)))
+                        print('Only the first one is saved')
+
+                    ps_int = lst_ps[0]
+
+                    # Remove padding that was applied by photic_stimulation() method
+                    pad_int = conf_dict["photic_pad_interval"]
+                    unpadd_it = lambda lst: [lst[0]+pad_int, lst[-1]-pad_int+1] # Add 1s to include the last 'Off' marker
+                    ps_int = unpadd_it(ps_int)
+
+                    if ps_int[1] - ps_int[0] < 1.5:                         # This may happen when no intervals were found
+                        print('\nNo PS intervals found in the record\n')    # but padded 0-length interval was returned
+                        continue
+
+                    safe_crop(p.raw, ps_int[0], ps_int[1], include_tmax=False)	# !!! Raw object modified in place !!!
 
                     write_mne_edf(p.raw, fname=target_folder+'/'+f, overwrite=True)
                     print('OK', flush = True)

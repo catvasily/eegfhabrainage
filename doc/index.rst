@@ -14,6 +14,8 @@ Python software documentation for the EEG Fraser Health project
 
    README
    code
+   README_reports
+   reports
 
 
 Indices and tables

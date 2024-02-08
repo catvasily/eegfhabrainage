@@ -43,7 +43,9 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="README.html">EEG preprocessing pipeline for FHA EDF dataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="code.html">Classes and functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Classes and functions for EEG data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README_reports.html">EEG clinical reports processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reports.html">Classes and functions for EEG reports processing</a></li>
 </ul>
 
         </div>
@@ -105,6 +107,10 @@
 </li>
         <li><a href="code.html#edf_preprocessing.PreProcessing.__init__">(PreProcessing method)</a>
 </li>
+        <li><a href="reports.html#reports_db.ReportsDB.__init__">(ReportsDB method)</a>
+</li>
+        <li><a href="code.html#running_mean_std.RunningMeanSTD.__init__">(RunningMeanSTD method)</a>
+</li>
         <li><a href="code.html#tfdata.TFData.__init__">(TFData method)</a>
 </li>
       </ul></li>
@@ -114,6 +120,8 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reports.html#create_db.add_db_tables">add_db_tables() (in module create_db)</a>
+</li>
       <li>
     add_virtual_channels
 
@@ -155,12 +163,16 @@
 </li>
       <li><a href="code.html#edf_preprocessing.PreProcessing.clean_intervals">clean_intervals (PreProcessing attribute)</a>
 </li>
+      <li><a href="reports.html#word2vec.cluster_reports">cluster_reports() (in module word2vec)</a>
+</li>
+      <li><a href="reports.html#word2vec.clustering_info_to_reports_db">clustering_info_to_reports_db() (in module word2vec)</a>
+</li>
+      <li><a href="reports.html#word2vec.clustering_results_tbl_name">clustering_results_tbl_name() (in module word2vec)</a>
+</li>
       <li><a href="code.html#do_src_reconstr.compute_beamformer_stc">compute_beamformer_stc() (in module do_src_reconstr)</a>
 </li>
       <li><a href="code.html#do_src_reconstr.compute_roi_time_courses">compute_roi_time_courses() (in module do_src_reconstr)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#do_src_reconstr.compute_source_timecourses">compute_source_timecourses() (in module do_src_reconstr)</a>
 </li>
       <li><a href="code.html#do_pyprep.Pipeline.conf_dict">conf_dict (Pipeline attribute)</a>
@@ -169,9 +181,26 @@
         <li><a href="code.html#edf_preprocessing.PreProcessing.conf_dict">(PreProcessing attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reports.html#reports_db.ReportsDB.conn">conn (ReportsDB attribute)</a>
+</li>
       <li><a href="code.html#do_src_reconstr.construct_noise_and_inv_cov">construct_noise_and_inv_cov() (in module do_src_reconstr)</a>
 </li>
+      <li><a href="code.html#running_mean_std.RunningMeanSTD.counter">counter() (RunningMeanSTD method)</a>
+</li>
+      <li>
+    create_db
+
+      <ul>
+        <li><a href="reports.html#module-create_db">module</a>
+</li>
+      </ul></li>
       <li><a href="code.html#edf_preprocessing.PreProcessing.create_intervals_data">create_intervals_data() (PreProcessing method)</a>
+</li>
+      <li><a href="reports.html#create_db.create_sqlite_db">create_sqlite_db() (in module create_db)</a>
+</li>
+      <li><a href="reports.html#reports_db.ReportsDB.cursor">cursor (ReportsDB attribute)</a>
 </li>
       <li><a href="code.html#run_cwt.CWT_CONFIG_FILE">CWT_CONFIG_FILE (in module run_cwt)</a>
 </li>
@@ -189,8 +218,6 @@
 </li>
       <li><a href="code.html#run_cwt.DIST">DIST (in module run_cwt)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     do_pyprep
 
@@ -198,6 +225,8 @@
         <li><a href="code.html#module-do_pyprep">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     do_src_reconstr
 
@@ -205,6 +234,8 @@
         <li><a href="code.html#module-do_src_reconstr">module</a>
 </li>
       </ul></li>
+      <li><a href="reports.html#word2vec.doc2vec">doc2vec() (in module word2vec)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -222,9 +253,11 @@
 </li>
       <li><a href="code.html#run_cwt.estimate_parms">estimate_parms() (in module run_cwt)</a>
 </li>
+      <li><a href="code.html#edf_preprocessing.PreProcessing.exclude_channels">exclude_channels (PreProcessing attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="code.html#edf_preprocessing.PreProcessing.exclude_channels">exclude_channels (PreProcessing attribute)</a>
+      <li><a href="reports.html#reports_db.ReportsDB.execute">execute() (ReportsDB method)</a>
 </li>
       <li><a href="code.html#view_inflated_brain_data.expand_data_to_rois">expand_data_to_rois() (in module view_inflated_brain_data)</a>
 </li>
@@ -271,7 +304,13 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reports.html#reports_db.ReportsDB.get_all_ids">get_all_ids() (ReportsDB method)</a>
+</li>
+      <li><a href="reports.html#reports_db.ReportsDB.get_all_reps">get_all_reps() (ReportsDB method)</a>
+</li>
       <li><a href="code.html#do_src_reconstr.get_beam_weights">get_beam_weights() (in module do_src_reconstr)</a>
+</li>
+      <li><a href="reports.html#word2vec.get_cluster_centers">get_cluster_centers() (in module word2vec)</a>
 </li>
       <li><a href="code.html#extract_hv_intervals.get_data_folders">get_data_folders() (in module extract_hv_intervals)</a>
 
@@ -285,8 +324,18 @@
         <li><a href="code.html#run_welch.get_data_folders">(in module run_welch)</a>
 </li>
       </ul></li>
+      <li><a href="reports.html#word2vec.get_doc_vectors_for_physicians">get_doc_vectors_for_physicians() (in module word2vec)</a>
+</li>
       <li><a href="code.html#tfdata.TFData.get_fixed_f_slice">get_fixed_f_slice() (TFData method)</a>
 </li>
+      <li><a href="reports.html#reports_db.ReportsDB.get_ids_for_hospital">get_ids_for_hospital() (ReportsDB method)</a>
+</li>
+      <li><a href="reports.html#word2vec.get_ids_for_physician">get_ids_for_physician() (in module word2vec)</a>
+
+      <ul>
+        <li><a href="reports.html#reports_db.ReportsDB.get_ids_for_physician">(ReportsDB method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#do_src_reconstr.get_label_coms">get_label_coms() (in module do_src_reconstr)</a>
@@ -301,7 +350,19 @@
 </li>
       <li><a href="code.html#tfdata.TFData.get_nearest_freq">get_nearest_freq() (TFData method)</a>
 </li>
+      <li><a href="reports.html#reports_db.ReportsDB.get_reps_by_ids">get_reps_by_ids() (ReportsDB method)</a>
+</li>
+      <li><a href="reports.html#reports_db.ReportsDB.get_reps_for_hospital">get_reps_for_hospital() (ReportsDB method)</a>
+</li>
+      <li><a href="reports.html#reports_db.ReportsDB.get_reps_for_physician">get_reps_for_physician() (ReportsDB method)</a>
+</li>
+      <li><a href="reports.html#process_reports.get_selected_reports">get_selected_reports() (in module process_reports)</a>
+</li>
+      <li><a href="reports.html#process_reports.get_selected_tagged_reports">get_selected_tagged_reports() (in module process_reports)</a>
+</li>
       <li><a href="code.html#do_src_reconstr.get_voxel_coords">get_voxel_coords() (in module do_src_reconstr)</a>
+</li>
+      <li><a href="reports.html#process_reports.get_words">get_words() (in module process_reports)</a>
 </li>
       <li><a href="code.html#do_pyprep.Pipeline.getRaw">getRaw() (Pipeline method)</a>
 </li>
@@ -332,6 +393,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#run_cwt.INPUT_JSON_FILE">INPUT_JSON_FILE (in module run_cwt)</a>
 </li>
+      <li><a href="reports.html#process_reports.inputs">inputs() (in module process_reports)</a>
+</li>
+      <li><a href="code.html#running_mean_std.RunningMeanSTD.is_array">is_array() (RunningMeanSTD class method)</a>
+</li>
       <li><a href="code.html#nearest_pos_def.isPD">isPD() (in module nearest_pos_def)</a>
 </li>
   </ul></td>
@@ -354,13 +419,19 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="code.html#run_welch.load_data">load_data() (in module run_welch)</a>
+      <li><a href="reports.html#reports_db.ReportsDB.list_hospitals">list_hospitals() (ReportsDB method)</a>
 </li>
-      <li><a href="code.html#edf_preprocessing.load_edf_data">load_edf_data() (in module edf_preprocessing)</a>
+      <li><a href="reports.html#reports_db.ReportsDB.list_physicians">list_physicians() (ReportsDB method)</a>
+</li>
+      <li><a href="code.html#run_welch.load_data">load_data() (in module run_welch)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="code.html#edf_preprocessing.load_edf_data">load_edf_data() (in module edf_preprocessing)</a>
+</li>
       <li><a href="code.html#run_cwt.loglin_freqs">loglin_freqs() (in module run_cwt)</a>
+</li>
+      <li><a href="reports.html#word2vec.low_dim_embedding">low_dim_embedding() (in module word2vec)</a>
 </li>
       <li><a href="code.html#do_src_reconstr.ltc_file_name">ltc_file_name() (in module do_src_reconstr)</a>
 </li>
@@ -379,11 +450,15 @@
       </ul></li>
       <li><a href="code.html#make_fsaverage_bem.make_fsaverage_bem">make_fsaverage_bem() (in module make_fsaverage_bem)</a>
 </li>
+      <li><a href="code.html#running_mean_std.RunningMeanSTD.mean">mean() (RunningMeanSTD method)</a>
+</li>
       <li>
     module
 
       <ul>
         <li><a href="code.html#module-add_virtual_channels">add_virtual_channels</a>
+</li>
+        <li><a href="reports.html#module-create_db">create_db</a>
 </li>
         <li><a href="code.html#module-do_pyprep">do_pyprep</a>
 </li>
@@ -401,6 +476,10 @@
 </li>
         <li><a href="code.html#module-plot_alpha_power">plot_alpha_power</a>
 </li>
+        <li><a href="reports.html#module-process_reports">process_reports</a>
+</li>
+        <li><a href="reports.html#module-reports_db">reports_db</a>
+</li>
         <li><a href="code.html#module-run_cwt">run_cwt</a>
 </li>
         <li><a href="code.html#module-run_filtering_segmentation">run_filtering_segmentation</a>
@@ -411,11 +490,15 @@
 </li>
         <li><a href="code.html#module-run_welch">run_welch</a>
 </li>
+        <li><a href="code.html#module-running_mean_std">running_mean_std</a>
+</li>
         <li><a href="code.html#module-tfdata">tfdata</a>
 </li>
         <li><a href="code.html#module-view_inflated_brain_data">view_inflated_brain_data</a>
 </li>
         <li><a href="code.html#module-view_raw_eeg">view_raw_eeg</a>
+</li>
+        <li><a href="reports.html#module-word2vec">word2vec</a>
 </li>
       </ul></li>
   </ul></td>
@@ -435,6 +518,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#nearest_pos_def.nearestPD">nearestPD() (in module nearest_pos_def)</a>
 </li>
+      <li><a href="reports.html#word2vec.num_workers">num_workers() (in module word2vec)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -444,6 +529,8 @@
       <li><a href="code.html#tfdata.TFData.PARM_DIM">PARM_DIM (TFData attribute)</a>
 </li>
       <li><a href="code.html#tfdata.TFData.parm_names">parm_names (TFData attribute)</a>
+</li>
+      <li><a href="reports.html#word2vec.parse_reports">parse_reports() (in module word2vec)</a>
 </li>
       <li><a href="code.html#do_src_reconstr.parse_vertex_list">parse_vertex_list() (in module do_src_reconstr)</a>
 </li>
@@ -460,10 +547,12 @@
       </ul></li>
       <li><a href="code.html#run_cwt.plot_distr">plot_distr() (in module run_cwt)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#run_welch.plot_psd">plot_psd() (in module run_welch)</a>
 </li>
+      <li><a href="reports.html#word2vec.plot_reports">plot_reports() (in module word2vec)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#view_inflated_brain_data.plot_rr">plot_rr() (in module view_inflated_brain_data)</a>
 </li>
       <li><a href="code.html#view_inflated_brain_data.plot_vertices">plot_vertices() (in module view_inflated_brain_data)</a>
@@ -479,6 +568,15 @@
 </li>
       </ul></li>
       <li><a href="code.html#edf_preprocessing.PreProcessing">PreProcessing (class in edf_preprocessing)</a>
+</li>
+      <li>
+    process_reports
+
+      <ul>
+        <li><a href="reports.html#module-process_reports">module</a>
+</li>
+      </ul></li>
+      <li><a href="code.html#running_mean_std.RunningMeanSTD.push">push() (RunningMeanSTD method)</a>
 </li>
       <li><a href="code.html#run_src_reconstr.PYPREP_CONFIG_FILE">PYPREP_CONFIG_FILE (in module run_src_reconstr)</a>
 </li>
@@ -503,6 +601,17 @@
       <li><a href="code.html#do_src_reconstr.read_roi_time_courses">read_roi_time_courses() (in module do_src_reconstr)</a>
 </li>
       <li><a href="code.html#run_welch.read_welch_psd">read_welch_psd() (in module run_welch)</a>
+</li>
+      <li>
+    reports_db
+
+      <ul>
+        <li><a href="reports.html#module-reports_db">module</a>
+</li>
+      </ul></li>
+      <li><a href="reports.html#reports_db.ReportsDB">ReportsDB (class in reports_db)</a>
+</li>
+      <li><a href="code.html#running_mean_std.RunningMeanSTD.reset">reset() (RunningMeanSTD method)</a>
 </li>
       <li>
     run_cwt
@@ -541,6 +650,15 @@
         <li><a href="code.html#module-run_welch">module</a>
 </li>
       </ul></li>
+      <li>
+    running_mean_std
+
+      <ul>
+        <li><a href="code.html#module-running_mean_std">module</a>
+</li>
+      </ul></li>
+      <li><a href="code.html#running_mean_std.RunningMeanSTD">RunningMeanSTD (class in running_mean_std)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -549,23 +667,37 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#individual_func.safe_crop">safe_crop() (in module individual_func)</a>
 </li>
+      <li><a href="reports.html#word2vec.save_clustering_results">save_clustering_results() (in module word2vec)</a>
+</li>
       <li><a href="code.html#edf_preprocessing.PreProcessing.save_edf">save_edf() (PreProcessing method)</a>
 </li>
       <li><a href="code.html#individual_func.save_notch_info">save_notch_info() (in module individual_func)</a>
 </li>
       <li><a href="code.html#tfdata.TFData.scan_id">scan_id (TFData attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#individual_func.select_chans">select_chans() (in module individual_func)</a>
 </li>
       <li><a href="code.html#individual_func.set_channel_types">set_channel_types() (in module individual_func)</a>
 </li>
+      <li><a href="reports.html#word2vec.set_cluster_codes">set_cluster_codes() (in module word2vec)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#edf_preprocessing.PreProcessing.sfreq">sfreq (PreProcessing attribute)</a>
+</li>
+      <li><a href="reports.html#word2vec.show_similar_reports">show_similar_reports() (in module word2vec)</a>
+</li>
+      <li><a href="reports.html#word2vec.show_similar_words">show_similar_words() (in module word2vec)</a>
 </li>
       <li><a href="code.html#do_pyprep.Pipeline.showplot">showplot() (Pipeline method)</a>
 </li>
       <li><a href="code.html#edf_preprocessing.slice_edfs">slice_edfs() (in module edf_preprocessing)</a>
+</li>
+      <li><a href="reports.html#word2vec.split_list">split_list() (in module word2vec)</a>
+</li>
+      <li><a href="code.html#running_mean_std.RunningMeanSTD.std">std() (RunningMeanSTD method)</a>
+</li>
+      <li><a href="reports.html#word2vec.subsample_idx">subsample_idx() (in module word2vec)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -596,6 +728,8 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="code.html#running_mean_std.RunningMeanSTD.var">var() (RunningMeanSTD method)</a>
+</li>
       <li>
     view_inflated_brain_data
 
@@ -620,12 +754,23 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    word2vec
+
+      <ul>
+        <li><a href="reports.html#module-word2vec">module</a>
+</li>
+      </ul></li>
+      <li><a href="reports.html#word2vec.word2vec">word2vec() (in module word2vec)</a>
+</li>
+      <li><a href="reports.html#process_reports.word_stats">word_stats() (in module process_reports)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#tfdata.TFData.write">write() (TFData method)</a>
 </li>
       <li><a href="code.html#individual_func.write_mne_edf">write_mne_edf() (in module individual_func)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code.html#do_src_reconstr.write_roi_time_courses">write_roi_time_courses() (in module do_src_reconstr)</a>
 </li>
       <li><a href="code.html#run_welch.write_welch_psd">write_welch_psd() (in module run_welch)</a>

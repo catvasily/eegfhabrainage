@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classes and functions for EEG reports processing &mdash; eegfh 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e031e9a9"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Classes and functions for EEG data processing" href="code.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            eegfh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README.html">EEG preprocessing pipeline for FHA EDF dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Classes and functions for EEG data processing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classes and functions for EEG reports processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#run-reports-py-protected">run_reports.py (protected)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-process_reports">process_reports.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#process_reports.get_selected_reports"><code class="docutils literal notranslate"><span class="pre">get_selected_reports()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process_reports.get_selected_tagged_reports"><code class="docutils literal notranslate"><span class="pre">get_selected_tagged_reports()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process_reports.get_words"><code class="docutils literal notranslate"><span class="pre">get_words()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process_reports.inputs"><code class="docutils literal notranslate"><span class="pre">inputs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#process_reports.word_stats"><code class="docutils literal notranslate"><span class="pre">word_stats()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-create_db">create_db.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create_db.add_db_tables"><code class="docutils literal notranslate"><span class="pre">add_db_tables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create_db.create_sqlite_db"><code class="docutils literal notranslate"><span class="pre">create_sqlite_db()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-reports_db">reports_db.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#reports_db.ReportsDB"><code class="docutils literal notranslate"><span class="pre">ReportsDB</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.conn"><code class="docutils literal notranslate"><span class="pre">ReportsDB.conn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.cursor"><code class="docutils literal notranslate"><span class="pre">ReportsDB.cursor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.__init__"><code class="docutils literal notranslate"><span class="pre">ReportsDB.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.execute"><code class="docutils literal notranslate"><span class="pre">ReportsDB.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.get_all_ids"><code class="docutils literal notranslate"><span class="pre">ReportsDB.get_all_ids()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.get_all_reps"><code class="docutils literal notranslate"><span class="pre">ReportsDB.get_all_reps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.get_ids_for_hospital"><code class="docutils literal notranslate"><span class="pre">ReportsDB.get_ids_for_hospital()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.get_ids_for_physician"><code class="docutils literal notranslate"><span class="pre">ReportsDB.get_ids_for_physician()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.get_reps_by_ids"><code class="docutils literal notranslate"><span class="pre">ReportsDB.get_reps_by_ids()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.get_reps_for_hospital"><code class="docutils literal notranslate"><span class="pre">ReportsDB.get_reps_for_hospital()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.get_reps_for_physician"><code class="docutils literal notranslate"><span class="pre">ReportsDB.get_reps_for_physician()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.list_hospitals"><code class="docutils literal notranslate"><span class="pre">ReportsDB.list_hospitals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reports_db.ReportsDB.list_physicians"><code class="docutils literal notranslate"><span class="pre">ReportsDB.list_physicians()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-word2vec">word2vec.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.cluster_reports"><code class="docutils literal notranslate"><span class="pre">cluster_reports()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.clustering_info_to_reports_db"><code class="docutils literal notranslate"><span class="pre">clustering_info_to_reports_db()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.clustering_results_tbl_name"><code class="docutils literal notranslate"><span class="pre">clustering_results_tbl_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.doc2vec"><code class="docutils literal notranslate"><span class="pre">doc2vec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.get_cluster_centers"><code class="docutils literal notranslate"><span class="pre">get_cluster_centers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.get_doc_vectors_for_physicians"><code class="docutils literal notranslate"><span class="pre">get_doc_vectors_for_physicians()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.get_ids_for_physician"><code class="docutils literal notranslate"><span class="pre">get_ids_for_physician()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.low_dim_embedding"><code class="docutils literal notranslate"><span class="pre">low_dim_embedding()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.num_workers"><code class="docutils literal notranslate"><span class="pre">num_workers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.parse_reports"><code class="docutils literal notranslate"><span class="pre">parse_reports()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.plot_reports"><code class="docutils literal notranslate"><span class="pre">plot_reports()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.save_clustering_results"><code class="docutils literal notranslate"><span class="pre">save_clustering_results()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.set_cluster_codes"><code class="docutils literal notranslate"><span class="pre">set_cluster_codes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.show_similar_reports"><code class="docutils literal notranslate"><span class="pre">show_similar_reports()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.show_similar_words"><code class="docutils literal notranslate"><span class="pre">show_similar_words()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.split_list"><code class="docutils literal notranslate"><span class="pre">split_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.subsample_idx"><code class="docutils literal notranslate"><span class="pre">subsample_idx()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#word2vec.word2vec"><code class="docutils literal notranslate"><span class="pre">word2vec()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">eegfh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Classes and functions for EEG reports processing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/reports.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="classes-and-functions-for-eeg-reports-processing">
+<h1>Classes and functions for EEG reports processing<a class="headerlink" href="#classes-and-functions-for-eeg-reports-processing" title="Permalink to this heading"></a></h1>
+<p>Python code used for EEG clinical reports processing.</p>
+<section id="run-reports-py-protected">
+<h2>run_reports.py (protected)<a class="headerlink" href="#run-reports-py-protected" title="Permalink to this heading"></a></h2>
+<p>Code for processing the original
+clinical reports, removing personal
+information and creating anonymized
+reports database.</p>
+</section>
+<section id="module-process_reports">
+<span id="process-reports-py"></span><h2>process_reports.py<a class="headerlink" href="#module-process_reports" title="Permalink to this heading"></a></h2>
+<p><strong>A top level script for perfoming various tasks with a clean
+(anonymized) EEG reports database</strong>.</p>
+<p>To add a step to be run to this script:</p>
+<ol class="arabic">
+<li><p>Encapsulate all related code in a dedicated function</p>
+<blockquote>
+<div><p><cite>def my_step(ss):
+…
+# NOTE: Step return value (if any) is not used</cite></p>
+</div></blockquote>
+</li>
+<li><p>Add corresponding entry to the cases dictionary in
+the <strong>EPILOGE</strong> section at the bottom of this .py file in the form</p>
+<p><cite>‘my_step’: my_step,</cite></p>
+</li>
+</ol>
+<p>Steps may reside in separate Python files. In that case
+corresponding <em>import</em> statements should be added here.
+The variables that are intended to be shared between
+steps should be defined as attributes of the ss object,
+as follows:</p>
+<blockquote>
+<div><p><cite>ss.common_var = common_var_value</cite></p>
+</div></blockquote>
+<p>The sequence of steps to be executed is listed under <strong>“to_run”</strong>
+key in the JSON input file, for example</p>
+<blockquote>
+<div><p><cite>“to_run”: [“init”, “step1”, “step6”]</cite></p>
+</div></blockquote>
+<hr class="docutils" />
+<p>Available steps:</p>
+<p><cite>‘input’</cite>: As is: set all the input and configuration
+parameters here. This step should always be run first.</p>
+<p><cite>‘word_stats’</cite>: collect words from all reports and run some
+stats on those.</p>
+<p><cite>‘word2vec’</cite>: construct vector embedding for words in reports.</p>
+<p><cite>‘show_similar_words’</cite>: display words similar to given, using word2vec results.</p>
+<p><cite>‘doc2vec’</cite>: construct vector embedding for words in reports.</p>
+<p><cite>‘show_similar_reports’</cite>: as is.</p>
+<p><cite>‘cluster_reports’</cite>: as is.</p>
+<p><cite>‘plot_reports’</cite>: plot document vectors embedded into 2D or 3D space.</p>
+<p><cite>‘clustering_info_to_reports_db’</cite>: update processed reports DB with clustering
+results.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="process_reports.get_selected_reports">
+<span class="sig-name descname"><span class="pre">get_selected_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#process_reports.get_selected_reports" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <strong>set</strong> of reports specified in the <cite>INPUT_JSON_FILE</cite> file.
+This function also sets <cite>reports_for</cite> attribute of the <cite>ss</cite> object which determines
+the target subset of reports: ‘all’, or ‘[&lt;physicians&gt;]’, or ‘[&lt;hospitals&gt;]’.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="process_reports.get_selected_tagged_reports">
+<span class="sig-name descname"><span class="pre">get_selected_tagged_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#process_reports.get_selected_tagged_reports" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <strong>set</strong> of tuples <cite>(‘hash_id’, report)</cite> for reports specified in
+the <cite>INPUT_JSON_FILE</cite> file.
+This function also sets <cite>reports_for</cite> attribute of the <cite>ss</cite> object which determines
+the target subset of reports: ‘all’, or ‘[&lt;physicians&gt;]’, or ‘[&lt;hospitals&gt;]’.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="process_reports.get_words">
+<span class="sig-name descname"><span class="pre">get_words</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#process_reports.get_words" title="Permalink to this definition"></a></dt>
+<dd><p>Return a <strong>set</strong> of words from a given text. The returned set is always
+in lower case, and certain types of tokens are ignored.</p>
+<p>Specifically, tokens which are not entirely alphabetic (like 11:30) will
+be dropped. If requested in the JSON config file, the stop words will
+also be dropped. Tokens specified in the <cite>ignore</cite> collection will
+be dropped as well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ss</strong> – reference to this app object</p></li>
+<li><p><strong>text</strong> (<em>str</em>) – the text to be parsed</p></li>
+<li><p><strong>ignore</strong> (<em>sequence</em>) – a collection of words/tokens to be excluded from the
+output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>words</strong> (<em>set</em>) – a set of words from the <cite>text</cite>, in lower case</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="process_reports.inputs">
+<span class="sig-name descname"><span class="pre">inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#process_reports.inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Set up here all the common inputs required by subsequent steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> – This app object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>None</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="process_reports.word_stats">
+<span class="sig-name descname"><span class="pre">word_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#process_reports.word_stats" title="Permalink to this definition"></a></dt>
+<dd><p>Collect words from all reports in DB and do some stats.
+Save results to <cite>.csv</cite> file and and also to <cite>ss.df_words</cite> attribute
+in the form of a DataFrame.</p>
+</dd></dl>
+
+</section>
+<section id="module-create_db">
+<span id="create-db-py"></span><h2>create_db.py<a class="headerlink" href="#module-create_db" title="Permalink to this heading"></a></h2>
+<p>Functions for creating a SQLite database and adding tables to it.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="create_db.add_db_tables">
+<span class="sig-name descname"><span class="pre">add_db_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tbls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_cursor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#create_db.add_db_tables" title="Permalink to this definition"></a></dt>
+<dd><p>Add new tables to a SQLite database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_file</strong> (<em>str</em>) – full pathname of the DB file</p></li>
+<li><p><strong>tbls</strong> (<em>dict</em>) – a dictionary of table descriptors, each one being
+&lt;table_name&gt;: […, [&lt;Column-name&gt;, Column-type&gt;],…]</p></li>
+<li><p><strong>return_cursor</strong> (<em>bool</em>) – flag to keep database connection open and return
+the <cite>Cursor</cite> object. If <cite>True</cite>, it’s the caller responsibility to
+close the database connection by executing <cite>cursor.connection.close()</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>cursor or None</strong> – the cursor object is returned if <cite>return_cursor</cite> is <cite>True</cite></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When specifying multi-word strings for column names or table names, those
+should be placed inside double quotes. For example, for a column named ‘Column 1’
+in a ‘Table 1’, corresponding key in the <cite>tbls</cite> dictionary should be
+“”Table 1””: [[“”Column 1””], “TEXT”],…,]</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="create_db.create_sqlite_db">
+<span class="sig-name descname"><span class="pre">create_sqlite_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_tables</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#create_db.create_sqlite_db" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a SQLite database and create all necessary
+tables.</p>
+<p>If a database under the specified name already exists, this
+functions aborts.</p>
+<p>As a result a new SQLite database file with empty tables is
+created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_file</strong> (<em>str</em>) – full pathname of the new database</p></li>
+<li><p><strong>db_tables</strong> (<em>dict</em>) – a dictionary with items that describe
+each database table to be created, in the form:
+&lt;table_name&gt;: […, [&lt;Column-name&gt;, Column-type&gt;],…]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-reports_db">
+<span id="reports-db-py"></span><h2>reports_db.py<a class="headerlink" href="#module-reports_db" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="reports_db.ReportsDB">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReportsDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB" title="Permalink to this definition"></a></dt>
+<dd><p>A wrapper class for communicating with an existing reports database.</p>
+<p><strong>Attributes</strong></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.conn">
+<span class="sig-name descname"><span class="pre">conn</span></span><a class="headerlink" href="#reports_db.ReportsDB.conn" title="Permalink to this definition"></a></dt>
+<dd><p>the db connection object</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.cursor">
+<span class="sig-name descname"><span class="pre">cursor</span></span><a class="headerlink" href="#reports_db.ReportsDB.cursor" title="Permalink to this definition"></a></dt>
+<dd><p>the db cursors object</p>
+</dd></dl>
+
+<p><strong>Methods</strong></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor. Initializes the DB connection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>db_file</strong> (<em>str</em>) – full pathname to the database file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sql</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Execute a SQL statement on current cursor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sql</strong> (<em>str</em>) – the SQL command to run</p></li>
+<li><p><strong>parms</strong> (<em>dict</em><em> | </em><em>list</em>) – optional arguments to the SQL command;
+a <cite>dict</cite> if named placeholders are used, a list if unnamed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>rows</strong> (<em>list of sqlite3.Row</em>) – A list of resulting rows (if any)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.get_all_ids">
+<span class="sig-name descname"><span class="pre">get_all_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.get_all_ids" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of ALL report IDs in the database</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.get_all_reps">
+<span class="sig-name descname"><span class="pre">get_all_reps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.get_all_reps" title="Permalink to this definition"></a></dt>
+<dd><p>Return ALL reports from a database as a dictionary {‘Hashed ID’: report}</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.get_ids_for_hospital">
+<span class="sig-name descname"><span class="pre">get_ids_for_hospital</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.get_ids_for_hospital" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of report IDs for the specified hospital</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.get_ids_for_physician">
+<span class="sig-name descname"><span class="pre">get_ids_for_physician</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.get_ids_for_physician" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of report IDs for the specified physician</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.get_reps_by_ids">
+<span class="sig-name descname"><span class="pre">get_reps_by_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lst_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.get_reps_by_ids" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve texts of reports for a list of report IDs.</p>
+<p>IMPORTANT: Generally, the order of returned reports is DIFFERENT
+from the order of IDs in <cite>lst_ids</cite>.</p>
+<p>NOTE: For a very long <cite>lst_ids</cite> list this function may be inefficient, or even
+return an error (for tens of thousands of IDs). If a list of IDs is created
+using one of  <cite>get_ids_for_</cite> methods, <strong>it is better to use corresponding `get_reps_for_…`
+methods</strong> to retrieve reports.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lst_ids</strong> (<em>sequence</em><em> of </em><em>str</em>) – a list of hashed IDs of the reports.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dict_reps</strong> (<em>dict</em>) – a dictionary mapping hashed ID -&gt; report (a text string)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.get_reps_for_hospital">
+<span class="sig-name descname"><span class="pre">get_reps_for_hospital</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.get_reps_for_hospital" title="Permalink to this definition"></a></dt>
+<dd><p>Return a dictionary {‘Hashed ID’: report} for the specified hospital</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.get_reps_for_physician">
+<span class="sig-name descname"><span class="pre">get_reps_for_physician</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.get_reps_for_physician" title="Permalink to this definition"></a></dt>
+<dd><p>Return a dictionary {‘Hashed ID’: report} for the specified physician</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.list_hospitals">
+<span class="sig-name descname"><span class="pre">list_hospitals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.list_hospitals" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of all hospitals in DB</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reports_db.ReportsDB.list_physicians">
+<span class="sig-name descname"><span class="pre">list_physicians</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#reports_db.ReportsDB.list_physicians" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of all hospitals in DB</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-word2vec">
+<span id="word2vec-py"></span><h2>word2vec.py<a class="headerlink" href="#module-word2vec" title="Permalink to this heading"></a></h2>
+<p><em>word2vec</em>: utils to construct vector embeddings for the words in reports,
+for reports themselves (‘doc2vec’), and also for clustering these vectors
+and visualizing the results.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.cluster_reports">
+<span class="sig-name descname"><span class="pre">cluster_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.cluster_reports" title="Permalink to this definition"></a></dt>
+<dd><p>Cluster report vectors passed as <cite>ss.data</cite> array with a shape
+<cite>(nvectors, ndimensions)</cite>.</p>
+<p>As a result, sets <cite>ss.labs2idx</cite> attribute, which is a mapping
+<cite>cluster_label -&gt; list of cluster point numbers</cite>
+where cluster label is an integer starting with 0, and point numbers
+correspond to the row numbers in <cite>ss.data</cite> array.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.clustering_info_to_reports_db">
+<span class="sig-name descname"><span class="pre">clustering_info_to_reports_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.clustering_info_to_reports_db" title="Permalink to this definition"></a></dt>
+<dd><p>Update the processed reports database, specified by the
+‘reports_db_name’ key in the input JSON, with clustering
+results that where previously saved in a database pointed to by
+the ‘clustered_reports_db_name’ key. As cluster labels are assigned in
+no specific order, the user will be requested to manually enter
+which label corresponds to which symbolic cluster code.</p>
+<p>Specifically, if there are three clusters, the user will be requested to provide
+label numbers for normal, abnormal and mixed clusters. Those will be assigned
+codes ‘N’, ‘A’ and ‘M’, repsectively. If there are two clusters only,
+then just ‘N’ and ‘A’ cluster codes will be used. In all other cases the user will
+need to specify labels for ‘N’, ‘A’ and ‘M’ codes as before, while codes for all other labels
+will be automatically set equal to the label numbers themselves.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.clustering_results_tbl_name">
+<span class="sig-name descname"><span class="pre">clustering_results_tbl_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.clustering_results_tbl_name" title="Permalink to this definition"></a></dt>
+<dd><p>Return a name of the clustering results column in the clustering
+results database. This name is determined by the clustering method and
+the number of requested clusters (both specified in the JSON file), and may be
+something like ‘KMeans results, 3 clusters’</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.doc2vec">
+<span class="sig-name descname"><span class="pre">doc2vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.doc2vec" title="Permalink to this definition"></a></dt>
+<dd><p>Train gensim doc2vec model on the reports data and construct a vector
+embedding for selected reports. The results are saved in the model file
+whose name is controlled by ‘d2v_model_file_name’ key. In
+fact, this key sets the file suffix (i.e. ‘doc2vec.model’), while the
+full file name is defined by the subset of reports used and will be like
+<cite>&lt;…&gt;_doc2vec.model</cite>. For example, if all reports were used to generate
+the model, the file name will be <cite>all_doc2vec.model</cite>.</p>
+<p>A subset of reports to work on is determined by keys <cite>‘select_physicians’</cite>,
+<cite>‘select_hospitals’ of the `INPUT_JSON_FILE</cite>. Doc2vec-specific input
+arguments are given under a key <cite>‘doc2vec’</cite>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.get_cluster_centers">
+<span class="sig-name descname"><span class="pre">get_cluster_centers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.get_cluster_centers" title="Permalink to this definition"></a></dt>
+<dd><p>Return nominal cluster center locations in the feature space,
+and real data points closest to the cluster centers. Returns results
+as attributes of the <cite>ss</cite> object, as shown below:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ss.cluster_centers</strong> (<em>ndarray</em>) – <cite>(nclusters, ndim)</cite> nominal cluster center
+locations in the feature space</p></li>
+<li><p><strong>ss.cluster_center_idx</strong> (<em>ndarray of ints</em>) – <cite>(nclusters, )</cite> indicies of real data
+points closest to the corresponding nominal center locations.</p></li>
+<li><p><strong>ss.cluster_center_hid</strong> (<em>ndarray of np.str_</em>) – <cite>(nclusters, )</cite> hashed IDs of the
+reports closest to corresponding cluster centers.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.get_doc_vectors_for_physicians">
+<span class="sig-name descname"><span class="pre">get_doc_vectors_for_physicians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">for_what</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.get_doc_vectors_for_physicians" title="Permalink to this definition"></a></dt>
+<dd><p>Load doc2vec model file, select only data vectors
+for specified physicians. If total number of these
+vectors is larger than <cite>max_reports</cite> - subsample
+the data so that the total equals <cite>max_reports</cite>.</p>
+<p>This function returns results by setting corresponding
+attributes to the application object <cite>ss</cite> as shown below:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ss</strong> – reference to this app object</p></li>
+<li><p><strong>for_what</strong> (<em>str</em>) – either <cite>‘cluster_reports’</cite> or <cite>‘plot_reports’</cite>;
+the app step where doc2vec model is being used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ss.data</strong> (<em>ndarray</em>) – <cite>(npoints, ndim)</cite> report vectors</p></li>
+<li><p><strong>ss.lst_hid</strong> (<em>array of str</em>) – hashed IDs of the reports in <cite>ss.data</cite></p></li>
+<li><p><strong>ss.phys2idx</strong> (<em>dict</em>) – mapping physician -&gt; list of indicies into <cite>ss.lst_hid</cite>
+and <cite>ss.data</cite> for each physician.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.get_ids_for_physician">
+<span class="sig-name descname"><span class="pre">get_ids_for_physician</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lst_hid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.get_ids_for_physician" title="Permalink to this definition"></a></dt>
+<dd><p>Return a dictionary physician -&gt; list of indecies
+for elements in ‘lst_hid’ corresponding to each
+physician.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.low_dim_embedding">
+<span class="sig-name descname"><span class="pre">low_dim_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.low_dim_embedding" title="Permalink to this definition"></a></dt>
+<dd><p>Embed high dimensional data into low dimensions, using
+Multi Dimensional Scaling (MDS) or t-Distributed Stochastic
+Neighbor Embedding (tSNE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ss</strong> – reference to this app object</p></li>
+<li><p><strong>data</strong> (<em>ndarray</em>) – shape (npoints, n_high_dims) the high dimensional data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>low_dim_data</strong> (<em>ndarray</em>) – shape (npoints, n_low_dims) the embedded
+low dimensional data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.num_workers">
+<span class="sig-name descname"><span class="pre">num_workers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.num_workers" title="Permalink to this definition"></a></dt>
+<dd><p>Return number of workers to use depending on number of available
+CPUs</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.parse_reports">
+<span class="sig-name descname"><span class="pre">parse_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reports</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.parse_reports" title="Permalink to this definition"></a></dt>
+<dd><p>Tokenize reports and remove stop words if requested in the input
+JSON file. Tokenizing is done using gensim’s <cite>simple_preprocessing()</cite>
+utility.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ss</strong> – reference to this app object</p></li>
+<li><p><strong>reports</strong> (<em>iterable</em><em> of </em><em>str</em>) – oritinal reports as single strings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>parsed</strong> (<em>list of lists of str</em>) – list of reports, each being a list of
+tokens</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.plot_reports">
+<span class="sig-name descname"><span class="pre">plot_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.plot_reports" title="Permalink to this definition"></a></dt>
+<dd><p>Perform low-dim embedding of the reports vectors produced by
+<cite>doc2vec</cite> and display reports distribution in 2D or 3D space.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.save_clustering_results">
+<span class="sig-name descname"><span class="pre">save_clustering_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.save_clustering_results" title="Permalink to this definition"></a></dt>
+<dd><p>Add clustering results to the public <cite>clustered_reports</cite> database.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.set_cluster_codes">
+<span class="sig-name descname"><span class="pre">set_cluster_codes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_clusters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.set_cluster_codes" title="Permalink to this definition"></a></dt>
+<dd><p>Asks user to identify cluster type for each label, and returns a
+list mapping each label to a corresponding code. Currently, there
+are three specific codes defined: ‘N’ for normal cluster, ‘A’ for
+abnormal cluster and ‘M’ for mixed cluster. Codes for remaining
+clusters (if any) match their labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_clusters</strong> (<em>int</em>) – as is</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>lst_codes</strong> (<em>list of str</em>) – list of symbolic codes for labels</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.show_similar_reports">
+<span class="sig-name descname"><span class="pre">show_similar_reports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.show_similar_reports" title="Permalink to this definition"></a></dt>
+<dd><p>Interactively show similar words, using a pretrained doc2vec model.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.show_similar_words">
+<span class="sig-name descname"><span class="pre">show_similar_words</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.show_similar_words" title="Permalink to this definition"></a></dt>
+<dd><p>Interactively show similar words, using a pretrained word2vec model.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.split_list">
+<span class="sig-name descname"><span class="pre">split_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lst_lens</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.split_list" title="Permalink to this definition"></a></dt>
+<dd><p>Split a 1D array <cite>d</cite> into sub-arrays of lengths
+specified in the list <cite>lst_lens</cite>. Return a list
+of sub-arrays</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.subsample_idx">
+<span class="sig-name descname"><span class="pre">subsample_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phys2idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsamples</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.subsample_idx" title="Permalink to this definition"></a></dt>
+<dd><p>Randomly choose indecies from the phys2idx dictionary so that
+total number of all indecies is equal to nsamples and return
+‘sub-sampled’ phys2idx. The algorithm tries to spread nsamples
+equally among physicians. If equal share is larger than total
+number of samples per physician, than all her samples will be
+used.</p>
+<p>NOTE: this function is only called when nsamples is less than
+total number of samples in phys2idx</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ss</strong> – ref to this app object</p></li>
+<li><p><strong>phys2idx</strong> (<em>dict</em>) – physician -&gt; list if indecies</p></li>
+<li><p><strong>nsamples</strong> (<em>int</em>) – total number of samples required</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>new_phys2idx</strong> (<em>dict</em>) – physician -&gt; 1D array of indecies.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="word2vec.word2vec">
+<span class="sig-name descname"><span class="pre">word2vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#word2vec.word2vec" title="Permalink to this definition"></a></dt>
+<dd><p>Train word2vec model on the reports data and construct the embedding.
+A subset of reports to work on is determined by keys <cite>‘select_physicians’</cite>,
+<cite>‘select_hospitals’ of the `INPUT_JSON_FILE</cite>. Word2vec-specific input
+arguments are given under a key <cite>‘word2vec’</cite>.</p>
+<p>The results are saved in the model file
+whose name is controlled by ‘w2v_model_file_name key’. In
+fact, this key sets the file suffix (i.e. ‘word2vec.model’), while the full file name is defined
+by the subset of reports used and will be like
+<cite>&lt;…&gt;_word2vec.model</cite>. For example, if all reports were used to generate
+the model, the file name will be <cite>all_word2vec.model</cite>.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="code.html" class="btn btn-neutral float-left" title="Classes and functions for EEG data processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, AM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

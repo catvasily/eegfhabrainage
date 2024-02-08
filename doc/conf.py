@@ -14,8 +14,10 @@ import sys
 sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('preprocessing').resolve().as_posix())
 sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('misc').resolve().as_posix())
 sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('beam-python').resolve().as_posix())
+sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('reports').resolve().as_posix())
 sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('mne/lib/python3.8/site-packages').resolve().as_posix())
 sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('mne/lib64/python3.8/site-packages').resolve().as_posix())
+sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('reports/pii/lib64/python3.8/site-packages').resolve().as_posix())
 print(sys.path)
 
 project = 'eegfh'

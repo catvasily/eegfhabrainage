@@ -8,7 +8,8 @@ Code uses the original EEG records in EDF format as input. The following steps (
 1. **Filtering, resampling and extracting of good data segments** of a target length. The output is the good segments in EDF format.
 2. **Performing EEG PREP procedure and artifact removal**. The input is typically good segments obtained on the 1st step,
     and the output is the records in **.fif** format.
-3. **Extracting hyperventilation intervals from the original records**. The extracted intervals (segments) are saved in .EDF format.
+3. **Extracting hyperventilation and photic stimulation intervals from the original records**. The extracted
+   intervals (segments) are saved in .EDF format.
 4. **Performing beamformer reconstruction of source time courses from standard atlas locations ("Regions of Interest" - ROIs)**.
 5. **Calculating power spectral densities (PSD)s of the sensor and source-reconstructed time courses.**
 6. **Calculating Continuous Wavelet Transforms (CWTs) and estimating statistical parameters of the CWT amplitudes.**
@@ -420,26 +421,32 @@ therefore comments in the code below should be removed if one wants to use it in
 
 ```
 
-## 3. Extracting hyperventilation intervals from the original records
-This step is completely independent from steps 1, 2 and is only used to identify and store the HV segments, as the name suggests.
+## 3. Extracting hyperventilation and photic stimulation intervals from the original records
+This step is completely independent from steps 1, 2 and is only used to identify and store the
+hyperventilation (HV) and photic stimulation (PS) segments, as the name suggests.
 
 ### Running the code
-The top level script to execute is **`extract_hv_intervals.py`**. Internally it calls the same function `slice_edfs()` as in the
+The top level scripts to execute are **`extract_hv_intervals.py`**, **`extract_ps_intervals.py`**
+respectively. Internally both scripts call the same function `slice_edfs()` as in the
 [first step](#1-filtering-resampling-and-extracting-of-good-data-segments).
 
-When executing the code locally, use this command in Linux terminal:
+When executing the code locally, use these commands in Linux terminal:
 ```
 python extract_hv_intervals.py
+python extract_ps_intervals.py
 ```
-If running as an array job on the cedar cluster, use this command in your sbatch script (see `eeg_array_job.sbatch` for an example):
+If running as an array job on the cedar cluster, use these commands in your sbatch script
+(see `eeg_array_job.sbatch` for an example):
 ```
 python extract_hv_intervals.py ${SLURM_ARRAY_TASK_ID}
+python extract_ps_intervals.py ${SLURM_ARRAY_TASK_ID}
 ```
 
-As usual, the main script **`extract_hv_intervals.py`** may need to be **modified** to set the root input and output folders, etc.
-Please refer to section ["Running the code"](#running-the-code) under the segmentation task
-["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments), for details.
-Note that this step should only be applied to the original EDF records. 
+As usual, the main scripts **`extract_XX_intervals.py`** may need to be **modified** to set
+the root input and output folders, etc. Please refer to section ["Running the code"](#running-the-code)
+under the segmentation task
+["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments),
+for details. Note that these steps should only be applied to the original EDF records. 
 
 ### Performed operations
 * First, the same **basic preprocessing operations as in the task 1 (segmentation) are done**, namely
@@ -450,13 +457,15 @@ Note that this step should only be applied to the original EDF records.
     * All EEG channels are additionally band-pass filtered to a `target_band`
     * All channels are resampled to a sampling frequency equal to the `target_frequency`
 
-* **Hyperventilation intervals** identified by markers (annotations) *"HV XX min"* **are extracted**.
-  No padding of the HV segments is applied.
+* **Hyperventilation intervals** are identified by markers (annotations) specified under keys
+  *"HV_regexp"*, *"HV_end"* in the `preproc_conf.json` file. **Photic stimulation intervals** are
+   identified by markers specified under keys *"photic_starts"*, *"photic_ends"* in the same file.
+  No padding is applied to the extracted HV and PS segments.
 
 * The resulting records are saved in EDF format.
 
 ### JSON configuration file
-All HV-related configuration parameters are stored in the JSON file `preproc_conf.json`.
+All HV and PS-related configuration parameters are stored in the JSON file `preproc_conf.json`.
 
 ## 4. Performing source reconstruction
 In this step, we reconstruct the source time courses from a designated set of Regions of Interest (ROIs).

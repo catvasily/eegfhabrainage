@@ -11,6 +11,8 @@ doc/_build/html/_sources/
 # Virtual env and/or symbolic link to it other folders
 mne
 mne/
+pii
+pii/
 
 *.png
 *.ds

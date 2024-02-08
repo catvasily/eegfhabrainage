@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Classes and functions &mdash; eegfh 0.1 documentation</title>
+  <title>Classes and functions for EEG data processing &mdash; eegfh 0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -20,6 +20,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Classes and functions for EEG reports processing" href="reports.html" />
     <link rel="prev" title="EEG preprocessing pipeline for FHA EDF dataset" href="README.html" /> 
 </head>
 
@@ -45,7 +46,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="README.html">EEG preprocessing pipeline for FHA EDF dataset</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Classes and functions</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classes and functions for EEG data processing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-run_filtering_segmentation">run_filtering_segmentation.py</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#run_filtering_segmentation.get_data_folders"><code class="docutils literal notranslate"><span class="pre">get_data_folders()</span></code></a></li>
 </ul>
@@ -209,8 +210,23 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-plot_alpha_power">plot_alpha_power.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-running_mean_std">running_mean_std.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running_mean_std.RunningMeanSTD"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.__init__"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.counter"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.counter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.is_array"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.is_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.mean"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.push"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.push()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.reset"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.std"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.std()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.var"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.var()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reports.html">Classes and functions for EEG reports processing</a></li>
 </ul>
 
         </div>
@@ -227,7 +243,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Classes and functions</li>
+      <li class="breadcrumb-item active">Classes and functions for EEG data processing</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/code.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -237,9 +253,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="classes-and-functions">
-<h1>Classes and functions<a class="headerlink" href="#classes-and-functions" title="Permalink to this heading"></a></h1>
-<p>Python modules, classes and functions used in preprocessing.</p>
+  <section id="classes-and-functions-for-eeg-data-processing">
+<h1>Classes and functions for EEG data processing<a class="headerlink" href="#classes-and-functions-for-eeg-data-processing" title="Permalink to this heading"></a></h1>
+<p>Python code used for EEG records processing.</p>
 <section id="module-run_filtering_segmentation">
 <span id="run-filtering-segmentation-py"></span><h2>run_filtering_segmentation.py<a class="headerlink" href="#module-run_filtering_segmentation" title="Permalink to this heading"></a></h2>
 <p><strong>A top level script for filtering, resampling and extracting good segments
@@ -2412,6 +2428,89 @@ for details.</p></li>
 <span id="plot-alpha-power-py"></span><h2>plot_alpha_power.py<a class="headerlink" href="#module-plot_alpha_power" title="Permalink to this heading"></a></h2>
 <p><strong>A top level script to display alpha-band source power distribution on the cortex surface.</strong></p>
 </section>
+<section id="module-running_mean_std">
+<span id="running-mean-std-py"></span><h2>running_mean_std.py<a class="headerlink" href="#module-running_mean_std" title="Permalink to this heading"></a></h2>
+<p>Calculate mean and STD of a stream of data.</p>
+<dl class="simple">
+<dt>Source:</dt><dd><p><a class="reference external" href="https://www.johndcook.com/blog/standard_deviation/">https://www.johndcook.com/blog/standard_deviation/</a>
+<a class="reference external" href="https://stackoverflow.com/questions/895929/how-do-i-determine-the-standard-deviation-stddev-of-a-set-of-values">https://stackoverflow.com/questions/895929/how-do-i-determine-the-standard-deviation-stddev-of-a-set-of-values</a></p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RunningMeanSTD</span></span><a class="headerlink" href="#running_mean_std.RunningMeanSTD" title="Permalink to this definition"></a></dt>
+<dd><p>This class’ purpose is to calculate a running value of the mean and
+variance (or standard deviation) of a stream of data. Each data item
+may be a scalar or a numpy ndarray.</p>
+<p>Methods:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#running_mean_std.RunningMeanSTD.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Constructor</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD.counter">
+<span class="sig-name descname"><span class="pre">counter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#running_mean_std.RunningMeanSTD.counter" title="Permalink to this definition"></a></dt>
+<dd><p>Return current number of accumulated data points</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD.is_array">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#running_mean_std.RunningMeanSTD.is_array" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>v</strong> – data item from the stream</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p><cite>True</cite> for non-scalar data types, <cite>False</cite> otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#running_mean_std.RunningMeanSTD.mean" title="Permalink to this definition"></a></dt>
+<dd><p>Return currently accumulated average</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD.push">
+<span class="sig-name descname"><span class="pre">push</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#running_mean_std.RunningMeanSTD.push" title="Permalink to this definition"></a></dt>
+<dd><p>Add new data item <cite>v</cite> from the stream to accumulated statistics.
+All the magic happens here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>v</strong> – data item from the stream</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#running_mean_std.RunningMeanSTD.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Clear all accumulated data and reinitialize the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD.std">
+<span class="sig-name descname"><span class="pre">std</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#running_mean_std.RunningMeanSTD.std" title="Permalink to this definition"></a></dt>
+<dd><p>Return currently accumulated standard deviation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="running_mean_std.RunningMeanSTD.var">
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#running_mean_std.RunningMeanSTD.var" title="Permalink to this definition"></a></dt>
+<dd><p>Return currently accumulated variance</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -2419,6 +2518,7 @@ for details.</p></li>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="README.html" class="btn btn-neutral float-left" title="EEG preprocessing pipeline for FHA EDF dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reports.html" class="btn btn-neutral float-right" title="Classes and functions for EEG reports processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

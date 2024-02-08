@@ -1,0 +1,219 @@
+# ----------------------------------------------------------------------
+# NOTE: this is a JSON file with comments. It requires using commentjson
+# module to process, instead of a standard python json library
+# ----------------------------------------------------------------------
+# Input parameters for process_reports.py                  
+# ----------------------------------------------------------------------
+{
+    # ----- Steps to be run: -----------------------------
+    #"to_run": ["inputs", "word_stats"],
+    #"to_run": ["inputs", "word2vec"],
+    #"to_run": ["inputs", "doc2vec"],
+    #"to_run": ["inputs", "show_similar_words"],
+    #"to_run": ["inputs", "show_similar_reports"],
+    #"to_run": ["inputs", "cluster_reports", "plot_reports"],
+    #"to_run": ["inputs", "doc2vec", "cluster_reports", "plot_reports"],
+    #"to_run": ["inputs", "plot_reports"],
+    "to_run": ["inputs", "clustering_info_to_reports_db"],
+    #-----------------------------------------------------
+
+    "reports_db_dir": "/user/alexm/tmp/clean_eeg_reps",
+    "reports_db_name": "processed_reports.db",              # Public database with anonymized reports 
+    "clustered_reports_db_name": "clustered_reports.db",    # Database with clustering results
+
+    #"select_physicians": [],    # If not empty, process only listed physicians 
+    #"select_physicians": ["Sophia"], 
+    "select_physicians": ["Zoe"], 
+    #"select_physicians": ["Sophia", "Zoe"], 
+    "select_hospitals": [],     # If not empty and "select_physicians" = [],
+                                # process only listed hospitals
+
+    # Maximum number of reports to process for resource-hungry tasks
+    # Currently applied to: MDS
+    # If total selected reports is more than that, a random sub-sample of size
+    # 'max_reports' will be used
+    # ------------------------------
+    "max_reports": 50000,        
+    # ------------------------------
+
+    "ignore_stop_words": true,  # Flag to ignore stop words when doing word stats
+    "seed": 1234321,            # If not null, a common seed for all random operations
+
+    "word2vec": {
+        # Saved trained word2vec model file suffix:
+        "w2v_model_file_name": "word2vec.model",
+        # Optional args to gensim's simple_preprocess()
+        "preproc_args": {"deacc": false, "min_len": 2, "max_len": 15},
+        "model_settings": {
+            "vector_size": 100,     # Embedding dimension
+            "window": 5,            # Maximum distance between the current and predicted word
+            "min_count": 5,         # Ignore words with count less than this
+            "alpha": 0.025,         # Initial learning rate
+            "sg": 0,                # Algorithm: 1 for skip-gram; otherwise CBOW.
+            "hs": 0,                # Target functional: If 1, hierarchical softmax, 0 - negative sampling
+            "negative": 5,          #  If > 0, number of “noise words” for neg sampling; 0 - no neg sampling used
+            "ns_exponent": 0.75,    # The exponent used to shape the negative sampling distribution.
+            "cbow_mean": 1,         # For CBOW: If 0, use the sum of the context word vectors; 1 - use the mean
+            "epochs": 5,            # Number of iterations (epochs) over the corpus.
+            "sorted_vocab": 1,      # 1 or 0 - flag to sort vocab by descending counts
+            "compute_loss": true    # Flag to save the last training's final loss
+        }
+    },
+
+    "doc2vec": {
+        # Saved trained doc2vec model file suffix:
+        "d2v_model_file_name": "doc2vec.model",     # This is a SUFFIX of model file; the full name will be like
+                                                    # all__<SUFFIX> or Zoe_<SUFFIX>
+        "model_settings": {
+            "vector_size": 100,     # Embedding dimension    
+            "window": 5,            # The maximum distance between the current and predicted word within a sentence.
+            "epochs": 100,          # Number of iterations (epochs) over the corpus.
+            "min_count": 3,         # Ignore a word if its count in vocabulary less than this setting
+            "hs": 1,                # If 1, hierarchical softmax used for model training, if set to 0 (default) - negative sampling.
+                                    # When 0, 'negative' must be a positive integer; 
+                                    # is non-zero, negative sampling will be used.
+            "negative": 5,          # If > 0 (default 5), negative sampling will be used, the int specifies number of “noise words” (usually between 5-20).
+                                    # If set to 0 - no negative sampling (then set hs = 1)
+            "ns_exponent": 0.75,    # The exponent of negative sampling distribution. A value of 1.0 samples exactly in proportion to the
+                                    # frequencies, 0.0 samples all words equally.
+            "dm_mean": 0,           # Use mean(1) or sum(0) of context vectors
+            "dm": 1,                # Algorithm: PV-DM (1) or PV-DBOW (0)
+            "dbow_words": 0,        # If set to 1 trains word-vectors (in skip-gram fashion) simultaneous with DBOW doc-vector training;
+                                    # If 0, only trains doc-vectors (faster).
+            "dm_concat": 0,         # If 1, use concatenation of context vectors rather than sum/average
+            "dm_tag_count": 1       # Number of tags per document
+        }
+    },
+
+    "cluster_reports": {
+        "method": "KMeans",    # "KMeans", "BisectingKMeans", "HDBSCAN"
+        "d2v_model_file_name": "all_doc2vec.model",
+
+        # See https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+        # regarding the parameters meaning
+        "KMeans_settings": {
+            "n_clusters": 3,
+            "init": "k-means++",
+            "n_init": "auto",
+            "max_iter": 300,
+            "tol": 0.0001,
+            "verbose": 0,
+            "copy_x": true,
+            "algorithm": "lloyd"
+        },
+
+        "BisectingKMeans_settings": {
+            "n_clusters": 3,
+            "init": "k-means++",
+            "n_init": 5,
+            "max_iter": 300,
+            "verbose": 0,
+            "tol": 0.0001,
+            "copy_x": true,
+            "algorithm": "lloyd",
+            "bisecting_strategy": "biggest_inertia"
+        },
+
+        "HDBSCAN_settings": {
+            "min_cluster_size": 3,              # min 2
+            "min_samples": null,                # Number of samples in the neighborhood for core points
+                                                # null (default) will use min_cluster_size
+            "cluster_selection_epsilon": 0.0,   # 0. is the default
+            "max_cluster_size": null,
+            "metric": "euclidean",
+            "metric_params": null,              # additional params for metric, if any
+            "alpha": 1.0,                       # distance scaling parameter, default 1
+            "algorithm": "auto",
+            "leaf_size": 40,                    # (default 40) parm for nearest neighbors search
+            "n_jobs": null,
+            "cluster_selection_method": "eom",  # {“eom”, “leaf”}, default=”eom”
+            "allow_single_cluster": false,
+            "store_centers": "centroid",        # null, "centroid", "medoid"
+            "copy": true                        # if data needs to be modified for the algorithm, original
+                                                # data will be copied first to be preserved
+        },
+
+        "output_tables": {
+            # NOTE: table names 'centers', and 'results' are place holders;
+            # they will be modified in accordance with clustering settings 
+            "centers": [["Cluster","INTEGER"], ["\"Hashed ID\"","TEXT"]],
+            "results": [["\"Hashed ID\"","TEXT"], ["Cluster","INTEGER"], ["Report","TEXT"],
+                ["Note","TEXT"]]
+        },
+
+        # This key should be consistent with existing processed_reports.db schema
+        # It specifies where the clustering results are saved in processed reports.db
+        "reports_db_info": {
+            "results_tbl": "reports",           # The table name
+            "hid_col": "\"Hashed ID\"",         # Hashed ID column name
+            "cluster_col": "\"Cluster code\"",  # Cluster code column name
+        }
+    },
+
+    "plot_reports": {
+        "d2v_model_file_name": "all_doc2vec.model", # Saved doc2vec model file in "reports_db_dir" folder
+        "low_dim_embedding": "tSNE",                # either "MDS" or "tSNE"
+        "colors_for": "clusters",                   # Colors depict: either "physicians" or "clusters"
+        #"colors_for": "physicians",
+        "dpi": 300,                         # DPI for savec PNG file
+
+        # Mapping physician -> color
+        "phys_colors": {
+            "Sophia": "red", 
+            "Maria": "blue",
+            "Eleni": "green",
+            "Zoe": "black",
+            "Athina": "violet",
+            "Ioanna": "cyan",
+            "Anastasia": "magenta",
+            "Despina": "gray",
+            "Katerina": "beige",
+            "Elektra": "gold",
+            "Other": "yellow"
+        },
+
+        # See matplotlib - scatter plot for possible valuse of args
+        "scatter_plot_args": {
+            "marker": ".",      # Marker type
+            "s": 30,            # Marker size
+            "alpha": 0.5        # Opacity for marker overlaps
+        },
+
+        # Parameters related to MDS embedding
+        "MDS": {
+            "n_components": 3,      # Either 2 or 3 - embedding dimension
+            "metric": true,         # Metric/nonmetric embedding
+            "n_init": 4,            # Number of times the algorithm is run to get best fit
+            "max_iter": 300,        # Max number of iterations in a single run
+            "verbose": 1,           # Verbose level
+            "eps": 0.001,           # Tolerance threshold to stop iterations
+            "n_jobs": null,         # Default None; -1 meand use all available CPUs
+                                    # When many CPUs are used, separate processes are started and required
+                                    # memory is increased proportionally
+                                    # When null, multiple threads are started so memory is reused
+            "dissimilarity": "euclidean",   # or 'precomputed'
+            "normalized_stress": false      # Whether return normed stress (Stress-1) instead of raw stress.
+                                            # Only supported in non-metric MDS.
+        },
+
+        # Parameters for tSNE embedding
+        "tSNE": {
+            "n_components": 2,
+            "perplexity": 30.0,             #default
+            #"perplexity": 60.0,
+            "early_exaggeration": 12.0,     #default
+            #"early_exaggeration": 30.0,
+            "learning_rate": "auto",
+            "n_iter": 1000,
+            "n_iter_without_progress": 300,
+            "min_grad_norm": 1e-07,
+            "metric": "euclidean",
+            "metric_params": null,
+            "init": "pca", "verbose": 1,
+            "method": "barnes_hut",
+            "angle": 0.5,
+            "n_jobs": null
+        }
+    }
+}
+

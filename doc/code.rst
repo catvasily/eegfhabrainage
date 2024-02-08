@@ -1,6 +1,6 @@
-Classes and functions
-=====================
-Python modules, classes and functions used in preprocessing.
+Classes and functions for EEG data processing
+=============================================
+Python code used for EEG records processing.
 
 run_filtering_segmentation.py
 -----------------------------
@@ -69,4 +69,8 @@ view_inflated_brain_data.py
 plot_alpha_power.py
 -------------------
 .. automodule:: plot_alpha_power
+
+running_mean_std.py
+-------------------
+.. automodule:: running_mean_std
 

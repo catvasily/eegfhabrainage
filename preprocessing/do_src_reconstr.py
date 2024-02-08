@@ -4,6 +4,7 @@
 import sys
 import os.path as path
 import numpy as np
+import json
 import h5py        # Needed to save/load files in .hdf5 format
 import mne
 
@@ -509,6 +510,9 @@ def read_roi_time_courses(ltc_file):
             Those can be used to reconstruct ROI time courses as `W.T @ sensor_data` 
         pz (float or None): data's pseudo-Z found as `pz = trace(R)/tr(N)`,
             where `N` is the noise covariance
+        ps_events(ndarray): nevents x 3; PS events array in MNE Python 'events' format
+        ps_id_dict(dict): dictionary event_descr -> event_id; see `event_id` parameter
+            description of the MNE `Epochs` object constructor
     """
     with h5py.File(ltc_file, 'r') as f:
         label_tcs = f['label_tcs'][:,:]
@@ -534,10 +538,20 @@ def read_roi_time_courses(ltc_file):
         else:
             pz = None
 
-    return (label_tcs, label_names, vertno, rr, W, pz)  
+        if 'ps_events' in f:
+            ps_events = f['ps_events'][:,:]
+        else:
+            ps_events = None
+
+        if 'ps_id_dict' in f:
+            ps_id_dict = json.loads(f['ps_id_dict'][()])
+        else:
+            ps_id_dict = None
+
+    return (label_tcs, label_names, vertno, rr, W, pz, ps_events, ps_id_dict)  
  
 def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr = None, W = None,
-                           pz = None):
+                           pz = None, ps_events = None, ps_id_dict = None):
     """Save ROI (label) time courses and related data in .hdf5
     file.
 
@@ -545,6 +559,12 @@ def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr =
     'label_names'. If provided, ROI centers of mass (COMs) vertex numbers
     on the FreeSurface's `fsaverage` cortex surface, ROI COMs in MRI coordinates,
     ROI spatial filter weights and the EEG record overall pseudo-Z will also be saved.
+
+    If photic stimulation (PS) segments of the EEG records are processed, 'events' array
+    and 'event_id' dictionary corresponding to the PS stimulation events may be saved (if
+    passed as the parameters) in the datasets named 'ps_events', 'ps_id_dict' respectively.
+    Note that ps_id_dict is saved as a JSON string corresponding to the this dictionary
+    object.
 
     Args:
         ltc_file (str): full pathname of the output .hdf5 file
@@ -558,7 +578,10 @@ def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr =
         W (ndarray or None): nchans x nlabels; spatial filter weights for each ROI.
             Those can be used to reconstruct ROI time courses as `W.T @ sensor_data` 
         pz (float or None): data's pseudo-Z found as `pz = trace(R)/tr(N)`,
-            where `N` is the noise covariance
+            where `N` is the noise covariance.
+        ps_events(ndarray): nevents x 3; PS events array in MNE Python 'events' format
+        ps_id_dict(dict): dictionary event_descr -> event_id; see `event_id` parameter
+            description of the MNE `Epochs` object constructor
 
     Returns:
         None
@@ -578,6 +601,14 @@ def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr =
 
         if not (pz is None):
             f.create_dataset('pz', data=pz)
+
+        if ps_events is not None:
+            f.create_dataset('ps_events', data=ps_events)
+
+        if ps_id_dict is not None:
+            # Convert dict to JSON string
+            sjson = json.dumps(ps_id_dict)
+            f.create_dataset('ps_id_dict', data=sjson)
 
 def beam_extract_label_time_course(sensor_data, cov, labels, fwd, W, mode = 'pca_flip',
         verbose = None):
