@@ -15,6 +15,7 @@ from do_src_reconstr import fwd_file_name, construct_noise_and_inv_cov,\
     compute_source_timecourses, get_beam_weights, compute_roi_time_courses,\
     get_voxel_coords, write_roi_time_courses, ltc_file_name, get_label_coms
 from add_virtual_channels import add_virtual_channels
+from create_ps_events import create_ps_events
 
 JSON_CONFIG_FILE = "src_reconstr_conf.json"
 '''Default name (without a path) for the JSON file with parameter settings for
@@ -55,13 +56,22 @@ def get_data_folders():
     # data_root - where the input comes from; out_root - where the output goes
     if 'ub20-04' in host:
         mne.viz.set_browser_backend('matplotlib')
-        data_root = '/data/eegfhabrainage/after-prep-ica'
-        out_root = '/data/eegfhabrainage/src-reconstr'
+        # For 'good' segments processing:
+        #data_root = '/data/eegfhabrainage/after-prep-ica'
+        #out_root = '/data/eegfhabrainage/src-reconstr'
+        # For photic stim segments processing:
+        data_root = '/data/eegfhabrainage/ps-after-prep-ica'
+        out_root = '/data/eegfhabrainage/ps-src-reconstr'
         fs_dir = user_home + '/mne_data/MNE-fsaverage-data'
         cluster_job = False
     elif 'cedar' in host:
-        data_root = '/project/6019337/databases/eeg_fha/preprocessed/001_a01_01/'
-        out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/src-reconstr'
+        # For 'good' segments processing:
+        #data_root = '/project/6019337/databases/eeg_fha/preprocessed/001_a01_01/'
+        #out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/src-reconstr'
+
+        # For photic stim segments processing:
+        data_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/ps-after-prep-ica'
+        out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/ps-src-reconstr'
         fs_dir = user_home + '/projects/rpp-doesburg/' + user + '/data/mne_data/MNE-fsaverage-data'
         cluster_job = True
     else:
@@ -79,21 +89,29 @@ if __name__ == '__main__':
     # ---------- Inputs ------------------
     N_ARRAY_JOBS = 100       # Number of parallel jobs to run on cluster
 
-    hospital = 'Burnaby'     # Burnaby, Abbotsford, RCH, etc.
+    #hospital = 'Burnaby'     # Burnaby, Abbotsford, RCH, etc.
     #hospital = 'Abbotsford' 
     #hospital = 'RCH' 
+    hospital = 'Surrey' 
+    
+    # RCH
+    #source_scan_ids = ['9aa13ea7-9f29-4fa1-91f3-8bd476fb15b6']      # photic
+
+    # Surrey
+    source_scan_ids = ['e21359e0-5535-44d9-8f11-83fe520cf9ae']      # photic
 
     # Abbotsford subset
-    #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
+    #source_scan_ids = ['2762e40d-6c0f-4185-9bfb-fb6f66b43f09']      # photic
 
     # Burnaby subset:
-    source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',		# Interesting spectrum
+    #source_scan_ids = ['a1ffd117-b263-480d-b18e-6f12820c3fec',        # photic stim segment
+                       #'2f8ab0f5-08c4-4677-96bc-6d4b48735da2',		# Interesting spectrum
                        #'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
                        #'81be60fc-ed17-4f91-a265-c8a9f1770517',
                        #'ffff1021-f5ba-49a9-a588-1c4778fb38d3',
                        #'81c0c60a-8fcc-4aae-beed-87931e582c45',
                        #'57ea2fa1-66f1-43f9-aa17-981909e3dc96',
-                    ]
+    #                ]
 
     #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
 
@@ -317,8 +335,16 @@ if __name__ == '__main__':
 
             ltc_file = subject_output_dir + "/" + ltc_file_name(scan_id, conf_dict["source_space"]) 
             label_com_rr = get_voxel_coords(fwd['src'], label_coms)    # rr's will be in head coords
+
+            ps_events, ps_id_dict = create_ps_events(raw, verbose='ERROR')
+
+            if np.size(ps_events) == 0:
+                ps_events = None
+                ps_id_dict = None
+
             write_roi_time_courses(ltc_file, label_tcs, label_names,
-                vertno = label_coms, rr = label_com_rr, W = label_wts, pz = pz)
+                vertno = label_coms, rr = label_com_rr, W = label_wts, pz = pz,
+                ps_events = ps_events, ps_id_dict = ps_id_dict)
 
             # TO DO:
             #    - (optional) implement source reconstruction with dSPM, for comparison
