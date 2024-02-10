@@ -59,7 +59,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#id3">JSON configuration file</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#extracting-hyperventilation-intervals-from-the-original-records">3. Extracting hyperventilation intervals from the original records</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records">3. Extracting hyperventilation and photic stimulation intervals from the original records</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id4">Running the code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id5">Performed operations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id6">JSON configuration file</a></li>
@@ -126,7 +126,8 @@ Code uses the original EEG records in EDF format as input. The following steps (
 <li><p><strong>Filtering, resampling and extracting of good data segments</strong> of a target length. The output is the good segments in EDF format.</p></li>
 <li><p><strong>Performing EEG PREP procedure and artifact removal</strong>. The input is typically good segments obtained on the 1st step,
 and the output is the records in <strong>.fif</strong> format.</p></li>
-<li><p><strong>Extracting hyperventilation intervals from the original records</strong>. The extracted intervals (segments) are saved in .EDF format.</p></li>
+<li><p><strong>Extracting hyperventilation and photic stimulation intervals from the original records</strong>. The extracted
+intervals (segments) are saved in .EDF format.</p></li>
 <li><p><strong>Performing beamformer reconstruction of source time courses from standard atlas locations (“Regions of Interest” - ROIs)</strong>.</p></li>
 <li><p><strong>Calculating power spectral densities (PSD)s of the sensor and source-reconstructed time courses.</strong></p></li>
 <li><p><strong>Calculating Continuous Wavelet Transforms (CWTs) and estimating statistical parameters of the CWT amplitudes.</strong></p></li>
@@ -552,25 +553,31 @@ therefore comments in the code below should be removed if one wants to use it in
 </div>
 </section>
 </section>
-<section id="extracting-hyperventilation-intervals-from-the-original-records">
-<h2>3. Extracting hyperventilation intervals from the original records<a class="headerlink" href="#extracting-hyperventilation-intervals-from-the-original-records" title="Permalink to this heading"></a></h2>
-<p>This step is completely independent from steps 1, 2 and is only used to identify and store the HV segments, as the name suggests.</p>
+<section id="extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records">
+<h2>3. Extracting hyperventilation and photic stimulation intervals from the original records<a class="headerlink" href="#extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records" title="Permalink to this heading"></a></h2>
+<p>This step is completely independent from steps 1, 2 and is only used to identify and store the
+hyperventilation (HV) and photic stimulation (PS) segments, as the name suggests.</p>
 <section id="id4">
 <h3>Running the code<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
-<p>The top level script to execute is <strong><code class="docutils literal notranslate"><span class="pre">extract_hv_intervals.py</span></code></strong>. Internally it calls the same function <code class="docutils literal notranslate"><span class="pre">slice_edfs()</span></code> as in the
+<p>The top level scripts to execute are <strong><code class="docutils literal notranslate"><span class="pre">extract_hv_intervals.py</span></code></strong>, <strong><code class="docutils literal notranslate"><span class="pre">extract_ps_intervals.py</span></code></strong>
+respectively. Internally both scripts call the same function <code class="docutils literal notranslate"><span class="pre">slice_edfs()</span></code> as in the
 <a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments">first step</a>.</p>
-<p>When executing the code locally, use this command in Linux terminal:</p>
+<p>When executing the code locally, use these commands in Linux terminal:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">extract_hv_intervals</span><span class="o">.</span><span class="n">py</span>
+<span class="n">python</span> <span class="n">extract_ps_intervals</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>If running as an array job on the cedar cluster, use this command in your sbatch script (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
+<p>If running as an array job on the cedar cluster, use these commands in your sbatch script
+(see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python extract_hv_intervals.py ${SLURM_ARRAY_TASK_ID}
+python extract_ps_intervals.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
 </div>
-<p>As usual, the main script <strong><code class="docutils literal notranslate"><span class="pre">extract_hv_intervals.py</span></code></strong> may need to be <strong>modified</strong> to set the root input and output folders, etc.
-Please refer to section <a class="reference internal" href="#running-the-code">“Running the code”</a> under the segmentation task
-<a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments">“1. Filtering, resampling and extracting of good data segments”</a>, for details.
-Note that this step should only be applied to the original EDF records.</p>
+<p>As usual, the main scripts <strong><code class="docutils literal notranslate"><span class="pre">extract_XX_intervals.py</span></code></strong> may need to be <strong>modified</strong> to set
+the root input and output folders, etc. Please refer to section <a class="reference internal" href="#running-the-code">“Running the code”</a>
+under the segmentation task
+<a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments">“1. Filtering, resampling and extracting of good data segments”</a>,
+for details. Note that these steps should only be applied to the original EDF records.</p>
 </section>
 <section id="id5">
 <h3>Performed operations<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
@@ -585,14 +592,16 @@ Note that this step should only be applied to the original EDF records.</p>
 <li><p>All channels are resampled to a sampling frequency equal to the <code class="docutils literal notranslate"><span class="pre">target_frequency</span></code></p></li>
 </ul>
 </li>
-<li><p><strong>Hyperventilation intervals</strong> identified by markers (annotations) <em>“HV XX min”</em> <strong>are extracted</strong>.
-No padding of the HV segments is applied.</p></li>
+<li><p><strong>Hyperventilation intervals</strong> are identified by markers (annotations) specified under keys
+<em>“HV_regexp”</em>, <em>“HV_end”</em> in the <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code> file. <strong>Photic stimulation intervals</strong> are
+identified by markers specified under keys <em>“photic_starts”</em>, <em>“photic_ends”</em> in the same file.
+No padding is applied to the extracted HV and PS segments.</p></li>
 <li><p>The resulting records are saved in EDF format.</p></li>
 </ul>
 </section>
 <section id="id6">
 <h3>JSON configuration file<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
-<p>All HV-related configuration parameters are stored in the JSON file <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code>.</p>
+<p>All HV and PS-related configuration parameters are stored in the JSON file <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code>.</p>
 </section>
 </section>
 <section id="performing-source-reconstruction">

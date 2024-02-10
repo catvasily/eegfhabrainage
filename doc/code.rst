@@ -26,6 +26,14 @@ extract_hv_intervals.py
 -----------------------
 .. automodule:: extract_hv_intervals
 
+extract_ps_intervals.py
+-----------------------
+.. automodule:: extract_ps_intervals
+
+create_ps_events.py
+-------------------
+.. automodule:: create_ps_events
+
 run_src_reconstr.py
 -------------------
 .. automodule:: run_src_reconstr
