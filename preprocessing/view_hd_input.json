@@ -1,0 +1,78 @@
+# ----------------------------------------------------------------------
+# NOTE: this is a JSON file with comments. It requires using commentjson
+# module to process, instead of a standard python json library
+# ----------------------------------------------------------------------
+# Input parameters for run_view_hd_embedding.py                  
+# ----------------------------------------------------------------------
+{
+    # Step(s) to run:
+    #----------------------------
+    "to_run": ["inputs", "rois_spectral_power"],
+    #----------------------------
+
+    "what": "sources",          # 'sensors' or 'sources' - which data to use
+    "hospitals": ["Abbotsford", "Burnaby", "RCH", "Surrey"],  # List of hospitals to process
+    "source_scan_ids": null,    # null or a list of lists of record IDs for each hospital
+    #"source_scan_ids": [["a1ffd117-b263-480d-b18e-6f12820c3fec"]],    # Burnaby
+    "view_plots": true,         # Flag to show interactive plots
+    "plot_only": false,         # Flag to only plot already precalculated spectra",
+    "rand_seed": 12345,         # Integer or null: seed value for random generator
+
+    # Input and output root folders depending on the host computer
+    "hosts": {
+        "ub20-04": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "/data/eegfhabrainage/welch", # input time courses here
+                "out_root": "/data/eegfhabrainage/view_hd",           # output PSDs here
+            },
+            "sources": {
+                "data_root": "/data/eegfhabrainage/src-welch",
+                "out_root": "/data/eegfhabrainage/view_hd"
+            }
+        },
+        "cedar": {
+            "cluster_job": true,
+
+            "sensors": {
+                "data_root": "/project/6019337/databases/eeg_fha/preprocessed/001_a01_01/spectra",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/view_hd"
+            },
+            "sources": {
+                "data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux/spectra",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/view_hd"
+            }
+        },
+        "other": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "welch", # input time courses here
+                "out_root": "view_hd",           # output PSDs here
+            },
+            "sources": {
+                "data_root": "src-welch",
+                "out_root": "view_hd"
+            }
+        }
+    },   # end of "hosts"
+    
+    # Args for rois_spectal_power step
+    "rois_spectral_power": {
+        "band": [8, 12],    # Spectral band to look at
+        "view_hd_embedding": {  # Additional args to view_hd_embedding() call
+            "method": "UMAP",
+            "title": " Hz band spectral power distribution over ROIs",
+            "nlow": 2,
+            "save_file": "Hz_PSD_over_ROIs.png",
+            "embed_args": null,
+            "plot_args": null,  # null, or a dictionary with keys 'figsize' = (width, height),  
+                                # 'colors' = list of color names (strings), 'dpi' = resolution of the saved figure
+            "plot_kwargs": {    # null, or other parameters for the scatter plots, if needed
+                "marker": ".",      # Marker type
+                "s": 30,            # Marker size
+                "alpha": 0.5        # Opacity for marker overlaps
+            }
+        }
+    }
+}
+

@@ -1,0 +1,83 @@
+# ----------------------------------------------------------------------
+# NOTE: this is a JSON file with comments. It requires using commentjson
+# module to process, instead of a standard python json library
+# ----------------------------------------------------------------------
+# Input parameters for run_spectparam.py                  
+# ----------------------------------------------------------------------
+{
+    # Step(s) to run:
+    #----------------------------
+    #"to_run": ["input", "do_fit"],
+    "to_run": ["input", "cumulative_report"],
+    #"to_run": ["input", "do_fit", "cumulative_report"],
+    #----------------------------
+
+    # !!! IMPORTANT!!! When running "cumulative_report" step on the cluster,
+    # only job #0 should be run, and N_ARRAY_JOBS below should be set to 1 !!!
+    "N_ARRAY_JOBS": 100,        # Number of parralel jobs when running on CC cluster
+
+    "hospital": "Burnaby",      # hospital to process
+    "source_scan_ids": null,    # null or a list of record IDs
+    "what": "sources",          # 'sensors' or 'sources' - which data to use
+
+    # Input and output root folders depending on the host computer
+    "hosts": {
+        "ub20-04": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "/data/eegfhabrainage/welch", # input time courses here
+                "out_root": "/data/eegfhabrainage/specparam",           # output PSDs here
+            },
+            "sources": {
+                "data_root": "/data/eegfhabrainage/src-welch",
+                "out_root": "/data/eegfhabrainage/src-specparam"
+            }
+        },
+        "cedar": {
+            "cluster_job": true,
+
+            "sensors": {
+                "data_root": "/project/6019337/databases/eeg_fha/preprocessed/001_a01_01/spectra",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/specparam"
+            },
+            "sources": {
+                "data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux/spectra",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-specparam"
+            }
+        },
+        "other": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "welch", # input time courses here
+                "out_root": "specparam",           # output PSDs here
+            },
+            "sources": {
+                "data_root": "src-welch",
+                "out_root": "src-specparam"
+            }
+        }
+    },   # end of "hosts"
+
+    # Model parameters: the arguments for SpectralGroupModel
+    # class constructor
+    "model": {
+        "peak_width_limits": [1.0, 12.0],   # Range of possible peak width in Hz; min should be set at least
+                                            # twice the frequency resolution of the spectra
+        "max_n_peaks": 5,                   # max number of peaks to find; infinite if null
+        "min_peak_height": 0.1,             # min possible amp for peak, in log10(absolute PSD values)
+        "peak_threshold": 2.0,              # relative threshold for detecting peaks. 
+        "aperiodic_mode": "fixed",          # 'fixed' or 'knee'; should be 'fixed' in most cases
+        "verbose": false                    # as is
+    },
+
+    # Settings for a cumulative report
+    "report" : {
+        "report_channels": null,            # A list of channels to include; if null - all channesl are included
+        #"report_channels": ["G_occipital_middle-lh", "G_occipital_middle-rh", "G_occipital_sup-lh",
+        #            "G_occipital_sup-rh", "Pole_occipital-lh", "Pole_occipital-rh"],
+        "seed": 12345,                      # Random generator seed (for replicability)
+        "max_num_scan_ids": 500,            # number of scan IDs to be randomly picked from all scan IDs
+        "file_png": "report_5peaks.png"     # Short (unqualified) file name for report .PNG
+    }
+}
+

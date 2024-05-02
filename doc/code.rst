@@ -62,6 +62,14 @@ run_cwt.py
 ----------
 .. automodule:: run_cwt
 
+run_spectparam.py
+-----------------
+.. automodule:: run_spectparam
+
+run_view_hd_embedding.py
+------------------------
+.. automodule:: run_view_hd_embedding
+
 tfdata.py
 ----------
 .. automodule:: tfdata
@@ -81,4 +89,8 @@ plot_alpha_power.py
 running_mean_std.py
 -------------------
 .. automodule:: running_mean_std
+
+view_hd_embedding.py
+--------------------
+.. automodule:: view_hd_embedding
 

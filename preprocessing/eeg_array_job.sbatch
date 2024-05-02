@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=rpp-doesburg
+#SBATCH --account=def-doesburg-ab
 #SBATCH --time=00:30:00		# init preproc/HV stage 35:00 (burnaby) (or 59 for Abbotsford)
 				# PREP/ICA step 00:35:00 (burnaby), 02:00:00 abbotsford, 1:30
 				# for Surrey
@@ -11,13 +11,16 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=4G	# 16G for initial preproc step/HV step, 4G for PREP/ICA,
 #SBATCH --mail-user=amoiseev@sfu.ca	# 4G for src reconstr
-				# Welch: 1G for any !!! despite 0% memory use reported !!!
+				# Welch: 2G for sensors, 4G for src
+				#       !!! despite 0% memory use reported !!!
 				# CWT: 500 Mb for any
-#SBATCH --array=0-99 		# should normally be 0-99 
+#SBATCH --array=0-0		# should normally be 0-99 
 				# 0-199 if 200 jobs are assumed in the Python prog
 				# (for example, CWT step for Abbotsford)
 
 # $SLURM_ARRAY_TASK_ID is 0-based index of a single task
+
+module load StdEnv/2020		# To get Python 3.8.10, since 2024
 module load python/3.8.10
 module load scipy-stack/2022a
 
@@ -27,10 +30,11 @@ cd preprocessing
 
 #python run_filtering_segmentation.py ${SLURM_ARRAY_TASK_ID}
 #python run_pyprep_ica.py ${SLURM_ARRAY_TASK_ID}
-python run_src_reconstr.py ${SLURM_ARRAY_TASK_ID}
+#python run_src_reconstr.py ${SLURM_ARRAY_TASK_ID}
 #python extract_hv_intervals.py ${SLURM_ARRAY_TASK_ID}
 #python extract_ps_intervals.py ${SLURM_ARRAY_TASK_ID}
 #python run_welch.py ${SLURM_ARRAY_TASK_ID}
 #python run_cwt.py ${SLURM_ARRAY_TASK_ID}
+python run_spectparam.py ${SLURM_ARRAY_TASK_ID}
 deactivate
 

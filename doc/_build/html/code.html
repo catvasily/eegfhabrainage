@@ -190,6 +190,22 @@
 <li class="toctree-l3"><a class="reference internal" href="#run_cwt.plot_distr"><code class="docutils literal notranslate"><span class="pre">plot_distr()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-run_spectparam">run_spectparam.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run_spectparam.cumulative_report"><code class="docutils literal notranslate"><span class="pre">cumulative_report()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_spectparam.do_fit"><code class="docutils literal notranslate"><span class="pre">do_fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_spectparam.get_data_folders"><code class="docutils literal notranslate"><span class="pre">get_data_folders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_spectparam.input"><code class="docutils literal notranslate"><span class="pre">input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_spectparam.read_model"><code class="docutils literal notranslate"><span class="pre">read_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_spectparam.write_model"><code class="docutils literal notranslate"><span class="pre">write_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-run_view_hd_embedding">run_view_hd_embedding.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run_view_hd_embedding.band_power"><code class="docutils literal notranslate"><span class="pre">band_power()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_view_hd_embedding.get_data_folders"><code class="docutils literal notranslate"><span class="pre">get_data_folders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_view_hd_embedding.inputs"><code class="docutils literal notranslate"><span class="pre">inputs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_view_hd_embedding.rois_spectral_power"><code class="docutils literal notranslate"><span class="pre">rois_spectral_power()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tfdata">tfdata.py</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#tfdata.TFData"><code class="docutils literal notranslate"><span class="pre">TFData</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#tfdata.TFData.CHAN_DIM"><code class="docutils literal notranslate"><span class="pre">TFData.CHAN_DIM</span></code></a></li>
@@ -232,6 +248,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#running_mean_std.RunningMeanSTD.var"><code class="docutils literal notranslate"><span class="pre">RunningMeanSTD.var()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-view_hd_embedding">view_hd_embedding.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#view_hd_embedding.do_embedding"><code class="docutils literal notranslate"><span class="pre">do_embedding()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#view_hd_embedding.plot_scatter"><code class="docutils literal notranslate"><span class="pre">plot_scatter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#view_hd_embedding.view_hd_embedding"><code class="docutils literal notranslate"><span class="pre">view_hd_embedding()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1908,12 +1930,14 @@ which was used to run filtering/segmentation step</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="run_welch.read_welch_psd">
 <span class="sig-name descname"><span class="pre">read_welch_psd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_welch.read_welch_psd" title="Permalink to this definition"></a></dt>
-<dd><p>Save PSDs of sensor or reconstructed ROI signals in .hdf5
+<dd><p>Read PSDs of sensor or reconstructed ROI signals in .hdf5
 file.</p>
 <p>The input file is expected to contain three datasets: ‘ch_names’ with sensor channel or
 ROI names, ‘freqs’ with frequency values in Hz, and ‘psd’ with PSD values in
-units of U^2/Hz, where U is Volts for sensor channels PSD and U is A*m for
-ROI signals PSDs.</p>
+units of U^2/Hz, where U is Volts for sensor channels PSD. For ROI PSDs the unit U
+depends on the setting of <cite>src_units</cite> parameter in <cite>src_reconstr_conf.json</cite> file
+at the time of running the source reconstruction step. It is A*m when <cite>src_units</cite>
+is set to ‘source’, or amplitude pseudo-Z when it is set to ‘pz’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>fname</strong> (<em>str</em>) – full pathname of the input .hdf5 file.</p>
@@ -2097,6 +2121,251 @@ to the closest ones available in the data.</p></li>
 <dd class="field-even"><p><strong>Nothing</strong></p>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="module-run_spectparam">
+<span id="run-spectparam-py"></span><h2>run_spectparam.py<a class="headerlink" href="#module-run_spectparam" title="Permalink to this heading"></a></h2>
+<p><strong>A top level script for running spectra parameterization into
+periodic and aperiodic components.</strong></p>
+<p>Based on code in</p>
+<p><a class="reference external" href="https://github.com/fooof-tools/fooof">https://github.com/fooof-tools/fooof</a>
+<a class="reference external" href="https://pypi.org/project/specparam/">https://pypi.org/project/specparam/</a>     # The latest package</p>
+<p>and original Nature Neuroscience paper referenced therein.</p>
+<p>To add a step to be run to this script:</p>
+<ol class="arabic simple">
+<li><p>Encapsulate necessary code in a dedicated function</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">def</span> <span class="pre">my_step(ss):</span>
+<span class="pre">...</span>
+<span class="pre">#</span> <span class="pre">NOTE:</span> <span class="pre">Step</span> <span class="pre">return</span> <span class="pre">value</span> <span class="pre">(if</span> <span class="pre">any)</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">used</span>
+<span class="pre">`</span></code></p>
+<p>2. Add corresponding entry to the cases dictionary in
+the EPILOGE section at the bottom in the form</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">'my_step':</span> <span class="pre">my_step</span>
+<span class="pre">`</span></code></p>
+<p>Steps may reside in separate Python files. In that case
+corresponding import statements should be added here.
+The variables that are intended to be shared between
+steps should be defined as attributes of the ss object,
+as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">ss.common_var</span> <span class="pre">=</span> <span class="pre">common_var_value</span>
+<span class="pre">`</span></code></p>
+<p>All input parameters for the script are expected to reside
+in a single JSON file specifed in a global constant
+<cite>INPUT_JSON_FILE</cite> as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">INPUT_JSON_FILE</span> <span class="pre">=</span> <span class="pre">'&lt;my-file&gt;.json'</span>
+<span class="pre">`</span></code></p>
+<p>Contents of the INPUT_JSON_FILE is available to each step
+as a dictionary <cite>ss.args</cite>, where <cite>ss</cite> is a reference to this
+application object passed to the step as an argument.</p>
+<p>The sequence of steps to be executed should be listed in <cite>to_run</cite>
+key in the JSON input file, for example
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">to_run</span> <span class="pre">=</span> <span class="pre">(&quot;init&quot;,&quot;step1&quot;,&quot;step6&quot;)</span>
+<span class="pre">`</span></code></p>
+<hr class="docutils" />
+<p>Available steps:</p>
+<dl class="simple">
+<dt><cite>‘input’</cite>: As is: set all the input and configuration</dt><dd><p>parameters here. This step should always be run first</p>
+</dd>
+<dt><cite>‘do_fit’</cite>: Run model fitting for all requested scan IDs and</dt><dd><p>save the results to .hdf5 files.</p>
+</dd>
+</dl>
+<p><cite>cumulative_report</cite>: Create a cumulative report for all processed scans</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="run_spectparam.cumulative_report">
+<span class="sig-name descname"><span class="pre">cumulative_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_spectparam.cumulative_report" title="Permalink to this definition"></a></dt>
+<dd><p>Create a cumulative report for all processed scans, either for all channels at once
+or for specified channels only.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_spectparam.do_fit">
+<span class="sig-name descname"><span class="pre">do_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_spectparam.do_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Perform model fits for specified scans.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_spectparam.get_data_folders">
+<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_spectparam.get_data_folders" title="Permalink to this definition"></a></dt>
+<dd><p>Setup input and output data folders depending on the host machine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>dict</em>) – dictionary with input arguments read from the
+<cite>INPUT_JSON_FILE</cite></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>data_root</strong> (<em>str</em>) – path to the root input folder</p></li>
+<li><p><strong>out_root</strong> (<em>str</em>) – path to the root output folder</p></li>
+<li><p><strong>cluster_job</strong> (<em>bool</em>) – a flag indicating whether the host is on CC cluster</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_spectparam.input">
+<span class="sig-name descname"><span class="pre">input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_spectparam.input" title="Permalink to this definition"></a></dt>
+<dd><p>Read and process common input parameters from JSON file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_spectparam.read_model">
+<span class="sig-name descname"><span class="pre">read_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_spectparam.read_model" title="Permalink to this definition"></a></dt>
+<dd><p>Read the model fit results from an HDF file created using <cite>write_model()</cite>
+The data which is returned includes: channel names, a list of frequencies
+model settings (<cite>peak_width_limits</cite>, <cite>max_n_peaks</cite>, <cite>min_peak_height</cite>,
+<cite>peak_threshold</cite>, <cite>aperiodic_mode</cite>), and fit results for each channel as
+a list of corresponding FitResults objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – pathname to the input .hdf5 file</p></li>
+<li><p><strong>fg</strong> (<em>SpectralGroupModel</em>) – a model group object with fit results</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ch_names</strong> (<em>lst of str</em>) – list of channel names</p></li>
+<li><p><strong>freqs</strong> (<em>ndarray</em>) – list of frequencies</p></li>
+<li><p><strong>model_settings</strong> (<em>ModelSettings</em>) – settings object, which is a named
+tuple of <cite>peak_width_limits, max_n_peaks, min_peak_height,
+peak_threshold, aperiodic_mode</cite></p></li>
+<li><p><strong>lst_results</strong> (<em>list of FitResults</em>) – fit results for each channel</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_spectparam.write_model">
+<span class="sig-name descname"><span class="pre">write_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_spectparam.write_model" title="Permalink to this definition"></a></dt>
+<dd><p>Save model fit results to HDF file.
+The data which is saved includes: channel names, a list of frequencies,
+model settings (<cite>peak_width_limits</cite>, <cite>max_n_peaks</cite>, <cite>min_peak_height</cite>,
+<cite>peak_threshold</cite>, <cite>aperiodic_mode</cite>) and fit results for each channel
+as returned in corresponding FitResults object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – pathname to the output .hdf5 file to be created</p></li>
+<li><p><strong>ch_names</strong> (<em>lst</em><em> of </em><em>str</em>) – list of channel names</p></li>
+<li><p><strong>fg</strong> (<em>SpectralGroupModel</em>) – a model group object with fit results</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-run_view_hd_embedding">
+<span id="run-view-hd-embedding-py"></span><h2>run_view_hd_embedding.py<a class="headerlink" href="#module-run_view_hd_embedding" title="Permalink to this heading"></a></h2>
+<p><strong>A top level script to view various mutli-dimensional data embedded in
+2D or 3D space.</strong></p>
+<p>To add a step to be run to this script:</p>
+<p>1. Encapsulate necessary code in a dedicated function
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">def</span> <span class="pre">my_step(ss):</span>
+<span class="pre">...</span>
+<span class="pre">#</span> <span class="pre">NOTE:</span> <span class="pre">Step</span> <span class="pre">return</span> <span class="pre">value</span> <span class="pre">(if</span> <span class="pre">any)</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">used</span>
+<span class="pre">`</span></code></p>
+<ol class="arabic simple" start="2">
+<li><p>Add corresponding entry to the cases dictionary in
+the EPILOGE section at the bottom in the form</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">'my_step':</span> <span class="pre">my_step</span>
+<span class="pre">`</span></code></p>
+<p>Steps may reside in separate Python files. In that case
+corresponding import statements should be added here.
+The variables that are intended to be shared between
+steps should be defined as attributes of the ss object,
+as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">ss.common_var</span> <span class="pre">=</span> <span class="pre">common_var_value</span>
+<span class="pre">`</span></code></p>
+<p>All input parameters for the script are expected to reside
+in a single JSON file specifed in a global constant
+<cite>INPUT_JSON_FILE</cite> as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">INPUT_JSON_FILE</span> <span class="pre">=</span> <span class="pre">'&lt;my-file&gt;.json</span>
+<span class="pre">`</span></code></p>
+<p>Contents of the INPUT_JSON_FILE is available to each step
+as a dictionary <cite>ss.args</cite>, where <cite>ss</cite> is a reference to this
+application object passed to the step as an argument.</p>
+<p>The sequence of steps to be executed should be listed in <cite>to_run</cite>
+key in the JSON input file, for example</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">to_run</span> <span class="pre">=</span> <span class="pre">(&quot;init&quot;,&quot;step1&quot;,&quot;step6&quot;)</span>
+<span class="pre">`</span></code></p>
+<hr class="docutils" />
+<p>Available steps:</p>
+<dl class="simple">
+<dt><cite>‘input’</cite>:</dt><dd><p>As is: set all the input and configuration parameters here. This step
+should always be run first</p>
+</dd>
+<dt><cite>‘rois_spectral_power’</cite>:</dt><dd><p>For each EEG record, construct a vector of values of total spectral power
+in a specified frequency band for all   atlas ROIs. Visualize spatial
+distribution of these vectors in nROIs-dimensional space</p>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="run_view_hd_embedding.band_power">
+<span class="sig-name descname"><span class="pre">band_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_view_hd_embedding.band_power" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate power in a specified band for each ROI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p></li>
+<li><p><strong>fname</strong> (<em>str</em>) – full path to .hdf5 file with source-space spectral data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>spect</strong> (<em>ndarray</em>) – shape (nROIs,) vector of band powers for the ROIs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_view_hd_embedding.get_data_folders">
+<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_view_hd_embedding.get_data_folders" title="Permalink to this definition"></a></dt>
+<dd><p>Setup input and output data folders depending on the host machine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>dict</em>) – dictionary with input arguments read from the
+<cite>INPUT_JSON_FILE</cite></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>data_root</strong> (<em>str</em>) – path to the root input folder</p></li>
+<li><p><strong>out_root</strong> (<em>str</em>) – path to the root output folder</p></li>
+<li><p><strong>cluster_job</strong> (<em>bool</em>) – a flag indicating whether the host is on CC cluster</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_view_hd_embedding.inputs">
+<span class="sig-name descname"><span class="pre">inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_view_hd_embedding.inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Read and process common input parameters from JSON file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_view_hd_embedding.rois_spectral_power">
+<span class="sig-name descname"><span class="pre">rois_spectral_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_view_hd_embedding.rois_spectral_power" title="Permalink to this definition"></a></dt>
+<dd><p>For each EEG record, construct a vector of values of total
+spectral power in a specified frequency band for all
+atlas ROIs. Visualize spatial distribution of these vectors
+in nROIs-dimensional space by embedding in low dim space.</p>
 </dd></dl>
 
 </section>
@@ -2593,6 +2862,113 @@ All the magic happens here.</p>
 <dd><p>Return currently accumulated variance</p>
 </dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="module-view_hd_embedding">
+<span id="view-hd-embedding-py"></span><h2>view_hd_embedding.py<a class="headerlink" href="#module-view_hd_embedding" title="Permalink to this heading"></a></h2>
+<p><em>view_hd_embedding</em>: a utility to visualize high-dimenstional data by
+embedding it into a 2D or 3D space by applying MDS, tSNE, UMAP
+or similar algortithm, and plotting the embedded data.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="view_hd_embedding.do_embedding">
+<span class="sig-name descname"><span class="pre">do_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_components</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#view_hd_embedding.do_embedding" title="Permalink to this definition"></a></dt>
+<dd><p>Function to perform the actual embedding into 2D or 3D space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em><em> of </em><em>floats</em>) – shape (npoints, n_high_dims) the high dimensional data.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – embedding method; one of ‘MDS’, ‘tSNE’</p></li>
+<li><p><strong>n_components</strong> (<em>int</em>) – number of low dimensions: 2 or 3</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em> or </em><em>None</em>) – if not None - a seed value for random generator. If not specified
+the embedding results may vary from one call to another</p></li>
+<li><p><strong>embed_args</strong> (<em>dict</em>) – a dictionary of parameters specific to the embedding method, in
+addition to <cite>n_components</cite> argument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>low_dim_data</strong> (<em>ndarray</em>) – shape (npoints, n_low_dims) the embedded
+low dimensional data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="view_hd_embedding.plot_scatter">
+<span class="sig-name descname"><span class="pre">plot_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low_dim_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taxonomy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#view_hd_embedding.plot_scatter" title="Permalink to this definition"></a></dt>
+<dd><p>Display a scatter plot of the embedded data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>low_dim_data</strong> (<em>ndarray</em>) – shape (npoints, n_low_dims) the embedded
+low dimensional data</p></li>
+<li><p><strong>taxonomy</strong> (<em>ndarray</em><em> of </em><em>ints</em><em> or </em><em>None</em>) – shape (npoints,) a mapping from point # to its category,
+which is an integer number. If not supplied, all points will be plotted with the same
+color.</p></li>
+<li><p><strong>title</strong> (<em>str</em><em> or </em><em>None</em>) – plot title</p></li>
+<li><p><strong>labels</strong> (<em>dict</em><em> or </em><em>None</em>) – labels for the categories encountered in taxonomy, in the form
+{…, k: ‘label-for-category-k’,…}</p></li>
+<li><p><strong>show_plot</strong> (<em>bool</em>) – flag to display the plotted figure</p></li>
+<li><p><strong>save_file</strong> (<em>str</em><em> or </em><em>None</em>) – if specified - pathname for the file to save the plot</p></li>
+<li><p><strong>plot_args</strong> (<em>dict</em><em> or </em><em>None</em>) – a dictionary with a minimal set of plotting parameters; if None -
+a default set will be used. This dictionary contains the following keys:
+‘figsize’ = (width, height) - figure size in inches
+‘colors’ = list of standard color names (strings) to be used for plotting different categories
+‘dpi’ = resolution of the saved figure</p></li>
+<li><p><strong>plot_kwargs</strong> (<em>dict</em><em> or </em><em>None</em>) – additional parameters to pass to matplotlib <cite>scatter()</cite> function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>fig</strong> (<em>matplotlib Figure</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="view_hd_embedding.view_hd_embedding">
+<span class="sig-name descname"><span class="pre">view_hd_embedding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taxonomy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nlow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#view_hd_embedding.view_hd_embedding" title="Permalink to this definition"></a></dt>
+<dd><p>Embed a set of data points in high dimensional space in 2D or 3D space
+and plot the results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em><em> of </em><em>floats</em>) – shape (npoints, n_high_dims) the high dimensional data.</p></li>
+<li><p><strong>taxonomy</strong> (<em>ndarray</em><em> of </em><em>int</em><em> or </em><em>None</em>) – shape (npoints,) a mapping from point # to its category,
+which is an integer number. Taxonomy is only used for visualization (plotting),
+where different categories will be plotted with different colors.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em> or </em><em>None</em>) – embedding method; one of ‘MDS’, ‘tSNE’, ‘UMAP’. If not specified (None),
+‘tSNE’ will be applied by default.</p></li>
+<li><p><strong>nlow</strong> (<em>int</em>) – number of low dimensions: 2 or 3</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em> or </em><em>None</em>) – if not None - a seed value for random generator. If not specified
+the embedding results may vary from one call to another</p></li>
+<li><p><strong>embed_args</strong> (<em>dict</em><em> or </em><em>None</em>) – a dictionary of parameters specific to the embedding method, with exclusion
+of the ‘ncomponents’ parameter which is already passed as ‘nlow’:
+‘MDS’ - see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html</a>;
+‘tSNE’ - see <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html</a>
+‘UMAP’ - see <a class="reference external" href="https://umap-learn.readthedocs.io/en/latest/parameters.html">https://umap-learn.readthedocs.io/en/latest/parameters.html</a>
+For ‘tSNE’ method default parameter set will be provided if omitted (None).</p></li>
+<li><p><strong>title</strong> (<em>str</em><em> or </em><em>None</em>) – plot title</p></li>
+<li><p><strong>labels</strong> (<em>dict</em><em> or </em><em>None</em>) – labels for the categories encountered in taxonomy, in the form
+{…, k: ‘label-for-category-k’,…}</p></li>
+<li><p><strong>show_plot</strong> (<em>bool</em>) – flag to display the plotted figure</p></li>
+<li><p><strong>save_file</strong> (<em>str</em><em> or </em><em>None</em>) – if specified - pathname for the file to save the plot</p></li>
+<li><p><strong>plot_args</strong> (<em>dict</em><em> or </em><em>None</em>) – a dictionary with a minimal set of plotting parameters; if None -
+a default set will be used. This dictionary contains the following keys:
+‘figsize’ = (width, height) - figure size in inches
+‘colors’ = list of standard color names (strings) to be used for plotting different categories
+‘dpi’ = resolution of the saved figure</p></li>
+<li><p><strong>plot_kwargs</strong> (<em>dict</em><em> or </em><em>None</em>) – additional parameters to pass to matplotlib <cite>scatter()</cite> function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>A tuple</strong> (<em>low_dim_data, fig</em>)</p></li>
+<li><p><strong>low_dim_data</strong> (<em>ndarray</em>) – shape (npoints, n_low_dims) the embedded
+low dimensional data</p></li>
+<li><p><strong>fig</strong> (<em>matploglib Figure</em>) – the figure object</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

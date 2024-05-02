@@ -13,6 +13,8 @@ Code uses the original EEG records in EDF format as input. The following steps (
 4. **Performing beamformer reconstruction of source time courses from standard atlas locations ("Regions of Interest" - ROIs)**.
 5. **Calculating power spectral densities (PSD)s of the sensor and source-reconstructed time courses.**
 6. **Calculating Continuous Wavelet Transforms (CWTs) and estimating statistical parameters of the CWT amplitudes.**
+7. **Representing spectra as a combination of periodic oscillations and aperiodic component.**
+8. **Visualizing multi-dimensional data via embedding in 2D or 3D space**
 
 Either of these tasks requires specifying numerous processing parameters. To separate the code and parameter data, default values
 of parameters are stored in JSON configuration files **`preproc_conf.json`** and **`pyprep_ica_conf.json`**; the latter
@@ -958,6 +960,47 @@ The continuous wavelet transforms of ***standardized*** (that is *z-scored*) inp
 
 Note that the Weibull distribution fit step is extremely time consuming therefore provisions are made to parallelize calculations for different frequency lines. One can take advantage of this by specifying an appropriate `--cpus-per-task` parameter in the sbatch job when running on the cluster.
 
+## 7. Representing spectra as a combination of periodic oscillations and aperiodic component
+At this step, power spectra are parameterized by fitting an analytic model, which expands each spectrum as a linear sum of a set of oscillatory "peaks" with different widths and amplitudes, and an aperiodic component characterized by an offset and an exponent. The code is based on scripts found here:     
+```
+    https://github.com/fooof-tools/fooof  
+    https://pypi.org/project/specparam/     # The latest package  
+```
+and the original Nature Neuroscience paper referenced therein. 
+
+### Running the code
+Corresponding top level script is **`run_spectparam.py`**.
+
+To execute the code, run the following commands in Linux terminal from the `.../eegfhabrainage/preprocessing`
+folder:
+```
+python run_spectparam.py                            # When running on local machine
+python run_spectparam.py ${SLURM_ARRAY_TASK_ID}     # When running array job on Alliance cluster
+```
+All input parameters for `run_spectparam.py` including input and output folders are defined in a dedicated JSON file `spectparam_input.json`. Thus changing parameters does not require modification of the Python source code.
+
+The `spectparam_input.json` file is a JSON file with comments, similar to ones described for other steps. Most keys and values are self-explanatory, or explained in documentation for the `specparam` package (https://pypi.org/project/specparam/).
+
+### Performed operations
+The script performs two steps: `do_fit` and `cumulative_report`. 
+
+`"do_fit"`, as the name suggests, fits the model to each of the channel spectra for each record defined by `"source_scan_ids"` key in the `spectparam_input.json` file. 
+When `"what"` key is set to `"sensors"`, then the channels correspond to the physical EEG channels; otherwise each channel corresponds to a ROI in a brain space.
+The fitting results are saved as HDF5 files in the folders specified in `spectparam_input.json`. Such .HDF5 files can be read using `read_model()` function defined in `run_spectparam.py` - please refer to [auto-generated documentation](../doc/_build/html/index.html) for details. 
+
+`"cumulative_report"` step creates a standard cumulative report about peaks and exponents distribution and fitting errors in all channels of all processed records.
+
+IMPORTANTLY, when running on the cluster **the`"cumulative_report"` step must be run as a single job** (it cannot be parallelized using multiple jobs).
+
+## 8. Visualizing multi-dimensional data via embedding in 2D or 3D space
+The top level script `run_view_hd_embedding.py` allows to perform 2D or 3D embedding of a set of points defined in high dimensional space, for visualization purposes. The data is assumed to be related to the EEG records and is expected to be structured accordingly: each data point should refer to a certain hospital and to a scan ID within that hospital's records. The embedding can be done using any of the following methods: 'MDS', 'tSNE' or 'UMAP'.
+
+The script itself just sets a framework for calling a function `view_hd_embedding()` which is the actual work horse that is doing the job - see [Miscellaneous functions](README.md#miscellaneous-functions) section below.
+
+Currently the script contains a single visualization step, where every data point is a vector representing distribution of spectral power in a certain frequency band over the atlas ROIs for corresponding EEG record. Other steps can be added in a similar way.
+
+All input parameters for the `run_view_hd_embedding.py` script including input and output folders are defined in a dedicated JSON file `view_hd_input.json`. Thus changing parameters does not require modification of the Python source code. This is a JSON file with comments, similar to ones described for other steps. Meaning of the keys and values should be clear from related comments.
+
 ## Miscellaneous functions
 Some utility scripts are located in the folder `.../eegfhabrainage/misc`. 
 
@@ -972,6 +1015,9 @@ Some utility scripts are located in the folder `.../eegfhabrainage/misc`.
 * `welch_logf.py`: calculate power spectrum by Welch method for logarithmically
     spaced frequencies
 * `utils.py`: a set of small utility functions; see [documentation](../doc/_build/html/index.html) for details
+
+* `view_hd_embedding()`: a top level utility function for visualization of high-dimensional data via
+  embedding it into a 2D or 3D space, by means of 'MDS', 'tSNE', 'UMAP' or a similar algortithm.
 
 Please refer to [auto-generated documentation](../doc/_build/html/index.html) for more details.
 
@@ -1020,12 +1066,24 @@ the project working folder and perform the following commands:
         python3 -m pip install myst_parser
         python3 -m pip install sphinx_rtd_theme
 
+        # For fitting model to the power spectra
+        # NOTE: originally this package was called fooof, and it still exists
+        # with the highest version 1.1.0. But the package is continued as specparam now
+        python3 -m pip install specparam	# Lately upgraded to version specparam-2.0.0rc1
+
+        # For multi-dimensional embeddings and clustering
+        python3 -m pip install pip --upgrade
+        python3 -m pip install -U scikit-learn
+        python3 -m pip install umap-learn
+
         deactivate
 ```
 - In your sbatch scripts, use commands
 ```
+        module load StdEnv/2020		# To get Python 3.8.10, since 2024
         module load python/3.8.10
         module load scipy-stack/2022a
+
         cd <your working folder>
         source mne/bin/activate
 
@@ -1036,8 +1094,10 @@ the project working folder and perform the following commands:
 - From time to time you may need to install new modules in your virtual environment or update existing ones.
   For example to install `mymodule` and to upgrade MNE Python to its latest stable version, use:
 ```
+        module load StdEnv/2020		# To get Python 3.8.10, since 2024
         module load python/3.8.10
         module load scipy-stack/2022a
+
         cd <your working folder>
         source mne/bin/activate
 

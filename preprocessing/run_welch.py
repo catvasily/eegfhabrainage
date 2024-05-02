@@ -242,13 +242,15 @@ def write_welch_psd(fname, ch_names, freqs, psd):
         f.create_dataset('psd', data=psd)
 
 def read_welch_psd(fname):
-    """Save PSDs of sensor or reconstructed ROI signals in .hdf5
+    """Read PSDs of sensor or reconstructed ROI signals in .hdf5
     file.
 
     The input file is expected to contain three datasets: 'ch_names' with sensor channel or
     ROI names, 'freqs' with frequency values in Hz, and 'psd' with PSD values in 
-    units of U^2/Hz, where U is Volts for sensor channels PSD and U is A*m for
-    ROI signals PSDs.
+    units of U^2/Hz, where U is Volts for sensor channels PSD. For ROI PSDs the unit U
+    depends on the setting of `src_units` parameter in `src_reconstr_conf.json` file
+    at the time of running the source reconstruction step. It is A*m when `src_units`
+    is set to 'source', or amplitude pseudo-Z when it is set to 'pz'.
 
     Args:
         fname (str): full pathname of the input .hdf5 file. 

@@ -83,6 +83,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#id13">Performed operations</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component">7. Representing spectra as a combination of periodic oscillations and aperiodic component</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Running the code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Performed operations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space">8. Visualizing multi-dimensional data via embedding in 2D or 3D space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#miscellaneous-functions">Miscellaneous functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-python-virtual-environment-on-compute-canada-alliance-cluster">Setting up Python virtual environment on Compute Canada (Alliance) cluster</a></li>
 </ul>
@@ -131,6 +137,8 @@ intervals (segments) are saved in .EDF format.</p></li>
 <li><p><strong>Performing beamformer reconstruction of source time courses from standard atlas locations (“Regions of Interest” - ROIs)</strong>.</p></li>
 <li><p><strong>Calculating power spectral densities (PSD)s of the sensor and source-reconstructed time courses.</strong></p></li>
 <li><p><strong>Calculating Continuous Wavelet Transforms (CWTs) and estimating statistical parameters of the CWT amplitudes.</strong></p></li>
+<li><p><strong>Representing spectra as a combination of periodic oscillations and aperiodic component.</strong></p></li>
+<li><p><strong>Visualizing multi-dimensional data via embedding in 2D or 3D space</strong></p></li>
 </ol>
 <p>Either of these tasks requires specifying numerous processing parameters. To separate the code and parameter data, default values
 of parameters are stored in JSON configuration files <strong><code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code></strong> and <strong><code class="docutils literal notranslate"><span class="pre">pyprep_ica_conf.json</span></code></strong>; the latter
@@ -1086,6 +1094,43 @@ folder:</p>
 <p>Note that the Weibull distribution fit step is extremely time consuming therefore provisions are made to parallelize calculations for different frequency lines. One can take advantage of this by specifying an appropriate <code class="docutils literal notranslate"><span class="pre">--cpus-per-task</span></code> parameter in the sbatch job when running on the cluster.</p>
 </section>
 </section>
+<section id="representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component">
+<h2>7. Representing spectra as a combination of periodic oscillations and aperiodic component<a class="headerlink" href="#representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component" title="Permalink to this heading"></a></h2>
+<p>At this step, power spectra are parameterized by fitting an analytic model, which expands each spectrum as a linear sum of a set of oscillatory “peaks” with different widths and amplitudes, and an aperiodic component characterized by an offset and an exponent. The code is based on scripts found here:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">fooof</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">fooof</span>  
+    <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">pypi</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">specparam</span><span class="o">/</span>     <span class="c1"># The latest package  </span>
+</pre></div>
+</div>
+<p>and the original Nature Neuroscience paper referenced therein.</p>
+<section id="id14">
+<h3>Running the code<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
+<p>Corresponding top level script is <strong><code class="docutils literal notranslate"><span class="pre">run_spectparam.py</span></code></strong>.</p>
+<p>To execute the code, run the following commands in Linux terminal from the <code class="docutils literal notranslate"><span class="pre">.../eegfhabrainage/preprocessing</span></code>
+folder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python run_spectparam.py                            # When running on local machine
+python run_spectparam.py ${SLURM_ARRAY_TASK_ID}     # When running array job on Alliance cluster
+</pre></div>
+</div>
+<p>All input parameters for <code class="docutils literal notranslate"><span class="pre">run_spectparam.py</span></code> including input and output folders are defined in a dedicated JSON file <code class="docutils literal notranslate"><span class="pre">spectparam_input.json</span></code>. Thus changing parameters does not require modification of the Python source code.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">spectparam_input.json</span></code> file is a JSON file with comments, similar to ones described for other steps. Most keys and values are self-explanatory, or explained in documentation for the <code class="docutils literal notranslate"><span class="pre">specparam</span></code> package (https://pypi.org/project/specparam/).</p>
+</section>
+<section id="id15">
+<h3>Performed operations<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
+<p>The script performs two steps: <code class="docutils literal notranslate"><span class="pre">do_fit</span></code> and <code class="docutils literal notranslate"><span class="pre">cumulative_report</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;do_fit&quot;</span></code>, as the name suggests, fits the model to each of the channel spectra for each record defined by <code class="docutils literal notranslate"><span class="pre">&quot;source_scan_ids&quot;</span></code> key in the <code class="docutils literal notranslate"><span class="pre">spectparam_input.json</span></code> file.
+When <code class="docutils literal notranslate"><span class="pre">&quot;what&quot;</span></code> key is set to <code class="docutils literal notranslate"><span class="pre">&quot;sensors&quot;</span></code>, then the channels correspond to the physical EEG channels; otherwise each channel corresponds to a ROI in a brain space.
+The fitting results are saved as HDF5 files in the folders specified in <code class="docutils literal notranslate"><span class="pre">spectparam_input.json</span></code>. Such .HDF5 files can be read using <code class="docutils literal notranslate"><span class="pre">read_model()</span></code> function defined in <code class="docutils literal notranslate"><span class="pre">run_spectparam.py</span></code> - please refer to <a class="reference download internal" download="" href="_downloads/a0f78390b83d56af3958387635feaa09/index.html"><span class="xref download myst">auto-generated documentation</span></a> for details.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;cumulative_report&quot;</span></code> step creates a standard cumulative report about peaks and exponents distribution and fitting errors in all channels of all processed records.</p>
+<p>IMPORTANTLY, when running on the cluster <strong>the<code class="docutils literal notranslate"><span class="pre">&quot;cumulative_report&quot;</span></code> step must be run as a single job</strong> (it cannot be parallelized using multiple jobs).</p>
+</section>
+</section>
+<section id="visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space">
+<h2>8. Visualizing multi-dimensional data via embedding in 2D or 3D space<a class="headerlink" href="#visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space" title="Permalink to this heading"></a></h2>
+<p>The top level script <code class="docutils literal notranslate"><span class="pre">run_view_hd_embedding.py</span></code> allows to perform 2D or 3D embedding of a set of points defined in high dimensional space, for visualization purposes. The data is assumed to be related to the EEG records and is expected to be structured accordingly: each data point should refer to a certain hospital and to a scan ID within that hospital’s records. The embedding can be done using any of the following methods: ‘MDS’, ‘tSNE’ or ‘UMAP’.</p>
+<p>The script itself just sets a framework for calling a function <code class="docutils literal notranslate"><span class="pre">view_hd_embedding()</span></code> which is the actual work horse that is doing the job - see <a class="reference internal" href="#miscellaneous-functions"><span class="std std-ref">Miscellaneous functions</span></a> section below.</p>
+<p>Currently the script contains a single visualization step, where every data point is a vector representing distribution of spectral power in a certain frequency band over the atlas ROIs for corresponding EEG record. Other steps can be added in a similar way.</p>
+<p>All input parameters for the <code class="docutils literal notranslate"><span class="pre">run_view_hd_embedding.py</span></code> script including input and output folders are defined in a dedicated JSON file <code class="docutils literal notranslate"><span class="pre">view_hd_input.json</span></code>. Thus changing parameters does not require modification of the Python source code. This is a JSON file with comments, similar to ones described for other steps. Meaning of the keys and values should be clear from related comments.</p>
+</section>
 <section id="miscellaneous-functions">
 <h2>Miscellaneous functions<a class="headerlink" href="#miscellaneous-functions" title="Permalink to this heading"></a></h2>
 <p>Some utility scripts are located in the folder <code class="docutils literal notranslate"><span class="pre">.../eegfhabrainage/misc</span></code>.</p>
@@ -1101,6 +1146,8 @@ distribution of alpha band spectral density over the cortex surface</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">welch_logf.py</span></code>: calculate power spectrum by Welch method for logarithmically
 spaced frequencies</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">utils.py</span></code>: a set of small utility functions; see <a class="reference download internal" download="" href="_downloads/a0f78390b83d56af3958387635feaa09/index.html"><span class="xref download myst">documentation</span></a> for details</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">view_hd_embedding()</span></code>: a top level utility function for visualization of high-dimensional data via
+embedding it into a 2D or 3D space, by means of ‘MDS’, ‘tSNE’, ‘UMAP’ or a similar algortithm.</p></li>
 </ul>
 <p>Please refer to <a class="reference download internal" download="" href="_downloads/a0f78390b83d56af3958387635feaa09/index.html"><span class="xref download myst">auto-generated documentation</span></a> for more details.</p>
 </section>
@@ -1148,14 +1195,26 @@ the project working folder and perform the following commands:</p></li>
         <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">myst_parser</span>
         <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">sphinx_rtd_theme</span>
 
+        <span class="c1"># For fitting model to the power spectra</span>
+        <span class="c1"># NOTE: originally this package was called fooof, and it still exists</span>
+        <span class="c1"># with the highest version 1.1.0. But the package is continued as specparam now</span>
+        <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">specparam</span>	<span class="c1"># Lately upgraded to version specparam-2.0.0rc1</span>
+
+        <span class="c1"># For multi-dimensional embeddings and clustering</span>
+        <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pip</span> <span class="o">--</span><span class="n">upgrade</span>
+        <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">U</span> <span class="n">scikit</span><span class="o">-</span><span class="n">learn</span>
+        <span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">umap</span><span class="o">-</span><span class="n">learn</span>
+
         <span class="n">deactivate</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>In your sbatch scripts, use commands</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">module</span> <span class="n">load</span> <span class="n">python</span><span class="o">/</span><span class="mf">3.8.10</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">module</span> <span class="n">load</span> <span class="n">StdEnv</span><span class="o">/</span><span class="mi">2020</span>		<span class="c1"># To get Python 3.8.10, since 2024</span>
+        <span class="n">module</span> <span class="n">load</span> <span class="n">python</span><span class="o">/</span><span class="mf">3.8.10</span>
         <span class="n">module</span> <span class="n">load</span> <span class="n">scipy</span><span class="o">-</span><span class="n">stack</span><span class="o">/</span><span class="mi">2022</span><span class="n">a</span>
+
         <span class="n">cd</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">working</span> <span class="n">folder</span><span class="o">&gt;</span>
         <span class="n">source</span> <span class="n">mne</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 
@@ -1168,8 +1227,10 @@ the project working folder and perform the following commands:</p></li>
 <li><p>From time to time you may need to install new modules in your virtual environment or update existing ones.
 For example to install <code class="docutils literal notranslate"><span class="pre">mymodule</span></code> and to upgrade MNE Python to its latest stable version, use:</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">module</span> <span class="n">load</span> <span class="n">python</span><span class="o">/</span><span class="mf">3.8.10</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="n">module</span> <span class="n">load</span> <span class="n">StdEnv</span><span class="o">/</span><span class="mi">2020</span>		<span class="c1"># To get Python 3.8.10, since 2024</span>
+        <span class="n">module</span> <span class="n">load</span> <span class="n">python</span><span class="o">/</span><span class="mf">3.8.10</span>
         <span class="n">module</span> <span class="n">load</span> <span class="n">scipy</span><span class="o">-</span><span class="n">stack</span><span class="o">/</span><span class="mi">2022</span><span class="n">a</span>
+
         <span class="n">cd</span> <span class="o">&lt;</span><span class="n">your</span> <span class="n">working</span> <span class="n">folder</span><span class="o">&gt;</span>
         <span class="n">source</span> <span class="n">mne</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 
