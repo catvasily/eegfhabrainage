@@ -661,7 +661,7 @@ def compute_roi_time_courses(inv_method, labels, fwd, mode = 'pca_flip',
         labels (list): a list of mne.Label objects for the ROIs 
         fwd (mne.Forward): forward solutions
         mode (str): a method of constructing a single time course for ROI - see description
-            of `mne.extract_label_time_course() function.
+            of `mne.extract_label_time_course()` function.
         stc (mne.SourceEstimate or None): source estimate (reconstructed source time courses) for
             a surfaced based source space; only needed for non-beamformer reconstructions
         sensor_data (ndarray or None): nchan x ntimes; EEG channels time courses. Must be

@@ -5,6 +5,7 @@
 To add a step to be run to this script:
 
 1. Encapsulate necessary code in a dedicated function
+
 ```
 def my_step(ss):
 ...
@@ -13,6 +14,7 @@ def my_step(ss):
 
 2. Add corresponding entry to the cases dictionary in
    the EPILOGE section at the bottom in the form
+
 ```
 'my_step': my_step
 ```

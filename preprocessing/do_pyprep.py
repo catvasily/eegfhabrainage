@@ -89,6 +89,11 @@ class Pipeline:
 
         self.conf_dict = conf_dict
 
+        # In MNE v > 1.4 one cannot have 'exclude' parameter for plotting
+        # to be None:
+        if self.conf_dict['plot_psd']['kwargs']['exclude'] is None:
+            self.conf_dict['plot_psd']['kwargs']['exclude'] = []
+
         self.raw = mne.io.read_raw_edf(file_name, infer_types = True, preload=False,
                                        verbose = 'ERROR')	# Get a light Raw object for now
 

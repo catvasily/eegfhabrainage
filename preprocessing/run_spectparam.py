@@ -57,12 +57,13 @@ to_run = ("init","step1","step6")
 --------------------------------------------------
 
 Available steps:
+    `'input'`: As is - set all the input and configuration
+        parameters here. This step should always be run first  
+    `'do_fit'`: Run model fitting for all requested scan IDs and
+        save the results to .hdf5 files.
+    `'cumulative_report'`: Create a cumulative report for all
+        processed scans
 
-`'input'`: As is: set all the input and configuration
-  parameters here. This step should always be run first  
-`'do_fit'`: Run model fitting for all requested scan IDs and
-  save the results to .hdf5 files.
-`cumulative_report`: Create a cumulative report for all processed scans
 """
 
 import sys

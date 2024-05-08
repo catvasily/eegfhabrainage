@@ -63,7 +63,10 @@ def safe_crop(raw, tmin=0.0, tmax=None, include_tmax=True, *, verbose=None):
     tmin = max(tmin, 0.)
 
     if not (tmax is None):
-        tmax = min(tmax, raw.tmax)
+        # After mne 1.4, Raw objects no longer carry attrributes tmin, tmax
+        # Use raw.times[0], raw.times[-1] respectively
+        #tmax = min(tmax, raw.tmax)     - does not work after mne 1.4
+        tmax = min(tmax, raw.times[-1])
 
     raw.crop(tmin=tmin, tmax=tmax, include_tmax=include_tmax, verbose=verbose)
     new_annot = raw.annotations

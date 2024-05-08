@@ -1034,6 +1034,7 @@ on the cluster
 - Assume that the virtual environment name is **`mne`**. Change your current folder to
 the project working folder and perform the following commands:
 ```
+        module load StdEnv/2020		# To get Python 3.8.10, since 2024
         module load python/3.8.10
         module load scipy-stack/2022a
 

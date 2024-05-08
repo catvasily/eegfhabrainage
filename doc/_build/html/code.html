@@ -1366,7 +1366,7 @@ will be used; otherwise a MNE function  mne.extract_label_time_course() will be 
 <li><p><strong>labels</strong> (<em>list</em>) – a list of mne.Label objects for the ROIs</p></li>
 <li><p><strong>fwd</strong> (<em>mne.Forward</em>) – forward solutions</p></li>
 <li><p><strong>mode</strong> (<em>str</em>) – a method of constructing a single time course for ROI - see description
-of <a href="#id1"><span class="problematic" id="id2">`</span></a>mne.extract_label_time_course() function.</p></li>
+of <cite>mne.extract_label_time_course()</cite> function.</p></li>
 <li><p><strong>stc</strong> (<em>mne.SourceEstimate</em><em> or </em><em>None</em>) – source estimate (reconstructed source time courses) for
 a surfaced based source space; only needed for non-beamformer reconstructions</p></li>
 <li><p><strong>sensor_data</strong> (<em>ndarray</em><em> or </em><em>None</em>) – nchan x ntimes; EEG channels time courses. Must be
@@ -2169,14 +2169,17 @@ key in the JSON input file, for example
 <span class="pre">to_run</span> <span class="pre">=</span> <span class="pre">(&quot;init&quot;,&quot;step1&quot;,&quot;step6&quot;)</span>
 <span class="pre">`</span></code></p>
 <hr class="docutils" />
-<p>Available steps:</p>
 <dl class="simple">
-<dt><cite>‘input’</cite>: As is: set all the input and configuration</dt><dd><p>parameters here. This step should always be run first</p>
+<dt>Available steps:</dt><dd><dl class="simple">
+<dt><cite>‘input’</cite>: As is - set all the input and configuration</dt><dd><p>parameters here. This step should always be run first</p>
 </dd>
 <dt><cite>‘do_fit’</cite>: Run model fitting for all requested scan IDs and</dt><dd><p>save the results to .hdf5 files.</p>
 </dd>
+<dt><cite>‘cumulative_report’</cite>: Create a cumulative report for all</dt><dd><p>processed scans</p>
+</dd>
 </dl>
-<p><cite>cumulative_report</cite>: Create a cumulative report for all processed scans</p>
+</dd>
+</dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="run_spectparam.cumulative_report">
 <span class="sig-name descname"><span class="pre">cumulative_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_spectparam.cumulative_report" title="Permalink to this definition"></a></dt>
@@ -2271,8 +2274,10 @@ as returned in corresponding FitResults object.</p>
 <p><strong>A top level script to view various mutli-dimensional data embedded in
 2D or 3D space.</strong></p>
 <p>To add a step to be run to this script:</p>
-<p>1. Encapsulate necessary code in a dedicated function
-<code class="docutils literal notranslate"><span class="pre">`</span>
+<ol class="arabic simple">
+<li><p>Encapsulate necessary code in a dedicated function</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
 <span class="pre">def</span> <span class="pre">my_step(ss):</span>
 <span class="pre">...</span>
 <span class="pre">#</span> <span class="pre">NOTE:</span> <span class="pre">Step</span> <span class="pre">return</span> <span class="pre">value</span> <span class="pre">(if</span> <span class="pre">any)</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">used</span>

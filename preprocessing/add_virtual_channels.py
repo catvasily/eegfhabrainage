@@ -5,7 +5,20 @@ for viewing/processing the EEG data using standard MNE Python routines.**
 import numpy as np
 import mne
 from mne.transforms import apply_trans, invert_transform
-from mne.io.tag import _coil_trans_to_loc
+
+# This was deprecated after MNE 1.4:
+# from mne.io.tag import _coil_trans_to_loc
+#
+# So, we just add it here (copied from MNE sources):
+def _coil_trans_to_loc(coil_trans):
+    """Convert coil_trans to loc.
+
+    Copied from MNE Python v.1.4 sources:
+        https://github.com/mne-tools/mne-python/blob/maint/1.4/mne/io/tag.py#L134
+    """
+    coil_trans = coil_trans.astype(np.float64)
+    return np.roll(coil_trans.T[:, :3], 1, 0).flatten()
+
 
 def add_virtual_channels(raw, vc_names, vc_pos, vc_data, verbose = None):
     """Add virtual channels with data to an existing physical dataset.
