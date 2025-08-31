@@ -15,6 +15,7 @@ import mne
 
 from scipy.signal import welch
 from do_src_reconstr import read_roi_time_courses
+from do_pyprep import Pipeline
 
 __file__ = path.realpath(__file__)    # expand potentially relative path to a full one
 pathname = lambda fname: path.join(path.dirname(__file__), fname)
@@ -40,6 +41,17 @@ def main():
     what = args['what']                     # 'sensors' or 'sources'
     hospital = args['hospital']             # Burnaby, Abbotsford, RCH, Surrey
     source_scan_ids = args['source_scan_ids']   # None or a list of specific scan IDs (without .edf)
+
+    ftype = args['input_file_type']         # fif or edf for sensors, always hdf5 for sources
+
+    if ftype not in ('edf','fif','hdf5'):
+        raise ValueError('Unrecognized input file type: ' + ftype)
+
+    if (what == 'sources') and (ftype != 'hdf5'):
+        raise ValueError('Source input data files should be in .hdf5 format')
+
+    ico = args['input_file_ico']        # Only used for source-reconstructed data
+
     view_plots = args['view_plots']         # Flag to show interactive plots
     plot_only = args['plot_only']           # if true, plot already precalculated spectra
 
@@ -70,8 +82,12 @@ def main():
 
     if source_scan_ids is None:
         if what == 'sensors':
-            # To get bare ID need to chop off "_raw.fif" at the end
-            source_scan_ids = [path.basename(f)[:-8] for f in glob.glob(input_dir + '/*.fif')]
+            if ftype == 'fif':
+                # To get bare ID need to chop off "_raw.fif" at the end
+                source_scan_ids = [path.basename(f)[:-8] for f in glob.glob(input_dir + '/*.fif')]
+            else:       # ftype == 'edf':
+                # To get bare ID need to chop off ".edf" at the end
+                source_scan_ids = [path.basename(f)[:-4] for f in glob.glob(input_dir + '/*.edf')]
         else:
             # To get bare ID one needs to get folders with names that are 5 HEX numbers
             # separated by 4 dashes. Poor man's solution for it is just '*-*-*-*-*'
@@ -91,9 +107,12 @@ def main():
         source_scan_ids = source_scan_ids[istart:iend]
 
     if what == 'sensors':
-        scan_files = [scan_id + '_raw.fif' for scan_id in source_scan_ids]
+        if ftype == 'fif':
+            scan_files = [scan_id + '_raw.fif' for scan_id in source_scan_ids]
+        else:       # ftype == 'edf':
+            scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
     else:
-        scan_files = [scan_id + '/' + scan_id + '-ico-3-ltc.hdf5' \
+        scan_files = [scan_id + '/' + scan_id + f'-ico-{ico}-ltc.hdf5' \
                 for scan_id in source_scan_ids]
 
     # load the original preprocessing configuration, as we need some data from there
@@ -132,6 +151,7 @@ def main():
 
             Pxx = Pxx[:, idx]
             write_welch_psd(outname(scan_id), ch_names, freqs, Pxx)
+
         print(f'Total {len(source_scan_ids)} records processed\n')
 
     if view_plots and (plot_ids is not None):
@@ -157,7 +177,7 @@ def get_data_folders(args):
 
     valid_whats = {'sensors', 'sources'}
     if what not in valid_whats:
-        raise ValueError(f'Invalid arguement \`{what}\` passed; should be one of {valid_whats}')
+        raise ValueError(f'Invalid arguement \'{what}\' passed; should be one of {valid_whats}')
 
     # path.expanduser("~") results in /home/<username>
     # user_home = path.expanduser("~")
@@ -211,10 +231,23 @@ def load_data(f):
         # the returned tuple is: (label_tcs, label_names, vertno, rr, W, pz)
         return read_roi_time_courses(f)[:2]
 
-    if path.splitext(f)[1] == '.fif':
-        return load_fif(f)
+    def load_edf(f):
+        # Reuse Pipeline class init() code as it properly updates EDF channel types
+        raw = Pipeline(f).getRaw()
+        mne.datasets.eegbci.standardize(raw)    # Change chnames to standard; i.e. PZ -> Pz
+        return raw.get_data(), raw.ch_names
 
-    return load_hdf5(f)
+    # The main function body start
+    ext = path.splitext(f)[1]
+
+    if ext == '.fif':
+        return load_fif(f)
+    elif ext == '.edf':
+        return load_edf(f)
+    elif ext == '.hdf5':
+        return load_hdf5(f)
+    else:
+        raise ValueError('Unrecognized input file type')
 
 def write_welch_psd(fname, ch_names, freqs, psd):
     """Save PSDs of sensor or reconstructed ROI signals in .hdf5
@@ -236,6 +269,9 @@ def write_welch_psd(fname, ch_names, freqs, psd):
     Returns:
         None
     """
+    if path.exists(fname):
+        raise ValueError(f'Output file {fname} already exists. Please delete or move it.')
+
     with h5py.File(fname, 'w') as f:
         f.create_dataset('ch_names', data=ch_names)
         f.create_dataset('freqs', data=freqs)

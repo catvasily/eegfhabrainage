@@ -65,7 +65,7 @@
 
     # Input and output root folders depending on the host computer
     "hosts": {
-        "ub20-04": {
+        "ub2": {
             "cluster_job": false,   # this is not an array job on the CC cluster
             "sensors": {
                 "data_root": "/data/eegfhabrainage/after-prep-ica", # input time courses here

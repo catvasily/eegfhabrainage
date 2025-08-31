@@ -8,9 +8,22 @@
     "what": "sources",          # 'sensors' or 'sources' - which PSD to calculate
     "hospital": "Burnaby",          # Burnaby, Abbotsford, RCH, Surrey
     #"source_scan_ids": null,    # null or a list of specific record IDs
-    "source_scan_ids": ["a1ffd117-b263-480d-b18e-6f12820c3fec"],    # Burnaby
+    "source_scan_ids": ["2f8ab0f5-08c4-4677-96bc-6d4b48735da2"],    # Burnaby
+    #"input_file_type": "fif",   # Files before prep/ica are 'edf'; files after prep.ica
+                                # are 'fif'; source reconstructed data are 'hdf5'
+    #"input_file_type": "edf",
+    "input_file_type": "hdf5",
+
+    "input_file_ico": 4,        # Set to 3 for label time courses files like "...-ico-3-ltc.hdf5"
+                                # (used for the Destrieux atlas), or to 4 for inputs like
+                                # "...-ico-4-ltc.hdf5" - used for the Schaefer atlas
+                                # Does not matter for sensor data
     "view_plots": true,         # Flag to show interactive plots
     "plot_only": false,         # Flag to only plot already precalculated spectra",
+
+    "N_ARRAY_JOBS": 100,        # Num of parallel jobs to run on cluster; should match
+                                # the same parameter in .sbatch file
+    "verbose": "INFO",          # Can be ‘DEBUG’, ‘INFO", ERROR", "CRITICAL", or "WARNING" (default)
 
     # IDs of records to plot if view_plots = true, or null, or []
     
@@ -20,31 +33,36 @@
     #        "fc34d5f0-dd6a-4e65-8f87-95ef5b452681"
     #        ],
     
-    "plot_ids": ["a1ffd117-b263-480d-b18e-6f12820c3fec"    # Burnaby
+    "plot_ids": ["2f8ab0f5-08c4-4677-96bc-6d4b48735da2"    # Burnaby
             ],
 
     # Channels/ROIs to plot if view_plots = true
-    "plot_chnames": {
-            "sensors": ["O1","O2","P3","P4","Pz"],
-            "sources": ["G_occipital_middle-lh", "G_occipital_middle-rh", "G_occipital_sup-lh",
-                "G_occipital_sup-rh", "Pole_occipital-lh", "Pole_occipital-rh"]
-            },
+    # Destrieux
+    #"plot_chnames": {
+    #        "sensors": ["O1","O2","P3","P4","Pz"],
+    #        "sources": ["G_occipital_middle-lh", "G_occipital_middle-rh", "G_occipital_sup-lh",
+    #            "G_occipital_sup-rh", "Pole_occipital-lh", "Pole_occipital-rh"]
+    #        },
 
-    "N_ARRAY_JOBS": 100,        # Num of parallel jobs to run on cluster; should match
-                                # the same parameter in .sbatch file
-    "verbose": "INFO",          # Can be ‘DEBUG’, ‘INFO", ERROR", "CRITICAL", or "WARNING" (default)
+    # Schaefer 
+    "plot_chnames": {
+        "sensors": ["O1","O2","P3","P4","Pz"],
+        "sources": ["17Networks_LH_SomMotB_Aud_1-lh", "17Networks_RH_SomMotB_Aud_1-rh",
+                    "17Networks_LH_LimbicA_TempPole_1-lh",
+                    "17Networks_RH_LimbicA_TempPole_1-rh"]
+    },
 
     # Input and output root folders depending on the host computer
     "hosts": {
-        "ub20-04": {
+        "ub2": {
             "cluster_job": false,   # this is not an array job on the CC cluster
             "sensors": {
-                "data_root": "/data/eegfhabrainage/ps-after-prep-ica", # input time courses here
-                "out_root": "/data/eegfhabrainage/ps-welch",           # output PSDs here
+                "data_root": "/data/eegfhabrainage/after-prep-ica", # input time courses here
+                "out_root": "/data/eegfhabrainage/welch"           # output PSDs here
             },
             "sources": {
-                "data_root": "/data/eegfhabrainage/ps-src-reconstr",
-                "out_root": "/data/eegfhabrainage/ps-src-welch"
+                "data_root": "/data/eegfhabrainage/src-reconstr",
+                "out_root": "/data/eegfhabrainage/src-welch"
             }
         },
         "cedar": {
@@ -55,7 +73,8 @@
                 "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/welch"
             },
             "sources": {
-                "data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux",
+                #"data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux",
+                "data_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-reconstr",
                 "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-welch"
             }
         },

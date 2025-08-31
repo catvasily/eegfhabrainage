@@ -20,7 +20,7 @@ def get_data_folders():
 	user_home = path.expanduser("~")
 	user = path.basename(user_home) # Yields just <username>
 
-	if 'ub20-04' in host:
+	if 'ub2' in host:       # 'ub20-04', 'ub24.04'
 		data_root = '/data/eegfhabrainage'
 		out_root = data_root + '/processed'
 		cluster_job = False

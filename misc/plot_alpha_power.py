@@ -63,7 +63,7 @@ if __name__ == '__main__':	# Need this to avoid running the code during doc gene
     fs = raw.info['sfreq']
     
     # Get the source time courses
-    (label_tcs, label_names, vertno, rr, W, pz) = read_roi_time_courses(ltc_file)
+    (label_tcs, label_names, vertno, rr, W, pz, _, _) = read_roi_time_courses(ltc_file)
     (f, spect)= scipy.signal.welch(label_tcs, fs, nperseg=n_fft, scaling = 'density')
     idx=np.logical_and(f>=band[0], f<=band[1])
     spect = np.mean(spect[:,idx], axis = 1)    # spect is a 1D array of n_ROI points

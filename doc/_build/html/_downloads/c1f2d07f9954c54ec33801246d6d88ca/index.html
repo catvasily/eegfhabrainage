@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python software documentation for the EEG Fraser Health project &mdash; eegfh 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=77e6fb11" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=2709fde1"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="EEG preprocessing pipeline for FHA EDF dataset" href="README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            eegfh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="README.html">EEG preprocessing pipeline for FHA EDF dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Classes and functions for EEG data processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README_reports.html">EEG clinical reports processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reports.html">Classes and functions for EEG reports processing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">eegfh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Python software documentation for the EEG Fraser Health project</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="python-software-documentation-for-the-eeg-fraser-health-project">
+<h1>Python software documentation for the EEG Fraser Health project<a class="headerlink" href="#python-software-documentation-for-the-eeg-fraser-health-project" title="Link to this heading"></a></h1>
+<p><em>Compiled using Sphinx package.</em></p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="README.html">EEG preprocessing pipeline for FHA EDF dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="README.html#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#filtering-resampling-and-extracting-of-good-data-segments">1. Filtering, resampling and extracting of good data segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#eeg-prep-procedure-and-artifact-removal">2. EEG PREP procedure and artifact removal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records">3. Extracting hyperventilation and photic stimulation intervals from the original records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#performing-source-reconstruction">4. Performing source reconstruction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#calculating-power-spectra">5. Calculating power spectra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#calculating-continuous-wavelet-transforms-cwts">6. Calculating Continuous Wavelet Transforms (CWTs)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component">7. Representing spectra as a combination of periodic oscillations and aperiodic component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space">8. Visualizing multi-dimensional data via embedding in 2D or 3D space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#miscellaneous-functions">Miscellaneous functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#setting-up-python-virtual-environment-on-compute-canada-alliance-cluster">Setting up Python virtual environment on Compute Canada (Alliance) cluster</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Classes and functions for EEG data processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-run_filtering_segmentation">run_filtering_segmentation.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-edf_preprocessing">edf_preprocessing.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-individual_func">individual_func.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-run_pyprep_ica">run_pyprep_ica.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-do_pyprep">do_pyprep.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-extract_hv_intervals">extract_hv_intervals.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-extract_ps_intervals">extract_ps_intervals.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-create_ps_events">create_ps_events.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-run_src_reconstr">run_src_reconstr.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-add_virtual_channels">add_virtual_channels.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-do_src_reconstr">do_src_reconstr.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-make_fsaverage_bem">make_fsaverage_bem.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-nearest_pos_def">nearest_pos_def.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-run_welch">run_welch.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-run_cwt">run_cwt.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-run_spectparam">run_spectparam.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-run_view_hd_embedding">run_view_hd_embedding.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-tfdata">tfdata.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-view_raw_eeg">view_raw_eeg.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-view_inflated_brain_data">view_inflated_brain_data.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-plot_alpha_power">plot_alpha_power.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-running_mean_std">running_mean_std.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-view_hd_embedding">view_hd_embedding.py</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="README_reports.html">EEG clinical reports processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="README_reports.html#summary">Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README_reports.html#installation">Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reports.html">Classes and functions for EEG reports processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reports.html#run-reports-py-protected">run_reports.py (protected)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html#process-reports-py">process_reports.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html#module-create_db">create_db.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html#module-reports_db">reports_db.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reports.html#word2vec-py">word2vec.py</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="README.html" class="btn btn-neutral float-right" title="EEG preprocessing pipeline for FHA EDF dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, AM.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

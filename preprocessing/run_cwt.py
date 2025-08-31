@@ -353,7 +353,7 @@ class FitEW:
         for all frequencies. `amps` argument is ignored
         '''
         if parm not in FitEW.ew_parms:
-            raise ValueError(f'Invalid parameter value \`{parm}\` specified')
+            raise ValueError(f'Invalid parameter value \'{parm}\' specified')
 
         return self.params[:, FitEW.ew_parms[parm]]
 

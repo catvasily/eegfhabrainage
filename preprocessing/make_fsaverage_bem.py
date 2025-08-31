@@ -67,10 +67,10 @@ if __name__ == '__main__':
     user_home = path.expanduser("~")
     user = path.basename(user_home) # Yields just <username>
 
-    # subjects_dir = user_home + '/mne_data/MNE-fsaverage-data'    # local
-    subjects_dir = user_home + '/projects/rpp-doesburg/' + user + '/data/mne_data/MNE-fsaverage-data'
+    subjects_dir = user_home + '/mne_data/MNE-fsaverage-data'    # local
+    #subjects_dir = user_home + '/projects/rpp-doesburg/' + user + '/data/mne_data/MNE-fsaverage-data'
     ico_bem = 4
-    ico_src = 3    
+    ico_src = 4    
     # ------------------------
 
     make_fsaverage_bem(subjects_dir, ico_bem = ico_bem, ico_src = ico_src, verbose = None)

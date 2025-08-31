@@ -377,7 +377,7 @@ def get_data_folders(args):
 
     valid_whats = {'sensors', 'sources'}
     if what not in valid_whats:
-        raise ValueError(f'Invalid argument \`{what}\` passed; should be one of {valid_whats}')
+        raise ValueError(f'Invalid argument \'{what}\' passed; should be one of {valid_whats}')
 
     # path.expanduser("~") results in /home/<username>
     # user_home = path.expanduser("~")

@@ -25,7 +25,7 @@ def get_data_folders():
     user_home = path.expanduser("~")
     user = path.basename(user_home) # Yields just <username>
 
-    if 'ub20-04' in host:
+    if 'ub2' in host:   # 'ub20-04', 'ub24.04'
         mne.viz.set_browser_backend('matplotlib')
         data_root = '/data/eegfhabrainage/processed'
         out_root = '/data/eegfhabrainage/after-prep-ica'

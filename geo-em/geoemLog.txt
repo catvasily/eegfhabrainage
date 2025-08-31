@@ -1,0 +1,95 @@
+Interactions with geo-electromagnetic activity
+----------------------------------------------
+* Data location:
+    cedar: /project/6019337/databases/eeg_fha/release_001/
+    local: /data/eegfhabrainage/metadata
+
+* Files:
+    readme.rtf                                              # .csv files field descriptions
+    MAPPING_ScanID_PatientURN_release_CIHI.csv              # hospital, scan ID -> full metadata
+    MAPPING_ScanID_PatientURN_release_CIHI_metadata.json    # column descriptions of above .csv
+    MAPPING_ScanID_PatientURN_release.csv                   # hospital, scan ID -> metadata without some columns
+    MAPPING_ScanID_PatientURN_release_metadata.json         # column descriptions of above .csv
+    age_ScanID.csv                                          # hospital, scan ID -> biological age data
+
+                                         -----------------------------
+* EEG date range (all hospitals pooled): from 2005-06-16 to 2019-04-26
+                                         -----------------------------
+
+* Plotted date histograms for all hospitals based on records available in src-Welch folders:
+    /data/eegfhabrainage/metadata/<hospital>_dates_distr.png
+
+* Note on PCA transformation:
+    . The strongest PC component essentially summates all channels with almost
+      equal weights. Its time course values may easily exceed 10 Hz. because 
+      those are in fact sums of deviations from means for each channel
+
+    . There is no sense in adding transformed means to the PCs, because for example
+      the mean corresponding to the strongest component will be much larger than
+      a typical channel mean. Example with all equal channels:
+        pc0 = {1/nchan^1/2}
+        pc0_mean = (ch_mean/nchan^1/2)*n_chan = nchan^1/2 * ch_mean
+      Thus pc0_mean does not reflect a typical channel mean but is nchan^1/2 larger.
+
+* Running scatter plots on cedar:
+  alpha_CF:
+    - Abbotsford (2 PCs x Kp, R): requested 1 hr, 16G; actual 20 min, < 1G
+      Result for alpha_cf: no visible dependencies
+
+    - Abbotsford (2 PCs x B, stdB): requested 40 min, 4G; actual 20 min, < 1G
+      Result for alpha_cf: no visible dependencies
+
+  alpha_PW:
+    - Abbotsford (2 PCs x Kp, R): requested 1 hr, 4G; actual 20 min, < 1G 
+      Result for alpha_pw: no visible dependencies
+
+  alpha_BW:
+    - Abbotsford (2 PCs x Kp, R): requested 40 min, 4G; actual 20 min, < 1G 
+      Result for alpha_bw: no visible dependencies
+
+* NOTE: light travels from Sun to Earth ~8 min. However solar wind speed is
+  ~400 km/s. Thus solar wind travels from Sun to Earth ~4.3 days, or ~104 hours
+
+* Downloaded full hourly data for all years from omni site:
+        omni2_all_years.dat, 171 Mb
+  then manually deleted all rows for years before 2005 and after 2019 using
+  office calc. The resulting file
+  is
+        omni2_2005-2019.dat, 31 Mb
+
+  To achieve this in libre office, use
+    - Ctrl-H to open search box; then select the years column, specify the
+      year you want, and check "Selected area only" or like that.
+      This way desired year rows can be found
+
+    - Use Data/Define range, then Data/Select range, to specify area one
+      wants to delete by area coords
+
+    - Use Sheet/Delete Rows to delete the area
+
+* In omni_ files, the hour column is #3 (1-based); _01_av.dat and _27_av.dat
+  files have 0 in that column. However value 0 cannot be interpreted as
+  NaN because this is a valid hour number in hour-averaged files.
+
+* After implementing time shift support, decided to drop using omni
+  .._01_av.dat files (that is, day averaged files), because they have
+  00:00 in the time data. So:
+    !!! omni_01_av.dat files are no longer supported !!!
+
+* TO CONTINUE:
+    - Run scatter plots alpha parms vs geo-parms for varying time shift
+      between EEG data and geo data (up to 100 - 120 hrs, see Note above)
+
+    - Add README.md for geoem
+
+    - Add geoem to automated doc generation; gen the docs
+
+    - What is "distance correlation"?  Spearman correlation
+
+    - May be think about R or Kp as dependent variable (for random forest)
+
+    - Add data_to_pca() description to the preproc README.md, and to the doc generation
+      scripts
+
+    - Create README.md and enable doc generation scripts
+

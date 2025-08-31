@@ -6,7 +6,7 @@ import glob
 import os
 import os.path as path
 import socket
-import json
+import commentjson as cjson
 import numpy as np
 import mne
 
@@ -37,8 +37,12 @@ _PYPREP_CONFIG_PATHNAME = path.dirname(__file__) + "/" + PYPREP_CONFIG_FILE
 sys.path.append(path.dirname(path.dirname(__file__))+ "/misc")
 from view_raw_eeg import view_raw_eeg
 
-def get_data_folders():
+def get_data_folders(args):
     '''Setup input and output data folders depending on the host machine.
+
+    Args:
+        args (dict): dictionary with input arguments read from the 
+            `INPUT_JSON_FILE`
 
     Returns:
         data_root (str): path to the root input folder
@@ -46,77 +50,55 @@ def get_data_folders():
         fs_dir (str): path to the folder with the template subject 'fsaverage' data
         cluster_job ( bool): a flag indicating whether the host is on CC cluster
     '''
+    host_found = False
     host = socket.gethostname()
 
-    # path.expanduser("~") results in /home/<username>
-    user_home = path.expanduser("~")
-    user = path.basename(user_home) # Yields just <username>
+    for key in args['hosts']:
+        if key in host:
+            host = key
+            host_found = True
+            break
 
+    if not host_found:
+        host = 'other'
+
+    if host != 'cedar':
+        mne.viz.set_browser_backend('matplotlib')
+
+    # Get the host data
     # data_root - where the input comes from; out_root - where the output goes
-    if 'ub20-04' in host:
-        mne.viz.set_browser_backend('matplotlib')
-        data_root = '/data/eegfhabrainage/after-prep-ica'
-        out_root = '/data/eegfhabrainage/src-reconstr'
-        fs_dir = user_home + '/mne_data/MNE-fsaverage-data'
-        cluster_job = False
-    elif 'cedar' in host:
-        data_root = '/project/6019337/databases/eeg_fha/preprocessed/001_a01_01/'
-        out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/src-reconstr'
-        fs_dir = user_home + '/projects/rpp-doesburg/' + user + '/data/mne_data/MNE-fsaverage-data'
-        cluster_job = True
-    else:
-        mne.viz.set_browser_backend('matplotlib')
+    cluster_job = args['hosts'][host]['cluster_job']
+    data_root = args['hosts'][host]['data_root']
+    out_root = args['hosts'][host]['out_root']
+    fs_dir = args['hosts'][host]['fs_dir']
+
+    if host == 'other':
         work_dir = os.getcwd()
-        data_root = work_dir + '/processed'
-        data_root = work_dir + '/after-prep-ica'
-        out_root = work_dir + '/src-reconstr'
-        fs_dir = work_dir + '/mne_data/MNE-fsaverage-data'
-        cluster_job = False
+        data_root = work_dir + '/' + data_root
+        out_root = work_dir + '/' + out_root
+        fs_dir = work_dir + '/' + fs_dir
 
     return data_root, out_root, fs_dir, cluster_job
 
 if __name__ == '__main__': 
+    # Load config
+    with open(_JSON_CONFIG_PATHNAME, "r") as fp:
+        cfg = cjson.loads(fp.read())
+
+    # Also load pyprep configuration, as we need some data from there
+    with open(_PYPREP_CONFIG_PATHNAME, "r") as fp:
+        pyprep_dict = cjson.loads(fp.read())
+
     # ---------- Inputs ------------------
-    N_ARRAY_JOBS = 100       # Number of parallel jobs to run on cluster
+    N_ARRAY_JOBS = cfg['N_ARRAY_JOBS']  # Number of parallel jobs to run on cluster
 
-    hospital = 'Burnaby'     # Burnaby, Abbotsford, RCH, etc.
-    #hospital = 'Abbotsford' 
-    #hospital = 'RCH' 
-
-    # Abbotsford subset
-    #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
-
-    # Burnaby subset:
-    source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',		# Interesting spectrum
-                       #'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
-                       #'81be60fc-ed17-4f91-a265-c8a9f1770517',
-                       #'ffff1021-f5ba-49a9-a588-1c4778fb38d3',
-                       #'81c0c60a-8fcc-4aae-beed-87931e582c45',
-                       #'57ea2fa1-66f1-43f9-aa17-981909e3dc96',
-                    ]
-
-    #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
-
-    recalc_forward = False    # Force recalculating forward solutions (even if already exist)
-    view_plots = True         # Flag to show interactive plots
-    plot_sensors = False      # Flag to plot montage and source space in 3D
-    plot_waveforms = False    # Flag to plot sensor and source waveforms
-
-    # Channels to plot if plot_waveforms = True. Set to None to plot all
-    # channels
-    #plot_chnames = None
-    plot_chnames = ['O1','O2','P3','P4','Pz','G_occipital_middle-lh', \
-        'G_occipital_middle-rh', 'G_occipital_sup-lh', 'G_occipital_sup-rh', \
-        'Pole_occipital-lh', 'Pole_occipital-rh']
-    # Scale factor for virtual channels for simultaneously plotting EEG and source
-    # waveforms. If the latter are in pseudo-Z units, their magnitudes are typicaly
-    # around 1, while EEGs have magnitudes ~1e-5
-    vc_scale_factor = 1e-5    # Only affects visual display of the virtual channels
-
-    verbose = 'INFO'     # Can be ‘DEBUG’, ‘INFO', ERROR', 'CRITICAL', or 'WARNING' (default)
+    hospital = cfg['hospital']     # Burnaby, Abbotsford, RCH, etc.
+    source_scan_ids = cfg['source_scan_ids']
+    view_plots = cfg['view_plots']
+    verbose = cfg['verbose']    # Can be ‘DEBUG’, ‘INFO', ERROR', 'CRITICAL', or 'WARNING' (default)
     # ------ end of inputs ---------------
 
-    data_root, out_root, fs_dir, cluster_job = get_data_folders()
+    data_root, out_root, fs_dir, cluster_job = get_data_folders(cfg)
     input_dir = data_root + "/" + hospital
     output_dir = out_root + "/" + hospital
     fs_subject_dir = fs_dir + "/fsaverage"
@@ -152,14 +134,6 @@ if __name__ == '__main__':
 
     scan_files = [scan_id + '_raw.fif' for scan_id in source_scan_ids]
 
-    # Load config
-    with open(_JSON_CONFIG_PATHNAME, "r") as fp:
-        conf_dict = json.loads(fp.read())
-
-    # Also load pyprep configuration, as we need some data from there
-    with open(_PYPREP_CONFIG_PATHNAME, "r") as fp:
-        pyprep_dict = json.loads(fp.read())
-
     # Create montage
     montage_kind = pyprep_dict["montage"]
     montage = mne.channels.make_standard_montage(montage_kind)
@@ -169,16 +143,16 @@ if __name__ == '__main__':
     trans_path = path.join(fs_subject_dir, "bem", "fsaverage-trans.fif")
 
     # Template subject's paths to bem solution and source space;
-    src_path = path.join(fs_subject_dir, "bem", conf_dict["source_space"])
-    bem_path = path.join(fs_subject_dir, "bem", conf_dict["bem_sol"])
+    src_path = path.join(fs_subject_dir, "bem", cfg["source_space"])
+    bem_path = path.join(fs_subject_dir, "bem", cfg["bem_sol"])
 
     trans = mne.read_trans(trans_path, verbose=verbose)
 
     # Read the atlas ROIs ("labels")
-    mri_labels = mne.read_labels_from_annot("fsaverage",	    # FreeSurfer subject
-                                        parc=conf_dict["parcellation"],       # parcellation (atlas)
+    mri_labels = mne.read_labels_from_annot("fsaverage",        # FreeSurfer subject
+                                        parc=cfg["parcellation"],       # parcellation (atlas)
                                         hemi='both',                          # 'lh', 'rh' or 'both'
-                                        surf_name=conf_dict["surface"],       # which surface:
+                                        surf_name=cfg["surface"],       # which surface:
                                                             # white = white/gray boundary;
                                                             # pial = gray/cereb fluid boundary
                                         annot_fname=None,   # .annot file - instead of 'parc' and 'hemi'
@@ -195,19 +169,29 @@ if __name__ == '__main__':
     del mri_labels
 
     # Remove labels (ROIs) that do not have any sources
-    labels = [l for l in labels if len(l.vertices)]
+    # or marked to drop
+    labels = [l for l in labels if (len(l.vertices) and \
+                    (l.name not in cfg['drop_labels'])) ]
     label_names = [label.name for label in labels]
+
+    print(f'\nTotal of {len(labels)} labels (ROIs) will be processed\n')
+
+    # Uncomment this to print all the labels
+    #print(f'Labels, n_vertices for {cfg["parcellation"]} atlas:')
+    #for l in labels:
+    #    print(l.name, len(l.vertices))
+
     label_coms = get_label_coms(labels, fs_dir)
 
     # Settings for source time course reconstructions - see a call to
     # compute_source_timecourses() below
-    inverse_method = conf_dict["inverse_method"]    # Inverse solution type
+    inverse_method = cfg["inverse_method"]    # Inverse solution type
 
     # Beamformer source reconstruction
-    beam_type = conf_dict["beam_type"]              # Beamformer type for method = 'beam'
-    src_units = conf_dict["src_units"]
-    rcond = 1./conf_dict["max_condition_number"]    # Inverse of max condition number for cov matrix
-    tol = conf_dict["noise_upper_bound_tolerance"]  # Accuracy of setting noise cov trace upper bound 
+    beam_type = cfg["beam_type"]              # Beamformer type for method = 'beam'
+    src_units = cfg["src_units"]
+    rcond = 1./cfg["max_condition_number"]    # Inverse of max condition number for cov matrix
+    tol = cfg["noise_upper_bound_tolerance"]  # Accuracy of setting noise cov trace upper bound 
                                                     # so that (data_cov - noise_cov) is a pos def matrix
     beam_kwargs = {"beam_type": beam_type, "units": src_units, "tol": tol,
         "rcond": rcond, "verbose": verbose}
@@ -233,7 +217,7 @@ if __name__ == '__main__':
             raw = mne.io.read_raw_fif(filepath, preload=True, verbose = verbose)
             raw.set_montage(montage, on_missing='raise')
 
-            if view_plots and plot_sensors:
+            if view_plots and cfg['plot_sensors']:
                 # Plot electrodes positions
                 mne.viz.plot_alignment(
                     raw.info,
@@ -265,9 +249,9 @@ if __name__ == '__main__':
 
             # Compute forward solutions. Should be done for each subject as the
             # the EEG channels subset actually used does vary. 
-            fwd_file = subject_output_dir + "/" + fwd_file_name(scan_id, conf_dict["source_space"]) 
+            fwd_file = subject_output_dir + "/" + fwd_file_name(scan_id, cfg["source_space"]) 
 
-            if recalc_forward or (not path.exists(fwd_file)):
+            if cfg['recalc_forward'] or (not path.exists(fwd_file)):
                 fwd = mne.make_forward_solution(
                           raw.info, 
                           trans = trans,
@@ -275,7 +259,7 @@ if __name__ == '__main__':
                           bem = bem_path,
                           meg = False,
                           eeg=True,
-                          mindist = conf_dict["min_dist_to_skull_mm"],
+                          mindist = cfg["min_dist_to_skull_mm"],
                           ignore_ref = False,    # this setting does not matter for EEG
                           n_jobs = -1,           # -1 recalcs to the number of available CPU cores
                           verbose = verbose
@@ -296,7 +280,7 @@ if __name__ == '__main__':
             label_tcs, label_wts = compute_roi_time_courses(
                 inv_method=inverse_method,
                 labels = labels, fwd = fwd,
-                mode = conf_dict["roi_time_course_method"],
+                mode = cfg["roi_time_course_method"],
                 stc = None if inverse_method == 'beam' else stc,
                 sensor_data = eeg_data,
                 cov = data_cov,
@@ -307,7 +291,7 @@ if __name__ == '__main__':
             # funcs (very slow). One needs stc != None for this.
             '''
             test_tcs = mne.extract_label_time_course(stc, labels, fwd['src'],
-                mode=conf_dict["roi_time_course_method"],    # How to extract a time course for ROI
+                mode=cfg["roi_time_course_method"],    # How to extract a time course for ROI
                 allow_empty=False,         # Raise exception for empty ROI 
                 return_generator=False,    # Return nRoi x nTimes matrix, not a generator
                 mri_resolution=False,      # Do not upsample source space
@@ -315,7 +299,7 @@ if __name__ == '__main__':
             print('max diff = {}'.format(np.max(np.abs(label_tcs - test_tcs))))
             '''
 
-            ltc_file = subject_output_dir + "/" + ltc_file_name(scan_id, conf_dict["source_space"]) 
+            ltc_file = subject_output_dir + "/" + ltc_file_name(scan_id, cfg["source_space"]) 
             label_com_rr = get_voxel_coords(fwd['src'], label_coms)    # rr's will be in head coords
             write_roi_time_courses(ltc_file, label_tcs, label_names,
                 vertno = label_coms, rr = label_com_rr, W = label_wts, pz = pz)
@@ -323,10 +307,10 @@ if __name__ == '__main__':
             # TO DO:
             #    - (optional) implement source reconstruction with dSPM, for comparison
 
-            if view_plots and plot_waveforms:
+            if view_plots and cfg['plot_waveforms']:
                 add_virtual_channels(raw, label_names, label_com_rr,
-                    vc_scale_factor * label_tcs, verbose = verbose)
-                view_raw_eeg(raw = raw, picks = plot_chnames)
+                    cfg['vc_scale_factor'] * label_tcs, verbose = verbose)
+                view_raw_eeg(raw = raw, picks = cfg['plot_chnames'])
 
             print('\n***** Processing of {} completed\n'.format(f), flush = True)
         except Exception as e:

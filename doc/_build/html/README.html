@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EEG preprocessing pipeline for FHA EDF dataset &mdash; eegfh 0.1 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=77e6fb11" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e031e9a9"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="_static/documentation_options.js?v=2709fde1"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -123,9 +125,9 @@
            <div itemprop="articleBody">
              
   <section id="eeg-preprocessing-pipeline-for-fha-edf-dataset">
-<h1>EEG preprocessing pipeline for FHA EDF dataset<a class="headerlink" href="#eeg-preprocessing-pipeline-for-fha-edf-dataset" title="Permalink to this heading"></a></h1>
+<h1>EEG preprocessing pipeline for FHA EDF dataset<a class="headerlink" href="#eeg-preprocessing-pipeline-for-fha-edf-dataset" title="Link to this heading"></a></h1>
 <section id="summary">
-<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading"></a></h2>
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
 <p>The code is aimed to preprocess clinical EEG recordings and make them a suitable input for later analyses and ML applications.
 Code uses the original EEG records in EDF format as input. The following steps (tasks) may be performed:</p>
 <ol class="arabic simple">
@@ -150,9 +152,9 @@ explicitly specified values take precedence, then those coming from the Python d
 <p>More details about each step and configurations files are given below.</p>
 </section>
 <section id="filtering-resampling-and-extracting-of-good-data-segments">
-<h2>1. Filtering, resampling and extracting of good data segments<a class="headerlink" href="#filtering-resampling-and-extracting-of-good-data-segments" title="Permalink to this heading"></a></h2>
+<h2>1. Filtering, resampling and extracting of good data segments<a class="headerlink" href="#filtering-resampling-and-extracting-of-good-data-segments" title="Link to this heading"></a></h2>
 <section id="running-the-code">
-<h3>Running the code<a class="headerlink" href="#running-the-code" title="Permalink to this heading"></a></h3>
+<h3>Running the code<a class="headerlink" href="#running-the-code" title="Link to this heading"></a></h3>
 <p>This step is executed by a top level script <strong><code class="docutils literal notranslate"><span class="pre">run_filtering_segmentation.py</span></code></strong>. It calls functions and classes defined in
 <code class="docutils literal notranslate"><span class="pre">edf_preprocessing.py</span></code> and <code class="docutils literal notranslate"><span class="pre">individual_func.py</span></code>. Most of the logic is encapsulated in class <code class="docutils literal notranslate"><span class="pre">PreProcessing</span></code>; for practical application
 of this class see source code for function <code class="docutils literal notranslate"><span class="pre">slice_edfs()</span></code>. One can find references and full description of both in the
@@ -239,7 +241,7 @@ and the returned <code class="docutils literal notranslate"><span class="pre">da
 </div>
 </section>
 <section id="performed-operations">
-<h3>Performed operations<a class="headerlink" href="#performed-operations" title="Permalink to this heading"></a></h3>
+<h3>Performed operations<a class="headerlink" href="#performed-operations" title="Link to this heading"></a></h3>
 <p>The following operations are performed for each input record.</p>
 <ul>
 <li><p>The EDF file is loaded using <code class="docutils literal notranslate"><span class="pre">mne.io.read_raw_edf()</span></code> function, except for the channels specified in the
@@ -268,7 +270,7 @@ used.</p></li>
 </ul>
 </section>
 <section id="json-configuration-file">
-<h3>JSON configuration file<a class="headerlink" href="#json-configuration-file" title="Permalink to this heading"></a></h3>
+<h3>JSON configuration file<a class="headerlink" href="#json-configuration-file" title="Link to this heading"></a></h3>
 <p>All default preprocessing configuration parameters are stored in the JSON file <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code>. Default parameter
 values can be changed when instantiating the <code class="docutils literal notranslate"><span class="pre">PreProcess</span></code> class or while calling its methods, by passing a custom JSON configuration
 file or an equivalent Python dictionary object. Also some of the parameters may be given explicitly as arguments. The same approach applies
@@ -364,9 +366,9 @@ using this example JSON snippet in practice.</p>
 </section>
 </section>
 <section id="eeg-prep-procedure-and-artifact-removal">
-<h2>2. EEG PREP procedure and artifact removal<a class="headerlink" href="#eeg-prep-procedure-and-artifact-removal" title="Permalink to this heading"></a></h2>
+<h2>2. EEG PREP procedure and artifact removal<a class="headerlink" href="#eeg-prep-procedure-and-artifact-removal" title="Link to this heading"></a></h2>
 <section id="id1">
-<h3>Running the code<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<h3>Running the code<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <p>This step is done by a top level script <strong><code class="docutils literal notranslate"><span class="pre">run_pyprep_ica.py</span></code></strong>. Most of related functions and classes are defined in
 the source file <code class="docutils literal notranslate"><span class="pre">do_pyprep.py</span></code>. The main work horse is class <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code>, which in turn uses class <code class="docutils literal notranslate"><span class="pre">PrepPipeline</span></code> imported from a <code class="docutils literal notranslate"><span class="pre">pyprep</span></code> library.
 See more details in the <a class="reference download internal" download="" href="_downloads/a0f78390b83d56af3958387635feaa09/index.html"><span class="xref download myst">“auto-generated documentation”</span></a>.</p>
@@ -384,7 +386,7 @@ Please refer to section <a class="reference internal" href="#running-the-code">�
 procedure is identical. Note that typically the PREP step is applied to extracted good segments rather than to the original data.</p>
 </section>
 <section id="id2">
-<h3>Performed operations<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<h3>Performed operations<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <ul>
 <li><p>The <strong>EEG PREP step</strong> executes the “PREP” procedure published in the literature as implemented by the <code class="docutils literal notranslate"><span class="pre">pyprep</span></code> library.
 It performs the following operations:</p>
@@ -406,7 +408,7 @@ However, <strong>no additional filtering of the EEG sensor channels is done</str
 </ul>
 </section>
 <section id="id3">
-<h3>JSON configuration file<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<h3>JSON configuration file<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>Parameter values specific to the PREP/ICA operations are defined in a JSON configuration file
 <code class="docutils literal notranslate"><span class="pre">pyprep_ica_conf.json</span></code>, which is described below. Note again that JSON files can not contain comments;
 therefore comments in the code below should be removed if one wants to use it in practice.</p>
@@ -562,11 +564,11 @@ therefore comments in the code below should be removed if one wants to use it in
 </section>
 </section>
 <section id="extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records">
-<h2>3. Extracting hyperventilation and photic stimulation intervals from the original records<a class="headerlink" href="#extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records" title="Permalink to this heading"></a></h2>
+<h2>3. Extracting hyperventilation and photic stimulation intervals from the original records<a class="headerlink" href="#extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records" title="Link to this heading"></a></h2>
 <p>This step is completely independent from steps 1, 2 and is only used to identify and store the
 hyperventilation (HV) and photic stimulation (PS) segments, as the name suggests.</p>
 <section id="id4">
-<h3>Running the code<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<h3>Running the code<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <p>The top level scripts to execute are <strong><code class="docutils literal notranslate"><span class="pre">extract_hv_intervals.py</span></code></strong>, <strong><code class="docutils literal notranslate"><span class="pre">extract_ps_intervals.py</span></code></strong>
 respectively. Internally both scripts call the same function <code class="docutils literal notranslate"><span class="pre">slice_edfs()</span></code> as in the
 <a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments">first step</a>.</p>
@@ -588,7 +590,7 @@ under the segmentation task
 for details. Note that these steps should only be applied to the original EDF records.</p>
 </section>
 <section id="id5">
-<h3>Performed operations<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<h3>Performed operations<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>First, the same <strong>basic preprocessing operations as in the task 1 (segmentation) are done</strong>, namely</p>
 <ul>
@@ -608,17 +610,17 @@ No padding is applied to the extracted HV and PS segments.</p></li>
 </ul>
 </section>
 <section id="id6">
-<h3>JSON configuration file<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<h3>JSON configuration file<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <p>All HV and PS-related configuration parameters are stored in the JSON file <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code>.</p>
 </section>
 </section>
 <section id="performing-source-reconstruction">
-<h2>4. Performing source reconstruction<a class="headerlink" href="#performing-source-reconstruction" title="Permalink to this heading"></a></h2>
+<h2>4. Performing source reconstruction<a class="headerlink" href="#performing-source-reconstruction" title="Link to this heading"></a></h2>
 <p>In this step, we reconstruct the source time courses from a designated set of Regions of Interest (ROIs).
 It’s important to note that in the MNE Python software, <strong>ROI</strong>s are referred to as “<em>labeled brain locations</em>”
 or simply “<strong>labels</strong>”. Therefore, in this document, we use both terms interchangeably to convey the same meaning.</p>
 <section id="id7">
-<h3>Running the code<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<h3>Running the code<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <p>To perform this step one needs to run a top level script <strong><code class="docutils literal notranslate"><span class="pre">run_src_reconstr.py</span></code></strong>. This script depends on source
 files <code class="docutils literal notranslate"><span class="pre">do_src_reconstr.py</span></code>, <code class="docutils literal notranslate"><span class="pre">nearest_pos_def.py</span></code> and file <code class="docutils literal notranslate"><span class="pre">construct_single_source_weights.py</span></code> from <code class="docutils literal notranslate"><span class="pre">beam-python</span></code>
 repository imported as a git submodule.</p>
@@ -632,17 +634,15 @@ folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python run_src_reconstr.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
 </div>
-<p>Typically, the user will need to modify the main script <strong><code class="docutils literal notranslate"><span class="pre">run_src_reconstr.py</span></code></strong> as per their requirements.
-This involves setting the root input and output folders by modifying function <code class="docutils literal notranslate"><span class="pre">get_data_folders()</span></code>, the
-hospital name, and other relevant parameters which are found at the top of the main function following the line
-<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">'__main__'</span></code>. The procedure is similar to the one described in the section
-<a class="reference internal" href="#running-the-code">“Running the code”</a> under the segmentation task
-<a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments">“1. Filtering, resampling and extracting of good data segments”</a>.</p>
+<p>For this step, the user does not need to modify the source code in any way to set input and configuration
+parameters. Everything is done by setting relevant keys in the <a class="reference internal" href="#json-configuration-file-3"><span class="xref myst">JSON configuration file</span></a>.
+In particular the user will need to set the hospital name and data paths depending on the host computer.
+The meaning of the keys to set is explained in the comments therein.</p>
 <p>It is important to note that this step expects the input files to be in <strong><code class="docutils literal notranslate"><span class="pre">.fif</span></code></strong> format. Normally, the records
 obtained after the PREP/ICA step are used as inputs.</p>
 </section>
 <section id="id8">
-<h3>Performed operations<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<h3>Performed operations<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
 <p>To perform the source reconstruction, the subject’s MRI data and the EEG sensor locations on the subject’s head
 are required. As those are not available in our case, a template MRI for the <code class="docutils literal notranslate"><span class="pre">fsaverage</span></code> subject which comes
 with the <code class="docutils literal notranslate"><span class="pre">FreeSurfer</span></code> software, and standard sensor locations for a given montage are utilized.</p>
@@ -654,14 +654,19 @@ The downloaded <code class="docutils literal notranslate"><span class="pre">fsav
 analyses of high density EEG and MEG recordings. However given that our EEGs have only 20 or fewer
 channels, the spatial resolution of our source reconstruction is relatively poor. Consequently, we can utilize
 lower density source spaces for the <code class="docutils literal notranslate"><span class="pre">fsaverage</span></code> subject. This choice helps improve computational speed and
-memory efficiency. Specifically, we employ a low-density source space named <code class="docutils literal notranslate"><span class="pre">fsaverage-ico-3-src.fif</span></code> with
-only around twelve hundred sources, which can be generated by executing a script <code class="docutils literal notranslate"><span class="pre">make_fsaverage_bem.py</span></code>
-(this script only needs to be run once).</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">fsaverage</span></code> template also comes with two standard brain parcellations which define ROIs (labels) on
-the cortical surface. One needs to specify the parcellation to use in the <code class="docutils literal notranslate"><span class="pre">src_reconstr_conf.json</span></code>
-configuration file described below. A lower resolution parcellation with 34 ROIs per hemisphere is used
-by setting <code class="docutils literal notranslate"><span class="pre">&quot;parcellation&quot;:</span> <span class="pre">&quot;aparc&quot;</span></code>. A higher resolution parcellation with 74 ROIs per hemisphere will
-be utilized with setting: <code class="docutils literal notranslate"><span class="pre">&quot;parcellation&quot;:</span> <span class="pre">&quot;aparc.a2009s&quot;</span></code> (default).</p>
+memory efficiency. Specifically, when using Destrieux atlas (see “aparc.a2009s” parcellation below) we employ
+a low-density source space named <code class="docutils literal notranslate"><span class="pre">fsaverage-ico-3-src.fif</span></code> with only around twelve hundred sources. When using
+Schaefer 400-17 functional atlas (“Schaefer2018_400Parcels_17Networks_order” parcellation), we create a more
+dense source space corresponding to ico-4 mesh. Corresponding BEM solutions and source spaces can be generated
+by executing a script <code class="docutils literal notranslate"><span class="pre">make_fsaverage_bem.py</span></code> (this script only needs to be run once per BEM solution/source
+space).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">fsaverage</span></code> template also comes with standard brain parcellations which define ROIs (labels) on
+the cortical surface; more can be added as .annot files. One needs to specify the parcellation to use
+in the <code class="docutils literal notranslate"><span class="pre">src_reconstr_conf.json</span></code> configuration file described below. A lower resolution parcellation
+with 34 ROIs per hemisphere is used by setting <code class="docutils literal notranslate"><span class="pre">&quot;parcellation&quot;:</span> <span class="pre">&quot;aparc&quot;</span></code>. A higher resolution parcellation with
+74 ROIs per hemisphere will be utilized with setting: <code class="docutils literal notranslate"><span class="pre">&quot;parcellation&quot;:</span> <span class="pre">&quot;aparc.a2009s&quot;</span></code> (default).
+Schaefer functional parcellation with 400 labels and 17 networks is obtained by setting
+<code class="docutils literal notranslate"><span class="pre">&quot;parcellation&quot;:</span> <span class="pre">&quot;Schaefer2018_400Parcels_17Networks_order&quot;</span></code>.</p>
 <p>The following operations are performed in this step.</p>
 <ul class="simple">
 <li><p>The labels (parcellation data), BEM model and the source space are read from the designated <code class="docutils literal notranslate"><span class="pre">fsaverage</span></code>
@@ -710,7 +715,7 @@ subfolder named after the subject’s scan ID, within the output location.</p></
 </ul>
 </section>
 <section id="beamformer-weights-calculation">
-<h3>Beamformer weights calculation<a class="headerlink" href="#beamformer-weights-calculation" title="Permalink to this heading"></a></h3>
+<h3>Beamformer weights calculation<a class="headerlink" href="#beamformer-weights-calculation" title="Link to this heading"></a></h3>
 <p>Beamformer weights are calculated using functions from <code class="docutils literal notranslate"><span class="pre">construct_single_source_weights.py</span></code>
 source file which should be located in the <code class="docutils literal notranslate"><span class="pre">../beam-python</span></code> folder relative to this file’s
 location.</p>
@@ -773,7 +778,7 @@ This adjustment ensures numerical stability while introducing negligible effects
 on the results, comparable to rounding errors in practice.</p>
 </section>
 <section id="normalizing-for-group-analyses">
-<h3>Normalizing for group analyses<a class="headerlink" href="#normalizing-for-group-analyses" title="Permalink to this heading"></a></h3>
+<h3>Normalizing for group analyses<a class="headerlink" href="#normalizing-for-group-analyses" title="Link to this heading"></a></h3>
 <p>Regardless of the units chosen for the reconstructed source time courses, their
 amplitudes can vary substantially among subjects. To prevent statistical biases
 in group analyses, we take an additional step of <strong>normalizing the weights</strong> (and
@@ -785,33 +790,19 @@ normalization helps to mitigate the amplitude differences among subjects and
 promotes fair comparisons in group analyses.</p>
 </section>
 <section id="id9">
-<h3>JSON configuration file<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<h3>JSON configuration file<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <p>Configuration parameters for the source reconstruction step are defined in file
-<code class="docutils literal notranslate"><span class="pre">src_reconstr_conf.json</span></code>. Note that JSON files can not contain comments;
-therefore comments in the code below should be removed for this JSON to be used
-in practice.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-        <span class="s2">&quot;bem_sol&quot;</span><span class="p">:</span> <span class="s2">&quot;fsaverage-5120-5120-5120-bem-sol.fif&quot;</span><span class="p">,</span>      <span class="c1"># Precalculated BEM solution</span>
-        <span class="s2">&quot;source_space&quot;</span><span class="p">:</span> <span class="s2">&quot;fsaverage-ico-3-src.fif&quot;</span><span class="p">,</span>              <span class="c1"># Precalculated source space</span>
-        <span class="s2">&quot;parcellation&quot;</span><span class="p">:</span> <span class="s2">&quot;aparc&quot;</span><span class="p">,</span>                                <span class="c1"># Can be &quot;aparc&quot; or &quot;aparc.a2009s&quot; </span>
-        <span class="s2">&quot;surface&quot;</span><span class="p">:</span> <span class="s2">&quot;white&quot;</span><span class="p">,</span>             <span class="c1"># Surface to use for the source space</span>
-        <span class="s2">&quot;min_dist_to_skull_mm&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>    <span class="c1"># Min allowed distance between a source and the skull</span>
-        <span class="s2">&quot;max_condition_number&quot;</span><span class="p">:</span> <span class="mf">1e10</span><span class="p">,</span>   <span class="c1"># Matrices with larger cond numbers considered degenerate</span>
-        <span class="s2">&quot;inverse_method&quot;</span><span class="p">:</span> <span class="s2">&quot;beam&quot;</span><span class="p">,</span>       <span class="c1"># &quot;beam&quot; is THE ONLY choice for now</span>
-        <span class="s2">&quot;beam_type&quot;</span><span class="p">:</span> <span class="s2">&quot;pz&quot;</span><span class="p">,</span>              <span class="c1"># Beamformer localizer type; no need to change</span>
-        <span class="s2">&quot;src_units&quot;</span><span class="p">:</span> <span class="s2">&quot;pz&quot;</span><span class="p">,</span>              <span class="c1"># Either &quot;source&quot; or &quot;pz&quot; </span>
-        <span class="s2">&quot;noise_upper_bound_tolerance&quot;</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">,</span>    <span class="c1"># Accuracy of choosing max allowed noise amp</span>
-        <span class="s2">&quot;roi_time_course_method&quot;</span><span class="p">:</span> <span class="s2">&quot;pca_flip&quot;</span>    <span class="c1"># The way how a single ROI time course is obtained </span>
-<span class="p">}</span>
-</pre></div>
-</div>
+<code class="docutils literal notranslate"><span class="pre">src_reconstr_conf.json</span></code>. Note that at this step JSON files which can contain comments
+can be used. Those comments detail the meaning and possible values of the parameters
+to be set.</p>
 </section>
 </section>
 <section id="calculating-power-spectra">
-<h2>5. Calculating power spectra<a class="headerlink" href="#calculating-power-spectra" title="Permalink to this heading"></a></h2>
-<p>At this step power spectral densities (PSDs) for the preprocessed sensor space and source reconstructed data are calculated using the Welch method.</p>
+<h2>5. Calculating power spectra<a class="headerlink" href="#calculating-power-spectra" title="Link to this heading"></a></h2>
+<p>At this step power spectral densities (PSDs) for the preprocessed sensor space
+and source reconstructed data are calculated using the Welch method.</p>
 <section id="id10">
-<h3>Running the code<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h3>
+<h3>Running the code<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
 <p>Corresponding top level script is <strong><code class="docutils literal notranslate"><span class="pre">run_welch.py</span></code></strong>; it also depends on source
 file <code class="docutils literal notranslate"><span class="pre">do_src_reconstr.py</span></code>.</p>
 <p>When executing the code locally, run this command in Linux terminal from the <code class="docutils literal notranslate"><span class="pre">.../eegfhabrainage/preprocessing</span></code>
@@ -824,7 +815,10 @@ folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python run_welch.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
 </div>
-<p>In contrast to steps 1 to 4 described above, all input parameters for <code class="docutils literal notranslate"><span class="pre">run_welch.py</span></code> including input and output folders are defined in a dedicated JSON file <code class="docutils literal notranslate"><span class="pre">welch_input.json</span></code>. Therefore no modification of the Python source is required. Here is an example of such file:</p>
+<p>In contrast to steps 1 to 3 described above, all input parameters for <code class="docutils literal notranslate"><span class="pre">run_welch.py</span></code>
+including input and output folders are defined in a dedicated JSON file
+<code class="docutils literal notranslate"><span class="pre">welch_input.json</span></code>. Therefore no modification of the Python source is required.
+Here is an example of such file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ----------------------------------------------------------------------</span>
 <span class="c1"># NOTE: this is a JSON file with comments. It requires using commentjson</span>
 <span class="c1"># module to process, instead of a standard python json library</span>
@@ -924,15 +918,15 @@ folder:</p>
 <p>For the sensor space spectra, the input records are expected in <code class="docutils literal notranslate"><span class="pre">.fif</span></code> format; typically those obtained after the PREP/ICA step will be used. For the source space spectra, the records in <code class="docutils literal notranslate"><span class="pre">.hdf5</span></code> format obtained at the source reconstruction step should be used. The results are also stored in <code class="docutils literal notranslate"><span class="pre">.hdf5</span></code> format and contain: a list of the channel names, a list of frequencies in Hz, and calculated PSDs for each channel measured in “units”^2/Hz.  “Units” are Volts for sensor channels PSDs. For the source level PSDs the units depend on the setting of <code class="docutils literal notranslate"><span class="pre">src_units</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">src_reconstr_conf.json</span></code> file at the time of running the source reconstruction step. That will be A*m when <code class="docutils literal notranslate"><span class="pre">src_units</span></code> was set to ‘source’, or amplitude pseudo-Z when <code class="docutils literal notranslate"><span class="pre">src_units</span></code> was set to ‘pz’.</p>
 </section>
 <section id="id11">
-<h3>Performed operations<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h3>
+<h3>Performed operations<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
 <p>The power spectral density estimates for each channel in the input records are calculated using the Welch method.</p>
 </section>
 </section>
 <section id="calculating-continuous-wavelet-transforms-cwts">
-<h2>6. Calculating Continuous Wavelet Transforms (CWTs)<a class="headerlink" href="#calculating-continuous-wavelet-transforms-cwts" title="Permalink to this heading"></a></h2>
+<h2>6. Calculating Continuous Wavelet Transforms (CWTs)<a class="headerlink" href="#calculating-continuous-wavelet-transforms-cwts" title="Link to this heading"></a></h2>
 <p>This step may be performed for both the sensor and the source space data. For each channel of the input record, a CWT is calculated using a <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.morlet2.html">complex Morlet wavelet</a> as a base function. Then channels CWTs are used to estimate the following parameters of statistical distributions of the CWT amplitudes: <em>mean, median, standard deviation, skew</em>, and <em>kurtosis</em>. Additionally an exponentiated Weibull distribution is fit to the CWT amplitude data to obtain 4 parameters: <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">c</span></code>, <code class="docutils literal notranslate"><span class="pre">loc</span></code>, <code class="docutils literal notranslate"><span class="pre">scale</span></code> (see <a class="reference external" href="http://scipy.github.io/devdocs/reference/generated/scipy.stats.exponweib.html">the scipy documentation</a> for reference). These results are stored as an .hdf5 file.</p>
 <section id="id12">
-<h3>Running the code<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
+<h3>Running the code<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
 <p>Corresponding top level script is <strong><code class="docutils literal notranslate"><span class="pre">run_cwt.py</span></code></strong>.</p>
 <p>When executing the code locally, run this command in Linux terminal from the <code class="docutils literal notranslate"><span class="pre">.../eegfhabrainage/preprocessing</span></code>
 folder:</p>
@@ -1089,13 +1083,13 @@ folder:</p>
 <p>The processing results of each record are accumulated in an <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray">xarray.DataArray</a> object. This object is then stored as <code class="docutils literal notranslate"><span class="pre">.hdf5</span></code> file using a dedicated xarray function. The stored data contains a list of the channel names, a list of frequencies in Hz, and the estimated CWT amplitude distribution parameters described earlier.</p>
 </section>
 <section id="id13">
-<h3>Performed operations<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
+<h3>Performed operations<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
 <p>The continuous wavelet transforms of <em><strong>standardized</strong></em> (that is <em>z-scored</em>) input data are calculated for each channel in a form of complex valued time courses for each frequency line. The frequencies are selected so that <em><strong>their decimal logarithms are linearly spaced</strong></em> in the requested frequency range. Then absolute values of the CWT coefficients are found to obtain CWT amplitude distributions. For these amplitude distributions a) the means, medians, standard deviations and skews are estimated b) an exponentiated Weibull distributions are fit to the obtained data. Finally, the CWTs themselves are discarded and only estimated statistical parameters of the amplitude distributsions are preserved and stored in <code class="docutils literal notranslate"><span class="pre">.hdf5</span></code> file. For details regarding how it is implemented, please refer to the description of <code class="docutils literal notranslate"><span class="pre">TFData</span></code> class in the <a class="reference download internal" download="" href="_downloads/a0f78390b83d56af3958387635feaa09/index.html"><span class="xref download myst">documentation</span></a>.</p>
 <p>Note that the Weibull distribution fit step is extremely time consuming therefore provisions are made to parallelize calculations for different frequency lines. One can take advantage of this by specifying an appropriate <code class="docutils literal notranslate"><span class="pre">--cpus-per-task</span></code> parameter in the sbatch job when running on the cluster.</p>
 </section>
 </section>
 <section id="representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component">
-<h2>7. Representing spectra as a combination of periodic oscillations and aperiodic component<a class="headerlink" href="#representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component" title="Permalink to this heading"></a></h2>
+<h2>7. Representing spectra as a combination of periodic oscillations and aperiodic component<a class="headerlink" href="#representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component" title="Link to this heading"></a></h2>
 <p>At this step, power spectra are parameterized by fitting an analytic model, which expands each spectrum as a linear sum of a set of oscillatory “peaks” with different widths and amplitudes, and an aperiodic component characterized by an offset and an exponent. The code is based on scripts found here:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">fooof</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">fooof</span>  
     <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">pypi</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">specparam</span><span class="o">/</span>     <span class="c1"># The latest package  </span>
@@ -1103,7 +1097,7 @@ folder:</p>
 </div>
 <p>and the original Nature Neuroscience paper referenced therein.</p>
 <section id="id14">
-<h3>Running the code<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
+<h3>Running the code<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
 <p>Corresponding top level script is <strong><code class="docutils literal notranslate"><span class="pre">run_spectparam.py</span></code></strong>.</p>
 <p>To execute the code, run the following commands in Linux terminal from the <code class="docutils literal notranslate"><span class="pre">.../eegfhabrainage/preprocessing</span></code>
 folder:</p>
@@ -1115,7 +1109,7 @@ python run_spectparam.py ${SLURM_ARRAY_TASK_ID}     # When running array job on 
 <p>The <code class="docutils literal notranslate"><span class="pre">spectparam_input.json</span></code> file is a JSON file with comments, similar to ones described for other steps. Most keys and values are self-explanatory, or explained in documentation for the <code class="docutils literal notranslate"><span class="pre">specparam</span></code> package (https://pypi.org/project/specparam/).</p>
 </section>
 <section id="id15">
-<h3>Performed operations<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
+<h3>Performed operations<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
 <p>The script performs two steps: <code class="docutils literal notranslate"><span class="pre">do_fit</span></code> and <code class="docutils literal notranslate"><span class="pre">cumulative_report</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">&quot;do_fit&quot;</span></code>, as the name suggests, fits the model to each of the channel spectra for each record defined by <code class="docutils literal notranslate"><span class="pre">&quot;source_scan_ids&quot;</span></code> key in the <code class="docutils literal notranslate"><span class="pre">spectparam_input.json</span></code> file.
 When <code class="docutils literal notranslate"><span class="pre">&quot;what&quot;</span></code> key is set to <code class="docutils literal notranslate"><span class="pre">&quot;sensors&quot;</span></code>, then the channels correspond to the physical EEG channels; otherwise each channel corresponds to a ROI in a brain space.
@@ -1125,14 +1119,14 @@ The fitting results are saved as HDF5 files in the folders specified in <code cl
 </section>
 </section>
 <section id="visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space">
-<h2>8. Visualizing multi-dimensional data via embedding in 2D or 3D space<a class="headerlink" href="#visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space" title="Permalink to this heading"></a></h2>
+<h2>8. Visualizing multi-dimensional data via embedding in 2D or 3D space<a class="headerlink" href="#visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space" title="Link to this heading"></a></h2>
 <p>The top level script <code class="docutils literal notranslate"><span class="pre">run_view_hd_embedding.py</span></code> allows to perform 2D or 3D embedding of a set of points defined in high dimensional space, for visualization purposes. The data is assumed to be related to the EEG records and is expected to be structured accordingly: each data point should refer to a certain hospital and to a scan ID within that hospital’s records. The embedding can be done using any of the following methods: ‘MDS’, ‘tSNE’ or ‘UMAP’.</p>
 <p>The script itself just sets a framework for calling a function <code class="docutils literal notranslate"><span class="pre">view_hd_embedding()</span></code> which is the actual work horse that is doing the job - see <a class="reference internal" href="#miscellaneous-functions"><span class="std std-ref">Miscellaneous functions</span></a> section below.</p>
 <p>Currently the script contains a single visualization step, where every data point is a vector representing distribution of spectral power in a certain frequency band over the atlas ROIs for corresponding EEG record. Other steps can be added in a similar way.</p>
 <p>All input parameters for the <code class="docutils literal notranslate"><span class="pre">run_view_hd_embedding.py</span></code> script including input and output folders are defined in a dedicated JSON file <code class="docutils literal notranslate"><span class="pre">view_hd_input.json</span></code>. Thus changing parameters does not require modification of the Python source code. This is a JSON file with comments, similar to ones described for other steps. Meaning of the keys and values should be clear from related comments.</p>
 </section>
 <section id="miscellaneous-functions">
-<h2>Miscellaneous functions<a class="headerlink" href="#miscellaneous-functions" title="Permalink to this heading"></a></h2>
+<h2>Miscellaneous functions<a class="headerlink" href="#miscellaneous-functions" title="Link to this heading"></a></h2>
 <p>Some utility scripts are located in the folder <code class="docutils literal notranslate"><span class="pre">.../eegfhabrainage/misc</span></code>.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">view_raw_eeg.py</span></code>: a simple EEG file viewer</p></li>
@@ -1152,7 +1146,7 @@ embedding it into a 2D or 3D space, by means of ‘MDS’, ‘tSNE’, ‘UMAP�
 <p>Please refer to <a class="reference download internal" download="" href="_downloads/a0f78390b83d56af3958387635feaa09/index.html"><span class="xref download myst">auto-generated documentation</span></a> for more details.</p>
 </section>
 <section id="setting-up-python-virtual-environment-on-compute-canada-alliance-cluster">
-<h2>Setting up Python virtual environment on Compute Canada (Alliance) cluster<a class="headerlink" href="#setting-up-python-virtual-environment-on-compute-canada-alliance-cluster" title="Permalink to this heading"></a></h2>
+<h2>Setting up Python virtual environment on Compute Canada (Alliance) cluster<a class="headerlink" href="#setting-up-python-virtual-environment-on-compute-canada-alliance-cluster" title="Link to this heading"></a></h2>
 <p>The following steps should be performed to run the code on Compute Canada. The same setup can
 be used on a local machine, except that commands <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span></code>, <code class="docutils literal notranslate"><span class="pre">deactivate</span></code> are not required, and
 <code class="docutils literal notranslate"><span class="pre">--no-index</span></code>, <code class="docutils literal notranslate"><span class="pre">--no-download</span></code> flags should <strong>not</strong> be used.</p>

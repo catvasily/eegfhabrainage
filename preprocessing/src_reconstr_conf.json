@@ -1,12 +1,79 @@
 {
+    "N_ARRAY_JOBS": 100,                        # Number of parallel jobs to run on cluster
+    "hospital": "Burnaby",                      # Burnaby, Abbotsford, RCH, etc.
+    "verbose": "INFO",                          # Can be ‘DEBUG’, ‘INFO", ERROR", "CRITICAL",
+                                                # or "WARNING" (default)
+
+    # Input and output root folders depending on the host computer
+    "hosts": {
+        "ub2": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "data_root": "/data/eegfhabrainage/after-prep-ica",
+            "out_root": "/data/eegfhabrainage/src-reconstr",
+            "fs_dir": "/home/alexm/mne_data/MNE-fsaverage-data"
+        },
+        "cedar": {
+            "cluster_job": true,
+            "data_root": "/project/6019337/databases/eeg_fha/preprocessed/001_a01_01/",
+            "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-reconstr",
+            "fs_dir": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/mne_data/MNE-fsaverage-data"
+        },
+        "other": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "data_root": "after-prep-ica",
+            "out_root": "src-reconstr",
+            "fs_dir": "mne_data/MNE-fsaverage-data"
+        }
+    },   # end of "hosts"
+
+    # ---------------------------------------------------------------------
+    # Records to process: null or a list of specific scan IDs (without .edf)
+    # ---------------------------------------------------------------------
+    #"source_scan_ids": null,
+
+    # Abbotsford subset
+    #"source_scan_ids": ["1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5"],
+
+    # Burnaby subset:
+    "source_scan_ids": ["2f8ab0f5-08c4-4677-96bc-6d4b48735da2"],      # Interesting spectrum
+
+    "recalc_forward": false,    # Flag to force recalculating forward solutions (even if exist)
+    "view_plots": true,         # Flag to show interactive plots
+    "plot_sensors": false,      # Flag to plot montage and source space in 3D
+    "plot_waveforms": true,     # Flag to plot sensor and source waveforms
+
+    # Channels to plot if plot_waveforms = true. Set to null to plot all
+    # channels
+    #"plot_chnames": null,
+    # Destrieux
+    #"plot_chnames": ["O1","O2","P3","P4","Pz","G_occipital_middle-lh",
+    #    "G_occipital_middle-rh", "G_occipital_sup-lh", "G_occipital_sup-rh",
+    #    "Pole_occipital-lh", "Pole_occipital-rh"],
+
+    # Schaefer 
+    "plot_chnames": ["O1","O2","P3","P4","Pz",
+        "17Networks_LH_SomMotB_Aud_1-lh", "17Networks_RH_SomMotB_Aud_1-rh",
+        "17Networks_LH_LimbicA_TempPole_1-lh",
+        "17Networks_RH_LimbicA_TempPole_1-rh"],
+
+    # Scale factor for virtual channels for simultaneously plotting EEG and source
+    # waveforms. If the latter are in pseudo-Z units, their magnitudes are typicaly
+    # around 1, while EEGs have magnitudes ~1e-5
+    "vc_scale_factor": 1e-5,    # Only affects visual display of the virtual channels
+
 	"bem_sol": "fsaverage-5120-5120-5120-bem-sol.fif",
-	"source_space": "fsaverage-ico-3-src.fif",
-	"parcellation": "aparc.a2009s",
+	"source_space": "fsaverage-ico-4-src.fif",  # Used ico-3 for Destrieux; using ico-4 for Schaefer
+	#"parcellation": "aparc.a2009s",            # Destrieux 150 ROIs
+	"parcellation": "Schaefer2018_400Parcels_17Networks_order", # Scaefer 400 ROIs 17 networks
+
+    # A list of labels (ROIs) to drop from processing. If none - place [] there.
+    "drop_labels": ["Background+FreeSurfer_Defined_Medial_Wall-lh",
+                    "Background+FreeSurfer_Defined_Medial_Wall-rh"],
 	"surface": "white",
 	"min_dist_to_skull_mm": 5.0,
 	"max_condition_number": 1e10,
 	"inverse_method": "beam",
-        "beam_type": "pz",
+    "beam_type": "pz",
 	"src_units": "pz",
 	"noise_upper_bound_tolerance": 1e-2,
 	"roi_time_course_method": "pca_flip"

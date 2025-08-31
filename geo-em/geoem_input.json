@@ -1,0 +1,154 @@
+# ----------------------------------------------------------------------
+# NOTE: this is a JSON file with comments. It requires using commentjson
+# module to process, instead of a standard python json library
+# ----------------------------------------------------------------------
+# Input parameters for run_geoem.py                  
+# ----------------------------------------------------------------------
+{
+    # Step(s) to run:
+    #----------------------------
+    #"to_run": ["input", "dates_distr"],
+    #"to_run": ["input", "read_geoem_data"],        # QQQQ debug
+    #"to_run": ["input", "read_specparam_data"],     # QQQQ debug
+    "to_run": ["input", "read_geoem_data", "read_specparam_data",
+        "plot_pc_vs_geovar"],
+    #----------------------------
+
+    #"N_ARRAY_JOBS": 100,        # Number of parralel jobs when running on CC cluster
+    "N_ARRAY_JOBS": 1,          # Number of parralel jobs when plotting all records
+    "hospital": "Abbotsford",      # hospital to process
+    "source_scan_ids": null,    # null or a list of record IDs
+    "what": "sources",          # 'sensors' or 'sources' - which data to use
+
+    # Input and output root folders depending on the host computer
+    "hosts": {
+        "ub2": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "/data/eegfhabrainage/specparam", # input time courses here
+                "out_root": "/data/eegfhabrainage/specparam",           # output PSDs here
+            },
+            "sources": {
+                "data_root": "/data/eegfhabrainage/src-specparam",
+                "out_root": "/data/eegfhabrainage/src-specparam"
+            },
+            # meta data .csv pathname
+            "meta_csv": "/data/eegfhabrainage/metadata/MAPPING_ScanID_PatientURN_release.csv",
+            "geoem_dat": "/data/eegfhabrainage/metadata/omni2_2005-2019.dat"
+        },
+        "cedar": {
+            "cluster_job": true,
+
+            "sensors": {
+                "data_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/specparam",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/specparam"
+            },
+            "sources": {
+                "data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux/aperiodic",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-specparam"
+            },
+            # meta data .csv pathname
+            "meta_csv": "/project/6019337/databases/eeg_fha/release_001/MAPPING_ScanID_PatientURN_release.csv",
+            "geoem_dat": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/metadata/omni2_2005-2019.dat"
+        },
+        "other": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "specparam", # input time courses here
+                "out_root": "specparam",           # output PSDs here
+            },
+            "sources": {
+                "data_root": "src-specparam",
+                "out_root": "src-specparam"
+            },
+            # meta data .csv pathname
+            "meta_csv": "metadata/MAPPING_ScanID_PatientURN_release.csv",
+            "geoem_dat": "metadata/omni2_2005-2019.dat"
+
+        }
+    },   # end of "hosts"
+
+    # Meta data related settings
+    "meta_data": {
+        # Mappings between the internal dataframe columns to those in MAPPING_ScanID_PatientURN_release.csv
+        "hospital": "Hospital",                 # hospital column name 
+        "scan_id": "ScanID",                    # EEG record scan ID column name
+        "scan_date_col": "CalibrationDateYmd",  # EEG scan date column name
+        "scan_time_col": "CalibrationDateHms",  # EEG scan date column name
+
+        "in_patient_status": "DIS IN",          # 'AdmittingStatus' column value for in-patients
+        "out_patients_only": true               # Flag to keep only out patients 
+    },
+
+    # Parameters related to OMNI geomagnetic data
+    "geoem_data": {
+        # Separator character in omni....dat file. " " means ANY white space,
+        # "," means comma
+        "sep": ",", 
+
+        # Indecies (1-based) of columns to read from the OMNI .dat file
+        # See column descriptions in omni2.txt for details
+        "get_cols_idx": [
+                # ----------------------------------------
+                # Columns 1, 2, 3 should ALWAYS be present
+                # ----------------------------------------
+                1,          # Year
+                2,          # Decimal day, Jan 1 = day 1
+                3,          # Hour (0 - 23)
+
+                9,          # |B|, nT
+                18,         # STD(|B|), nT
+                39,         # Kp, Planetary Geomagnetic Activity Index, signed integer
+                40          # R, sun spot number, positive integer 
+            ],
+        # Values for columns in defined by "get_cols_idx", which correspond
+        # to missing data    
+        "get_cols_nans": [-1, -1, -1, 999.9, 999.9, 99, 999],
+
+        # Names of columns in the constructed dataframe
+        "df_col_names": [
+            "Datetime",         # 'Datetime' must be present! do not change this value
+            "|B|",
+            "stdB",
+            "Kp",
+            "R"
+           ]
+    },
+
+    # Reading the spectparam results related
+    "specparam": {
+        "alpha_band": [8.0, 12.0],  # Alpha band definition
+
+        # List of model parameters to read for each channel
+        # Possible values are: "alpha_cf", "alpha_pw", "alpha_bw"
+        "parms": ["alpha_pw"]       
+    },
+
+    # Parameters for the 'pc_vs_geovar_scatter_plot' step
+    "pc_geoem_scatter": {
+        "parm": "alpha_pw",     # Spect param to plot
+        #"geovar": ["|B|","stdB","Kp","R"],        # List of geo-em variables to plot
+        "geovar": ["Kp","R"],   # List of geo-em variables to plot
+        "lead_time": 104,       # Time interval in hours for the geo-data to happen before
+                                # corresponing meta data 
+        "ncomponents": 2,       # Number of PCs to extract
+        "plot_components": [0,1], # List of PC components to plot
+        "missing": "mean",      # Missing values strategy: "mean", "median" or "most_frequent"
+        "marker_size": 3,
+        "figsize": [15.0, 9.0],
+        "fname_suffix": "_alpha_PW_vs_Kp_R.png", 
+        "dpi": 300
+    },
+
+    "plots": {
+        "dates_distr": {
+            "fname_suffix": "_dates_distr.png", 
+            "figsize": [10.0, 6.0],
+            "xlabel": "Date",
+            "ylabel": "Number of Records",
+            "xticks_rotation": 45.0,
+            "dpi": 300
+        }
+    }
+}
+

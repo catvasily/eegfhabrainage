@@ -153,3 +153,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+reports/docs/7-16 Preliminary Results Presentation (Chris).pdf
+reports/docs/notesCrisPresentation240716.txt

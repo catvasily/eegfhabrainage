@@ -9,6 +9,18 @@ clinical reports, removing personal
 information and creating anonymized
 reports database.
 
+clean_pii (protected)
+---------------------
+
+map_eegs_to_reports (protected)
+-------------------------------
+Code for mapping EEG scan IDs to
+clinical reports and subjects metadata, and creating
+eeg info database.
+
+unit_tests (protected)
+----------------------
+
 process_reports.py
 ------------------
 .. automodule:: process_reports
