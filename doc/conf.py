@@ -21,7 +21,7 @@ sys.path.insert(0, pathlib.Path(__file__).parents[1].joinpath('reports/pii/lib64
 print(sys.path)
 
 project = 'eegfh'
-copyright = '2023, AM'
+copyright = '2026, AM'
 author = 'AM'
 release = '0.1'
 

@@ -6,9 +6,9 @@
 # ----------------------------------------------------------------------
 {
     "what": "sources",          # 'sensors' or 'sources' - which PSD to calculate
-    "hospital": "Burnaby",          # Burnaby, Abbotsford, RCH, Surrey
-    #"source_scan_ids": null,    # null or a list of specific record IDs
-    "source_scan_ids": ["2f8ab0f5-08c4-4677-96bc-6d4b48735da2"],    # Burnaby
+	"hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+                                            # "Burnaby", "RCH", "Surrey" 
+    "source_scan_ids": null,    # null or a list of specific record IDs
     #"input_file_type": "fif",   # Files before prep/ica are 'edf'; files after prep.ica
                                 # are 'fif'; source reconstructed data are 'hdf5'
     #"input_file_type": "edf",
@@ -18,7 +18,7 @@
                                 # (used for the Destrieux atlas), or to 4 for inputs like
                                 # "...-ico-4-ltc.hdf5" - used for the Schaefer atlas
                                 # Does not matter for sensor data
-    "view_plots": true,         # Flag to show interactive plots
+    "view_plots": false,         # Flag to show interactive plots
     "plot_only": false,         # Flag to only plot already precalculated spectra",
 
     "N_ARRAY_JOBS": 100,        # Num of parallel jobs to run on cluster; should match
@@ -26,24 +26,10 @@
     "verbose": "INFO",          # Can be ‘DEBUG’, ‘INFO", ERROR", "CRITICAL", or "WARNING" (default)
 
     # IDs of records to plot if view_plots = true, or null, or []
-    
-    #"plot_ids": [ "80cbae5d-625b-473b-bf17-f5352cbf3c0c",   # RCH
-    #        "799d4cae-40e0-449e-9119-793c91b3305c",
-    #        "7cd8be05-5286-4d65-bb5d-42031f131db8",
-    #        "fc34d5f0-dd6a-4e65-8f87-95ef5b452681"
-    #        ],
-    
     "plot_ids": ["2f8ab0f5-08c4-4677-96bc-6d4b48735da2"    # Burnaby
             ],
 
     # Channels/ROIs to plot if view_plots = true
-    # Destrieux
-    #"plot_chnames": {
-    #        "sensors": ["O1","O2","P3","P4","Pz"],
-    #        "sources": ["G_occipital_middle-lh", "G_occipital_middle-rh", "G_occipital_sup-lh",
-    #            "G_occipital_sup-rh", "Pole_occipital-lh", "Pole_occipital-rh"]
-    #        },
-
     # Schaefer 
     "plot_chnames": {
         "sensors": ["O1","O2","P3","P4","Pz"],
@@ -65,17 +51,16 @@
                 "out_root": "/data/eegfhabrainage/src-welch"
             }
         },
-        "cedar": {
+        "fir": {
             "cluster_job": true,
 
             "sensors": {
                 "data_root": "/project/6019337/databases/eeg_fha/preprocessed/001_a01_01",
-                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/welch"
+                "out_root": "/project/6019337/amoiseev/data/eegfhabrainage/welch"
             },
             "sources": {
-                #"data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux",
-                "data_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-reconstr",
-                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-welch"
+                "data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux",
+                "out_root": "/project/6019337/amoiseev/data/eegfhabrainage/src-welch"
             }
         },
         "other": {

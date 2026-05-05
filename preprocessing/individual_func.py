@@ -383,14 +383,21 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
                 label = mne.channel_type(mne_raw.info, i).upper() + ' ' + mne_raw.ch_names[i]
                 prefilter = prefilter_string(mne_raw.info, i)
 
+                """
+                # This code was commented out 260425 - AM
                 try:
                     ch_dict = {'label': label, 
                                'dimension': mne_raw._orig_units[keys[i]], 
-                               'sample_rate': mne_raw._raw_extras[0]['n_samps'][i], 
-                               'physical_min': mne_raw._raw_extras[0]['physical_min'][i], 
-                               'physical_max': mne_raw._raw_extras[0]['physical_max'][i], 
-                               'digital_min':  mne_raw._raw_extras[0]['digital_min'][i], 
-                               'digital_max':  mne_raw._raw_extras[0]['digital_max'][i], 
+                               #'sample_rate': mne_raw._raw_extras[0]['n_samps'][i],         # Still works for MNE 1.7 
+                               #                                                             # !!! but carried ORIGINAL SR !!!
+                               'sample_rate': sfreq, 
+
+                               # This no longer works in MNE 1.7
+                               'physical_min': mne_raw._raw_extras[0]['physical_min'][i],   # Absent 
+                               'physical_max': mne_raw._raw_extras[0]['physical_max'][i],   # Still works for MNE 1.7 
+                               'digital_min':  mne_raw._raw_extras[0]['digital_min'][i],    # Absent
+                               'digital_max':  mne_raw._raw_extras[0]['digital_max'][i],    # Still works for MNE 1.7 
+
                                'transducer': '', 
                                'prefilter': prefilter}
                 except:
@@ -403,10 +410,27 @@ def write_mne_edf(mne_raw, fname, picks=None, tmin=0, tmax=None,
                                'digital_max':  dmax, 
                                'transducer': '', 
                                'prefilter': prefilter}
-            
+                """
+           
+                # This code does not use any hidden attributes like _raw_extras(), and generates
+                # the same EDFs that were obtained with MNE versions prior to 1.7
+                ch_dict = {'label': label, 
+                           'dimension': mne_raw._orig_units[keys[i]], 
+                           'sample_rate': sfreq, 
+                           'physical_min': channels.min(), 
+                           'physical_max': channels.max(), 
+                           'digital_min':  dmin, 
+                           'digital_max':  dmax, 
+                           'transducer': '', 
+                           'prefilter': prefilter}
+        
                 channel_info.append(ch_dict)
+            # This no longer works for MNE 1.7:
+            #    f.setPatientCode(mne_raw._raw_extras[0]['subject_info']['id'])
+            # The correct way to get the ID is (the 'hospital ID' is meant in fact)
+            f.setPatientCode(mne_raw.info['subject_info'].get('his_id', ''))    # expect it to be missing
 
-            f.setPatientCode(mne_raw._raw_extras[0]['subject_info']['id'])
+                                                            
             #f.setPatientName(mne_raw._raw_extras[0]['subject_info']['name'])
             f.setTechnician('mne-gist-save-edf-skjerns')
             f.setSignalHeaders(channel_info)

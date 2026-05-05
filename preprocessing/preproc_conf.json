@@ -1,4 +1,48 @@
+// ----------------------------------------------------------------------
+// NOTE: this is a JSON file with comments. It requires using commentjson
+// module to process, instead of a standard python json library.
+// ----------------------------------------------------------------------
 {
+	// ----------------------------------------------------------------------
+	// run_filtering_segmentation.py runtime controls
+	// ----------------------------------------------------------------------
+	"N_ARRAY_JOBS": 100,
+
+	// Can be a string or a list of strings.
+	"hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+                                            # "Burnaby", "RCH", "Surrey" 
+
+	// null means process all EDFs for each listed hospital.
+	// When not null, must be a list of scan IDs and hospital must contain one item.
+	"source_scan_ids": null,
+
+	"hosts": {
+		"ub2": {
+			"cluster_job": false,
+			"data_root": "/data/eegfhabrainage",
+			"out_root": "/data/eegfhabrainage/processed",
+			"hv_out_root": "/data/eegfhabrainage/hv_segments",
+			"ps_out_root": "/data/eegfhabrainage/ps_segments"
+		},
+
+		"fir": {
+			"cluster_job": true,
+			"data_root": "/project/6019337/databases/eeg_fha/release_001/edf",
+			"out_root": "~/projects/rpp-doesburg/${USER}/data/eegfhabrainage/processed",
+			"hv_out_root": "~/projects/rpp-doesburg/${USER}/data/eegfhabrainage/hv_segments",
+			"ps_out_root": "~/projects/rpp-doesburg/${USER}/data/eegfhabrainage/ps_segments"
+		},
+
+		"other": {
+			"cluster_job": false,
+			"data_root": ".",
+			"out_root": "processed",
+			"hv_out_root": "hv_segments",
+			"ps_out_root": "ps_segments"
+		}
+	},
+
+
 	"target_channels":  ["FP1", "FPZ", "FP2", "F3", "F4", "F7", "F8", "FZ", "T3", "T4",
 			     "T5",  "T6",  "C3",  "C4", "CZ", "P3", "P4", "PZ", "O1", "O2"],
 

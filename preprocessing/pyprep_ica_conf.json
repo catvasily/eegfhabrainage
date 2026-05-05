@@ -1,4 +1,43 @@
+// ----------------------------------------------------------------------
+// NOTE: this is a JSON file with comments. It requires using commentjson
+// module to process, instead of a standard python json library.
+// ----------------------------------------------------------------------
 {
+	// ----------------------------------------------------------------------
+	// run_pyprep_ica.py runtime controls
+	// ----------------------------------------------------------------------
+	"N_ARRAY_JOBS": 100,
+
+	// Can be a string or a list of strings.
+	"hospital": ["Abbotsford"],
+
+	// null means process all EDFs for each listed hospital.
+	// When not null, must be a list of scan IDs and hospital must contain one item.
+	"source_scan_ids": null,
+
+	"view_plots": false,
+	"verbose": "ERROR",
+
+	"hosts": {
+		"ub2": {
+			"cluster_job": false,
+			"data_root": "/data/eegfhabrainage/processed",
+			"out_root": "/data/eegfhabrainage/after-prep-ica"
+		},
+
+		"fir": {
+			"cluster_job": true,
+			"data_root": "~/projects/rpp-doesburg/${USER}/data/eegfhabrainage/processed",
+			"out_root": "~/projects/rpp-doesburg/${USER}/data/eegfhabrainage/after-prep-ica"
+		},
+
+		"other": {
+			"cluster_job": false,
+			"data_root": "processed",
+			"out_root": "after-prep-ica"
+		}
+	},
+
 	"montage": "standard_1020",
 	"powerline_frq": 60.0,
 
@@ -100,7 +139,7 @@
 			},
 		"remove_dc": true,
 		"order": null,
-		"show": true,
+		"show": false,
 		"block": false,
 		"clipping": 1.5,
 		"show_first_samp": false,

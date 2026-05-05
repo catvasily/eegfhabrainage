@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import zscore
-import json
+import commentjson as cjson
 import re
 
 JSON_CONFIG_FILE = "preproc_conf.json"
@@ -54,7 +54,7 @@ def assign_known_channel_types(raw, *, conf_json = None,
     if conf_dict is None:
         # Read configuraion from a json file
         with open(conf_json, "r") as fp:
-            conf_dict = json.loads(fp.read())
+            conf_dict = cjson.loads(fp.read())
 
     if ch_groups is None:
         ch_groups = dict()
@@ -121,7 +121,7 @@ def read_edf(filepath, *, conf_json = None, conf_dict = None, target_channels = 
     if conf_dict is None:
         # Read configuraion from a json file
         with open(conf_json, "r") as fp:
-            conf_dict = json.loads(fp.read())
+            conf_dict = cjson.loads(fp.read())
 
     # Set channel lists from the dictionary when not specified
     if target_channels is None:
@@ -250,7 +250,7 @@ class PreProcessing:
         if conf_dict is None:
             # Read configuraion from a json file
             with open(conf_json, "r") as fp:
-                conf_dict = json.loads(fp.read())
+                conf_dict = cjson.loads(fp.read())
 
         # Set the missing arguments from the dictionary
         if target_channels is None:
@@ -760,7 +760,7 @@ def slice_edfs(source_folder, target_folder, *, conf_json = None, conf_dict = No
     if conf_dict is None:
         # Read configuraion from a json file
         with open(conf_json, "r") as fp:
-            conf_dict = json.loads(fp.read())
+            conf_dict = cjson.loads(fp.read())
 
     if not (extract in ['good', 'HV', 'PS']):
         raise ValueError("Unrecognized value for the 'extract' argument specified: extract = '{}'".format(extract))

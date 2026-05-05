@@ -1,0 +1,24 @@
+# Ignore .fif files and symlinks
+**/*.fif
+
+# Ignore .png files
+**/*.png
+
+# Ignore .sbatch files
+**/*.sbatch
+
+# Ignore .git files and subfolders
+.git*
+**/.git*
+
+# Ignore Jupyter checkpoint folders
+**/.ipynb_checkpoints/
+
+# Ignore Python cache folders
+**/__pycache__/
+
+# Ignore any qq's
+**/qq*
+
+# Ignore .md documents
+**/*.md

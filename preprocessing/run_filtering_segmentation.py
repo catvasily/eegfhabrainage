@@ -2,39 +2,96 @@
 **A top level script for filtering, resampling and extracting good segments
 from the EEG recordings.**
 '''
+import sys
+import glob
+import os
+import os.path as path
+import socket
+import commentjson as cjson
 
-def get_data_folders():
-	'''Setup input and output data folders depending on the host machine.
+from edf_preprocessing import slice_edfs
 
-	Returns:
-	    data_root, out_root, cluster_job (str, str, bool): paths to the root input and output
-		data folders, and a flag indicating whether host is on CC cluster
-	    
-	'''
-	import os.path as path
-	import socket
+__file__ = path.realpath(__file__)    # expand potentially relative path to a full one
+_pathname = lambda fname: path.join(path.dirname(__file__), fname)
 
-	host = socket.gethostname()
+JSON_CONFIG_FILE = "preproc_conf.json"
 
-	# path.expanduser("~") results in /home/<username>
-	user_home = path.expanduser("~")
-	user = path.basename(user_home) # Yields just <username>
 
-	if 'ub2' in host:       # 'ub20-04', 'ub24.04'
-		data_root = '/data/eegfhabrainage'
-		out_root = data_root + '/processed'
-		cluster_job = False
-	elif 'cedar' in host:
-		data_root = '/project/6019337/databases/eeg_fha/release_001/edf'
-		out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
-		cluster_job = True
-	else:
-		home_dir = os.getcwd()
-		data_root = home_dir
-		out_root = home_dir + '/processed'
-		cluster_job = False
+def _expand_cfg_path(path_value):
+	"""Expand env vars and ~ in path strings from config."""
+	return path.expandvars(path.expanduser(path_value))
+
+
+def _get_host(conf_dict):
+	"""Return host key listed in config, or "other" fallback if present."""
+	host = socket.getfqdn()
+
+	for key in conf_dict['hosts']:
+		if key == 'other':
+			continue
+		if key in host:
+			return key
+
+	if 'other' in conf_dict['hosts']:
+		return 'other'
+
+	raise ValueError(f'Host is not listed in the {JSON_CONFIG_FILE}.')
+
+
+def get_data_folders(conf_dict, out_root_key='out_root'):
+	"""Read input/output roots and cluster flag from JSON config.
+
+	Args:
+		conf_dict (dict): configuration loaded from preproc_conf.json
+		out_root_key (str): key to use for the output root inside each host
+			entry (default 'out_root'; use 'hv_out_root' or 'ps_out_root'
+			for the HV/PS extract scripts).
+	"""
+	host = _get_host(conf_dict)
+	host_cfg = conf_dict['hosts'][host]
+
+	data_root = _expand_cfg_path(host_cfg['data_root'])
+	out_root = _expand_cfg_path(host_cfg[out_root_key])
+	cluster_job = bool(host_cfg['cluster_job'])
+
+	# Preserve previous behavior for generic fallback paths.
+	if host == 'other':
+		if not path.isabs(data_root):
+			data_root = path.join(os.getcwd(), data_root)
+		if not path.isabs(out_root):
+			out_root = path.join(os.getcwd(), out_root)
 
 	return data_root, out_root, cluster_job
+
+
+def _read_script_config():
+	with open(_pathname(JSON_CONFIG_FILE), 'r') as fp:
+		return cjson.loads(fp.read())
+
+
+def _normalize_hospitals(hospital_cfg):
+	if isinstance(hospital_cfg, str):
+		hospitals = [hospital_cfg]
+	elif isinstance(hospital_cfg, list) and all(isinstance(h, str) for h in hospital_cfg):
+		hospitals = hospital_cfg
+	else:
+		raise ValueError('"hospital" must be either a string or a list of strings in preproc_conf.json')
+
+	if not hospitals:
+		raise ValueError('"hospital" list in preproc_conf.json should not be empty')
+
+	return hospitals
+
+
+def _validate_source_scan_ids(source_scan_ids, hospitals):
+	if source_scan_ids is None:
+		return
+
+	if not isinstance(source_scan_ids, list) or not all(isinstance(s, str) for s in source_scan_ids):
+		raise ValueError('"source_scan_ids" must be null or a list of strings in preproc_conf.json')
+
+	if len(hospitals) != 1:
+		raise AssertionError('When "source_scan_ids" is provided, exactly one hospital must be specified.')
 
 # ------------------------------------------------------------------
 # Main script for filtering, resampling and extracting good segments.
@@ -43,68 +100,48 @@ def get_data_folders():
 # The 'if' is needed to prevent running this code when the file is 
 # imported into some other source and is not supposed to run
 if __name__ == '__main__': 
-	# Test processing a single record using the PreProcessing class directly
-	import sys
-	import glob
-	import os
-	import os.path as path
-	from edf_preprocessing import PreProcessing
-	from edf_preprocessing import slice_edfs
+    conf_dict = _read_script_config()
 
-	# Inputs
-	N_ARRAY_JOBS = 100	# Number of parrallel jobs to run on cluster
-	#hospital = 'Burnaby'	# Burnaby, Abbotsford, RCH, etc.
-	#hospital = 'Abbotsford'
-	#hospital = 'RCH'
-	hospital = 'Surrey'
+    N_ARRAY_JOBS = int(conf_dict['N_ARRAY_JOBS'])
+    if N_ARRAY_JOBS < 1:
+        raise ValueError('"N_ARRAY_JOBS" should be >= 1 in preproc_conf.json')
 
-	data_root, out_root, cluster_job = get_data_folders()
+    hospitals = _normalize_hospitals(conf_dict['hospital'])
+    source_scan_ids = conf_dict.get('source_scan_ids')
+    _validate_source_scan_ids(source_scan_ids, hospitals)
 
-	# Burnaby
-	#source_scan_ids = ["fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2", "ffff1021-f5ba-49a9-a588-1c4778fb38d3"]
-	#source_scan_ids = [
-        #        '819ebadf-1bcb-4c35-8280-fb63d4747b35','ffedacda-ce90-452c-8007-f46ec1a04cd1',
-	#	'81a91d9d-281d-4321-a656-5b68ecb37090','ffee84ea-1238-4ef5-99fd-8ea9a05b98ca',
-	#	'81aa06db-db61-45af-965d-71813cf34a81','ffef5962-ed51-45d6-b20a-a95dd1f6ddde',
-	#	'81be60fc-ed17-4f91-a265-c8a9f1770517','fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
-	#	'81c0c60a-8fcc-4aae-beed-87931e582c45','ffff1021-f5ba-49a9-a588-1c4778fb38d3']
-	#source_scan_ids = ['57ea2fa1-66f1-43f9-aa17-981909e3dc96.edf']
+    data_root, out_root, cluster_job = get_data_folders(conf_dict)
 
-	# Abbotsford
-	#source_scan_ids = ["1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5"]	# Here annots not cropped properly in prev version
+    # When running on the CC cluster, 1st command line argument is a 0-based
+    # array job index.
+    if len(sys.argv) == 1:
+        ijob = 0
+    else:
+        ijob = int(sys.argv[1])
 
-	# Surrey
-	#source_scan_ids = ["00141ed0-783f-48e7-847e-5d3d80de0829"]
+    for hospital in hospitals:
+        input_dir = path.join(data_root, hospital)
+        output_dir = path.join(out_root, hospital)
 
-	source_scan_ids = None
+        if not path.exists(output_dir):
+            os.makedirs(output_dir)
 
-	input_dir = data_root + "/" + hospital
-	output_dir = out_root + "/" + hospital
+        if source_scan_ids is None:
+            hospital_scan_ids = [path.basename(f)[:-4] for f in glob.glob(input_dir + '/*.edf')]
+        else:
+            hospital_scan_ids = list(source_scan_ids)
 
-	if not path.exists(output_dir):
-		os.makedirs(output_dir)
+        if cluster_job:
+            nfiles = len(hospital_scan_ids)
+            files_per_job = nfiles // N_ARRAY_JOBS + 1
+            istart = ijob * files_per_job
 
-	# When running on the CC cluster, 1st command line argument is a 0-based
-	# array job index
-	if len(sys.argv) == 1:	# No command line args
-		ijob = 0
-	else:
-		ijob = int(sys.argv[1])
+            if istart > nfiles - 1:
+                print(f'All done for {hospital}')
+                continue
 
-	if source_scan_ids is None:
-		source_scan_ids = [path.basename(f)[:-4] for f in glob.glob(input_dir + '/*.edf')]
+            iend = min(istart + files_per_job, nfiles)
+            hospital_scan_ids = hospital_scan_ids[istart:iend]
 
-	if cluster_job:
-		nfiles = len(source_scan_ids)
-		files_per_job = nfiles // N_ARRAY_JOBS + 1
-		istart = ijob * files_per_job
-
-		if istart > nfiles - 1:
-			print('All done')
-			sys.exit()
-
-		iend = min(istart + files_per_job, nfiles)
-		source_scan_ids = source_scan_ids[istart:iend]
-
-	slice_edfs(input_dir, output_dir, source_scan_ids = source_scan_ids)
+        slice_edfs(input_dir, output_dir, conf_dict=conf_dict, source_scan_ids=hospital_scan_ids)
 

@@ -5,20 +5,22 @@
 The code is aimed to preprocess clinical EEG recordings and make them a suitable input for later analyses and ML applications. 
 Code uses the original EEG records in EDF format as input. The following steps (tasks) may be performed:
 
-1. **Filtering, resampling and extracting of good data segments** of a target length. The output is the good segments in EDF format.
-2. **Performing EEG PREP procedure and artifact removal**. The input is typically good segments obtained on the 1st step,
+1. [**Filtering, resampling and extracting of good data segments**](#1-filtering-resampling-and-extracting-of-good-data-segments) of
+a target length. The output is the good segments in EDF format.
+2. [**Performing EEG PREP procedure and artifact removal**](#2-eeg-prep-procedure-and-artifact-removal). The input is typically good segments obtained on the 1st step,
     and the output is the records in **.fif** format.
-3. **Extracting hyperventilation and photic stimulation intervals from the original records**. The extracted
-   intervals (segments) are saved in .EDF format.
-4. **Performing beamformer reconstruction of source time courses from standard atlas locations ("Regions of Interest" - ROIs)**.
-5. **Calculating power spectral densities (PSD)s of the sensor and source-reconstructed time courses.**
-6. **Calculating Continuous Wavelet Transforms (CWTs) and estimating statistical parameters of the CWT amplitudes.**
-7. **Representing spectra as a combination of periodic oscillations and aperiodic component.**
-8. **Visualizing multi-dimensional data via embedding in 2D or 3D space**
+3. [**Extracting hyperventilation and photic stimulation intervals from the original records**](#3-extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records). The extracted intervals (segments) are saved in .EDF format.
+4. [**Performing beamformer reconstruction of source time courses from standard atlas locations ("Regions of Interest" - ROIs)**](#4-performing-source-reconstruction).
+5. [**Calculating power spectrum densities (PSD)s of the sensor and source-reconstructed time courses.**](#5-calculating-power-spectra)
+6. [**Calculating Continuous Wavelet Transforms (CWTs) and estimating statistical parameters of the CWT amplitudes.**](#6-calculating-continuous-wavelet-transforms-cwts)
+7. [**Representing spectra as a combination of periodic oscillations and aperiodic component.**](#7-representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component)
+8. [**Visualizing multi-dimensional data via embedding in 2D or 3D space.**](#8-visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space)
+9. [**Running preprocessing steps and other scripts using prebuilt container (apptainer) image**](#9-running-preprocessing-steps-and-other-scripts-using-prebuilt-container-apptainer-image)
 
 Either of these tasks requires specifying numerous processing parameters. To separate the code and parameter data, default values
 of parameters are stored in JSON configuration files **`preproc_conf.json`** and **`pyprep_ica_conf.json`**; the latter
 is needed only for step 2. These files are expected to reside in the same folder as the top level Python script files.
+For steps 1-3, these configuration files are parsed with `commentjson`, so comments in JSON are supported.
 
 Key functions and classes by default import JSON configuration files to set most parameter values. One can always override the defaults
 a) by specifying their own versions of JSON files as arguments to a class or a function call, b) by providing an equivalent Python dictionary, or
@@ -45,67 +47,21 @@ When executing the code locally, use this command in Linux terminal:
 ```
 python run_filtering_segmentation.py
 ```
-If running as an array job on the cedar cluster, use this command in your sbatch script (see `eeg_array_job.sbatch` for an example):
+If running as an array job on the Digital Alliance cluster, use this command in your sbatch script (see `eeg_array_job.sbatch` for an example):
 ```
 python run_filtering_segmentation.py ${SLURM_ARRAY_TASK_ID}
 ```
 
-**Before running**, file **`run_filtering_segmentation.py`** may need to be **modified** by the user as follows.
+No Python source edits are required for this step. Configure everything in **`preproc_conf.json`**.
 
-* **Function `get_data_folders()`** identifies the host computer where the script is executed, and returns `data_root`, `out_root` paths and
-a `cluster_job` flag. **`data_root`** points to the top folder where the input
-EDF files are located. One level down are subfolders corresponding to each hospital (like `Abbotsford`, `Burnaby`); the EDF records themselves are
-located inside the hospital subfolders. Please refer to the file structure in `/project/6019337/databases/eeg_fha/release_001/edf` on cedar as an example. 
-The **`out_root`** defines location where the resulting (processed) records are put and has the same structure. ***User may need to add/edit the host definitions
-and the returned `data_root`, `out_root` paths as appropriate***, by modifying the following code segment:
-```
-        if 'ub20-04' in host:
-                data_root = '/data/eegfhabrainage'
-                out_root = data_root + '/processed'
-                cluster_job = False
-        elif 'cedar' in host:
-                data_root = '/project/6019337/databases/eeg_fha/release_001/edf'
-                out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
-                cluster_job = True
-        else:
-                home_dir = os.getcwd()
-                data_root = home_dir
-                out_root = home_dir + '/processed'
-                cluster_job = False
-```
+Set the following keys before running:
 
-* **User needs to specify which hospital is being processed**, by setting the **`hospital`** variable in the main function of the script:
-```
-        # Inputs
-        ...
-        hospital = 'Abbotsford'
-        ...
-```
+* **`hosts`**: host-specific values for `data_root`, `out_root`, and `cluster_job`.
+* **`N_ARRAY_JOBS`**: number of array jobs. Keep it consistent with sbatch setting `#SBATCH --array=0-(N_ARRAY_JOBS-1)`.
+* **`hospital`**: either a single hospital string or a list of hospital names.
+* **`source_scan_ids`**: `null` to process all records in each selected hospital, or a list of scan IDs.
 
-* **When running as an array job on the cluster**, the variable **`N_ARRAY_JOBS`** should be consistent with the  
-  **`"--array"`** parameter value in the sbatch script:  
-> File **`run_filtering_segmentation.py`**:
-```
-        # Inputs
-        ...
-        N_ARRAY_JOBS = 100      # Number of parallel jobs to run on cluster
-        ...
-```
->> The **sbatch script** (see **`eeg_array_job.sbatch`** as an example):
-```
-        ...
-        #SBATCH --array=0-99    # the last job index should be equal to N_ARRAY_JOBS - 1 
-        ...
-```
-* **When only some records for the hospital need to be processed**, provide a list of record IDs in the variable
-**`source_scan_ids`**:
-```
-        # Inputs
-        ...
-        # Use source_scan_ids = None to process all records
-        source_scan_ids = ["1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5", "fffaab93-e908-4b93-a021-ab580e573585"]
-        ...
-```
+If `source_scan_ids` is not `null`, exactly one hospital must be specified.
 
 ### Performed operations
 The following operations are performed for each input record.
@@ -147,9 +103,8 @@ over values found in `conf_json` file.
 
 Detailed description of all arguments of each function or method are available in the [auto-generated documentation](../doc/_build/html/index.html).
 
-The meaning of parameters in the JSON configuration file is explained in the comments in the code below. Comment lines start
-with the `#` character. IMPORTANTLY, please mind that **comments are NOT allowed in real JSON files**. Please remove them if
-using this example JSON snippet in practice.
+The meaning of parameters in the JSON configuration file is explained in the comments in the code below.
+In this project, these configuration files are processed with `commentjson`, so comments are allowed.
 
 ```python
 {
@@ -240,15 +195,23 @@ When executing the code locally, use this command in Linux terminal:
 ```
 python run_pyprep_ica.py
 ```
-If running as an array job on the cedar cluster, use this command in your sbatch script (see `eeg_array_job.sbatch` for an example):
+If running as an array job on the Digital Alliance cluster, use this command in your sbatch script (see `eeg_array_job.sbatch` for an example):
 ```
 python run_pyprep_ica.py ${SLURM_ARRAY_TASK_ID}
 ```
 
-The main script **`run_pyprep_ica.py`** may need to be **modified** by the user, to set the root input and output folders, hospital name, etc.
-Please refer to section ["Running the code"](#running-the-code) under the segmentation task
-["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments), because the
-procedure is identical. Note that typically the PREP step is applied to extracted good segments rather than to the original data. 
+No Python source edits are required for this step. Configure everything in **`pyprep_ica_conf.json`**.
+
+Set these keys:
+
+* **`hosts`**: host-specific `data_root`, `out_root`, and `cluster_job`.
+* **`N_ARRAY_JOBS`**: number of array jobs (should match sbatch `--array`).
+* **`hospital`**: string or list of hospitals.
+* **`source_scan_ids`**: `null` for all records, or a list of scan IDs.
+* **`view_plots`**, **`verbose`**: runtime behavior for plotting/logging.
+
+If `source_scan_ids` is not `null`, exactly one hospital must be specified.
+Typically, this step is applied to the good segments produced by step 1.
 
 ### Performed operations
 * The **EEG PREP step** executes the "PREP" procedure published in the literature as implemented by the `pyprep` library.
@@ -270,8 +233,7 @@ It performs the following operations:
 
 ### JSON configuration file
 Parameter values specific to the PREP/ICA operations are defined in a JSON configuration file
-`pyprep_ica_conf.json`, which is described below. Note again that JSON files can not contain comments;
-therefore comments in the code below should be removed if one wants to use it in practice.
+`pyprep_ica_conf.json`, which is described below. This file is processed with `commentjson`, so comments are allowed.
 
 ```python
 {
@@ -437,18 +399,23 @@ When executing the code locally, use these commands in Linux terminal:
 python extract_hv_intervals.py
 python extract_ps_intervals.py
 ```
-If running as an array job on the cedar cluster, use these commands in your sbatch script
+If running as an array job on the Digital Alliance cluster, use these commands in your sbatch script
 (see `eeg_array_job.sbatch` for an example):
 ```
 python extract_hv_intervals.py ${SLURM_ARRAY_TASK_ID}
 python extract_ps_intervals.py ${SLURM_ARRAY_TASK_ID}
 ```
 
-As usual, the main scripts **`extract_XX_intervals.py`** may need to be **modified** to set
-the root input and output folders, etc. Please refer to section ["Running the code"](#running-the-code)
-under the segmentation task
-["1. Filtering, resampling and extracting of good data segments"](#1-filtering-resampling-and-extracting-of-good-data-segments),
-for details. Note that these steps should only be applied to the original EDF records. 
+No Python source edits are required for this step. Both scripts reuse the same top-level runtime keys
+from **`preproc_conf.json`**:
+
+* **`N_ARRAY_JOBS`**
+* **`hospital`** (string or list)
+* **`source_scan_ids`** (`null` or list of scan IDs)
+
+Input/output roots are resolved from `hosts`: `data_root` for input, and either `hv_out_root` or `ps_out_root`
+for outputs depending on the script. If `source_scan_ids` is not `null`, exactly one hospital must be specified.
+Note that these steps should only be applied to the original EDF records.
 
 ### Performed operations
 * First, the same **basic preprocessing operations as in the task 1 (segmentation) are done**, namely
@@ -468,6 +435,7 @@ for details. Note that these steps should only be applied to the original EDF re
 
 ### JSON configuration file
 All HV and PS-related configuration parameters are stored in the JSON file `preproc_conf.json`.
+This file is processed with `commentjson`, so comments are allowed.
 
 ## 4. Performing source reconstruction
 In this step, we reconstruct the source time courses from a designated set of Regions of Interest (ROIs).
@@ -485,7 +453,7 @@ folder:
 python run_src_reconstr.py
 ```
 
-If running as an array job on the cedar cluster, use this command in your sbatch script
+If running as an array job on the Digital Alliance cluster, use this command in your sbatch script
 (see `eeg_array_job.sbatch` for an example):
 ```
 python run_src_reconstr.py ${SLURM_ARRAY_TASK_ID}
@@ -672,7 +640,7 @@ folder:
 python run_welch.py
 ```
 
-If running as an array job on the cedar cluster, use this command in your sbatch script
+If running as an array job on the Digital Alliance cluster, use this command in your sbatch script
 (see `eeg_array_job.sbatch` for an example):
 ```
 python run_welch.py ${SLURM_ARRAY_TASK_ID}
@@ -728,7 +696,7 @@ Here is an example of such file:
                 "out_root": "/data/eegfhabrainage/src-welch"
             }
         },
-        "cedar": {
+        "fir": {
             "cluster_job": true,
 
             "sensors": {
@@ -795,7 +763,7 @@ folder:
 python run_cwt.py
 ```
 
-When running as an array job on the cedar cluster, use this command in your sbatch script
+When running as an array job on the Digital Alliance cluster, use this command in your sbatch script
 (see `eeg_array_job.sbatch` for an example):
 ```
 python run_cwt.py ${SLURM_ARRAY_TASK_ID}
@@ -864,7 +832,7 @@ All input parameters for `run_cwt.py` including input and output folders are def
                 "out_root": "/data/eegfhabrainage/src-cwt"
             }
         },
-        "cedar": {
+        "fir": {
             "cluster_job": true,
 
             "sensors": {
@@ -992,6 +960,83 @@ Currently the script contains a single visualization step, where every data poin
 
 All input parameters for the `run_view_hd_embedding.py` script including input and output folders are defined in a dedicated JSON file `view_hd_input.json`. Thus changing parameters does not require modification of the Python source code. This is a JSON file with comments, similar to ones described for other steps. Meaning of the keys and values should be clear from related comments.
 
+## 9. Running preprocessing steps and other scripts using prebuilt container (apptainer) image
+
+### General information
+The "apptainer" containers supported on Digital Allience (DA) clusters are "frozen" software environments similar
+to docker containers. When using them, software is running exactly as on the machine where the container was created.
+It is completely insulated from various settings, conventions and modules that currently exist on the cluster.
+For example, Python versions and packages not supported by DA software stack can still be used. This is the main
+advantage of using containers.
+
+At the same time, with container being a read-only version of the software, changes to the files inside
+the container are impossible. Yet such changes may be needed. For example, all preprocessing steps are
+controlled via JSON configuration files, but those files within the container cannot be adjusted. This problem is resolved
+by mapping editable versions of required files onto those within the container. This is done via
+"`--bind`" option of the apptainer. Additionally, all the host file system folders that should be accessible by
+the contained software, should also be "bound" to the container.
+
+Importantly, **the home folder from which the container is started is automatically bound to the container
+and is always accessible**. This provides a simple way to change runtime settings or even to make modifications to the software
+without rebuilding the image. Required editable copies of the files (i.e. `cfg1.json`, `myscript.py`) are placed into
+the home folder, and are bound to the container using constructions like
+`--bind cfg1.json:/app/cfg1.json,myscript.py:/app/myscript.py` when starting the container. Please refer to `run_apptainer.sh`
+bash script for a detailed example.
+
+### Running the "three steps" preprocessing
+The preprocessing steps in question are:
+
+1. [filtering/resampling EDFs and extracting good segments](#1-filtering-resampling-and-extracting-of-good-data-segments),
+2. [PyPREP and ICA](#2-eeg-prep-procedure-and-artifact-removal), and
+3. [beamformer source reconstruction](#4-performing-source-reconstruction).
+
+
+Each step is controlled by its own JSON configuration file. While many settings rarely need modifications, some
+of them may be changed frequently and even for every run - for example, the EEG record ID and corresponding hospital. Input and
+output folders may also vary. Importantly, these changes should be done synchronously in all JSON files.  
+
+To simplify this process, all three steps are packed into a single bash script **`run_three_stage_pipeline.sh`**. In its turn
+this script is started from the main script **`run_apptainer.sh`**. The latter performs binding of necessary folders
+of the host file system and then running the container. Both scripts include extensive comments. The intended procedure is as follows.
+
+* Copies of `run_three_stage_pipeline.sh` and JSON files `preproc_conf.json, pyprep_ica_conf.json, src_reconstr_conf.json` 
+should be placed into the folder from which the container will be started.
+* In the **`run_three_stage_pipeline.sh`**, the following variables should be set: `SOURCE_SCAN_IDS`, `HOSPITAL`, `HOST`.
+Please pay attention to how `SOURCE_SCAN_IDS`, `HOSPITAL` are specified (i.e. single quotes), especially when a list of
+values is provided - the bash script is very picky about the syntax used. **IMPORTANTLY, if a command line argument is
+provided, its value will replace the `SOURCE_SCAN_IDS` value set inside the script**.
+* In the **`run_apptainer.sh`**, one needs to set values for variables in the "User-configurable variables"
+section. Meaning of most of them is self-explanatory. In particular,
+    - `WORKDIR` should point to the folder from which the apptainer will be started; 
+    - `ORG_EDF_ROOT`, `SEGMENTED_EDF_ROOT`, `PYPREPED_FIF_ROOT`, `BEAMFORMED_ROOT` should contain paths to
+      raw EDFs folder, "filtered good segments" EDF folder, folder for PyPREP'd .fif files, folder for source reconstructed
+      .hdf5 files and .fif forward solutions, respectively. Note that each "root" folder will contain subfolders
+      for corresponding hospitals.
+    - `FREESURFER_DIR` should contain a path to the folder which has a standard `fsaverage` subfolder with all the usual
+      FreeSurfer stuff.
+* The `run_apptainer.sh` can be run with a command line argument. In this case, it is interpreted as a list of EEG
+scan IDs to process and will be passed directly to the `run_three_stage_pipeline.sh` command. The list should be
+specified in the following format: `'["id1",...,"idN"]'`.
+
+### Other notes
+When running the `run_three_stage_pipeline.sh` script, the JSON files in the working folder will usually
+be modified to set scan IDs, hospital and various data paths for the processing steps. Also, the comments
+(if any) will be removed.
+
+No other parts of the JSONs will be changed. However, user can modify them manually if needed, and these
+changes will not be affected by invoking the `run_three_stage_pipeline.sh`.
+
+Currently the apptainer image holds many other processing routines. They can be run the same way as it is done
+for the three preprocessing steps above - namely, by binding proper JSON files and paths, and invoking corresponding
+command with the apptainer. For example, a command to calculate Welch power spectra will look like
+```
+apptainer exec \
+    --bind ${BIND} \
+    "${IMAGE}"  python3 run_welch.py
+```
+assuming that `BIND` and `IMAGE` variables are properly set, `welch_input.json` contains desired hospital and scan IDs
+and resides in the current working directory. Please refer to the apptainer official documentation for details.
+
 ## Miscellaneous functions
 Some utility scripts are located in the folder `.../eegfhabrainage/misc`. 
 
@@ -1099,3 +1144,4 @@ the project working folder and perform the following commands:
 
         deactivate
 ```
+

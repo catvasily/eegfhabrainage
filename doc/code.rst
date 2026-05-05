@@ -94,3 +94,63 @@ view_hd_embedding.py
 --------------------
 .. automodule:: view_hd_embedding
 
+analyse_cwt_data.py
+-------------------
+.. automodule:: analyse_cwt_data
+
+run_classifier.py
+-----------------
+.. automodule:: run_classifier
+
+cls_feature_importance.py
+-------------------------
+.. automodule:: cls_feature_importance
+
+cls_predict.py
+--------------
+.. automodule:: cls_predict
+
+compare_roi_time_courses.py
+---------------------------
+.. automodule:: compare_roi_time_courses
+
+consensus_cv.py
+---------------
+.. automodule:: consensus_cv
+
+do_cls_summarize.py
+-------------------
+.. automodule:: do_cls_summarize
+
+do_xgboost.py
+-------------
+.. automodule:: do_xgboost
+
+get_scan_ids_for_job.py
+-----------------------
+.. automodule:: get_scan_ids_for_job
+
+migrate_xgb_pickles_format.py
+-----------------------------
+.. automodule:: migrate_xgb_pickles_format
+
+nested_cv.py
+------------
+.. automodule:: nested_cv
+
+plot_3d_heatmap.py
+------------------
+.. automodule:: plot_3d_heatmap
+
+plot_cls_summary.py
+-------------------
+.. automodule:: plot_cls_summary
+
+plot_pr_curve.py
+----------------
+.. automodule:: plot_pr_curve
+
+build_epi_features.py
+---------------------
+.. automodule:: build_epi_features
+

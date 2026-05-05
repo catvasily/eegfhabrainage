@@ -32,6 +32,31 @@ which was used to run filtering/segmentation step
 WELCH_CONFIG_FILE = 'welch_conf.json'   # This script general configuration settings
 INPUT_JSON_FILE = "welch_input.json"    # This script input parameters
 
+
+def _normalize_hospitals(hospital_cfg):
+    if isinstance(hospital_cfg, str):
+        hospitals = [hospital_cfg]
+    elif isinstance(hospital_cfg, list) and all(isinstance(h, str) for h in hospital_cfg):
+        hospitals = hospital_cfg
+    else:
+        raise ValueError('"hospital" must be either a string or a list of strings in welch_input.json')
+
+    if not hospitals:
+        raise ValueError('"hospital" list in welch_input.json should not be empty')
+
+    return hospitals
+
+
+def _validate_source_scan_ids(source_scan_ids, hospitals):
+    if source_scan_ids is None:
+        return
+
+    if not isinstance(source_scan_ids, list) or not all(isinstance(s, str) for s in source_scan_ids):
+        raise ValueError('"source_scan_ids" must be null or a list of strings in welch_input.json')
+
+    if len(hospitals) != 1:
+        raise AssertionError('When "source_scan_ids" is provided, exactly one hospital must be specified.')
+
 def main():
     # Parse input args
     with open(pathname(INPUT_JSON_FILE), 'r') as fp:
@@ -39,8 +64,9 @@ def main():
 
     N_ARRAY_JOBS = args['N_ARRAY_JOBS']     # Number of parallel jobs to run on cluster
     what = args['what']                     # 'sensors' or 'sources'
-    hospital = args['hospital']             # Burnaby, Abbotsford, RCH, Surrey
+    hospitals = _normalize_hospitals(args['hospital'])
     source_scan_ids = args['source_scan_ids']   # None or a list of specific scan IDs (without .edf)
+    _validate_source_scan_ids(source_scan_ids, hospitals)
 
     ftype = args['input_file_type']         # fif or edf for sensors, always hdf5 for sources
 
@@ -65,12 +91,6 @@ def main():
     data_root, out_root, cluster_job = get_data_folders(args)
     # ------ end of args parsing ---------------
 
-    input_dir = data_root + "/" + hospital
-    output_dir = out_root + "/" + hospital
-    
-    if not path.exists(output_dir):
-        os.makedirs(output_dir)
-
     mne.set_log_level(verbose=verbose)
 
     # When running on the CC cluster, 1st command line argument is a 0-based
@@ -79,41 +99,6 @@ def main():
         ijob = 0
     else:
         ijob = int(sys.argv[1])
-
-    if source_scan_ids is None:
-        if what == 'sensors':
-            if ftype == 'fif':
-                # To get bare ID need to chop off "_raw.fif" at the end
-                source_scan_ids = [path.basename(f)[:-8] for f in glob.glob(input_dir + '/*.fif')]
-            else:       # ftype == 'edf':
-                # To get bare ID need to chop off ".edf" at the end
-                source_scan_ids = [path.basename(f)[:-4] for f in glob.glob(input_dir + '/*.edf')]
-        else:
-            # To get bare ID one needs to get folders with names that are 5 HEX numbers
-            # separated by 4 dashes. Poor man's solution for it is just '*-*-*-*-*'
-            source_scan_ids = [path.basename(f) for f in glob.glob(input_dir + '/*-*-*-*-*')]
-
-    if cluster_job:
-        view_plots = False    # Disable interactive plots, just in case
-        nfiles = len(source_scan_ids)
-        files_per_job = nfiles // N_ARRAY_JOBS + 1
-        istart = ijob * files_per_job
-
-        if istart > nfiles - 1:
-            print('All done')
-            sys.exit()
-
-        iend = min(istart + files_per_job, nfiles)
-        source_scan_ids = source_scan_ids[istart:iend]
-
-    if what == 'sensors':
-        if ftype == 'fif':
-            scan_files = [scan_id + '_raw.fif' for scan_id in source_scan_ids]
-        else:       # ftype == 'edf':
-            scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
-    else:
-        scan_files = [scan_id + '/' + scan_id + f'-ico-{ico}-ltc.hdf5' \
-                for scan_id in source_scan_ids]
 
     # load the original preprocessing configuration, as we need some data from there
     with open(pathname(PREPROC_CONFIG_FILE), "r") as fp:
@@ -133,33 +118,92 @@ def main():
     nfft = next_power_of_2(nsamples)        # FFT length for each segment in Welch
     idx = None
 
-    outname = lambda scan_id:   \
-            output_dir + '/' + scan_id + \
-            ('_psd.hdf5' if what == 'sensors' else  '_src_psd.hdf5')
+    for hospital in hospitals:
+        input_dir = data_root + "/" + hospital
+        output_dir = out_root + "/" + hospital
 
-    if not plot_only:
-        # main loop
-        print('\nProcessing record IDs:')
-        for scan_id, f in zip(source_scan_ids, scan_files):
-            print(f'{scan_id}')
-            data, ch_names = load_data(input_dir + '/' + f)
+        if not path.exists(output_dir):
+            os.makedirs(output_dir)
 
-            f, Pxx = welch(data, fs=fs, nperseg=nfft, **conf_dict['welch'])
+        if source_scan_ids is None:
+            if what == 'sensors':
+                if ftype == 'fif':
+                    # To get bare ID need to chop off "_raw.fif" at the end
+                    hospital_scan_ids = [path.basename(f)[:-8] for f in glob.glob(input_dir + '/*.fif')]
+                else:       # ftype == 'edf':
+                    # To get bare ID need to chop off ".edf" at the end
+                    hospital_scan_ids = [path.basename(f)[:-4] for f in glob.glob(input_dir + '/*.edf')]
+            else:
+                # To get bare ID one needs to get folders with names that are 5 HEX numbers
+                # separated by 4 dashes. Poor man's solution for it is just '*-*-*-*-*'
+                hospital_scan_ids = [path.basename(f) for f in glob.glob(input_dir + '/*-*-*-*-*')]
+        else:
+            hospital_scan_ids = list(source_scan_ids)
 
-            if idx is None:
-                idx = closest_elements(f, freqs)    # indecies of f's that are close to freqs
+        if cluster_job:
+            view_plots = False    # Disable interactive plots, just in case
+            nfiles = len(hospital_scan_ids)
+            files_per_job = nfiles // N_ARRAY_JOBS + 1
+            istart = ijob * files_per_job
 
-            Pxx = Pxx[:, idx]
-            write_welch_psd(outname(scan_id), ch_names, freqs, Pxx)
+            if istart > nfiles - 1:
+                print(f'All done for {hospital}')
+                continue
 
-        print(f'Total {len(source_scan_ids)} records processed\n')
+            iend = min(istart + files_per_job, nfiles)
+            hospital_scan_ids = hospital_scan_ids[istart:iend]
 
-    if view_plots and (plot_ids is not None):
-        for pid in plot_ids:
-            plt.figure()
-            plot_psd(outname(pid), plot_chnames, title = pid)
+        if what == 'sensors':
+            if ftype == 'fif':
+                scan_files = [scan_id + '_raw.fif' for scan_id in hospital_scan_ids]
+            else:       # ftype == 'edf':
+                scan_files = [scan_id + '.edf' for scan_id in hospital_scan_ids]
+        else:
+            scan_files = [scan_id + '/' + scan_id + f'-ico-{ico}-ltc.hdf5' \
+                    for scan_id in hospital_scan_ids]
 
-        plt.show()
+        outname = lambda scan_id:   \
+                output_dir + '/' + scan_id + \
+                ('_psd.hdf5' if what == 'sensors' else  '_src_psd.hdf5')
+
+        if not plot_only:
+            # main loop
+            print('\nProcessing record IDs:')
+            for scan_id, f in zip(hospital_scan_ids, scan_files):
+                print(f'{scan_id}')
+                data, ch_names = load_data(input_dir + '/' + f)
+
+                f, Pxx = welch(data, fs=fs, nperseg=nfft, **conf_dict['welch'])
+
+                if idx is None:
+                    idx = closest_elements(f, freqs)    # indecies of f's that are close to freqs
+
+                Pxx = Pxx[:, idx]
+                write_welch_psd(outname(scan_id), ch_names, freqs, Pxx)
+
+            print(f'Total {len(hospital_scan_ids)} records processed for {hospital}\n')
+
+        if view_plots and (plot_ids is not None):
+            for pid in plot_ids:
+                plt.figure()
+                plot_psd(outname(pid), plot_chnames, title = pid)
+
+            plt.show()
+
+def _get_host(conf_dict):
+    """Return host key listed in config, or "other" fallback if present."""
+    host = socket.getfqdn()
+
+    for key in conf_dict['hosts']:
+        if key == 'other':
+            continue
+        if key in host:
+            return key
+
+    if 'other' in conf_dict['hosts']:
+        return 'other'
+
+    raise ValueError(f'Host is not listed in the {INPUT_JSON_FILE}.')
 
 def get_data_folders(args):
     '''Setup input and output data folders depending on the host machine.
@@ -185,7 +229,7 @@ def get_data_folders(args):
 
     # Choose appropriate host name from those listed in the json:
     host_found = False
-    host = socket.gethostname()
+    host = _get_host(args)
 
     for key in args['hosts']:
         if key in host:
@@ -197,12 +241,12 @@ def get_data_folders(args):
         host = 'other'
 
     # Get the host data
-    cluster_job = args['hosts'][host]['cluster_job']
+    cluster_job = args['hosts'][host].get('cluster_job', False)
     data_root = args['hosts'][host][what]['data_root']
     out_root = args['hosts'][host][what]['out_root']
 
     # Additional adjustments
-    if host != 'cedar':
+    if not cluster_job:
         mne.viz.set_browser_backend('matplotlib')
 
     if host == 'other':

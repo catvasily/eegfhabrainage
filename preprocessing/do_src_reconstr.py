@@ -514,8 +514,13 @@ def read_roi_time_courses(ltc_file):
         ps_id_dict(dict): dictionary event_descr -> event_id; see `event_id` parameter
             description of the MNE `Epochs` object constructor
     """
+    tcs_ready = False           # Flag that label_tcs are ready
+
     with h5py.File(ltc_file, 'r') as f:
-        label_tcs = f['label_tcs'][:,:]
+        if 'label_tcs' in f:
+            label_tcs = f['label_tcs'][:,:]
+            tcs_ready = True
+
         label_names = f['label_names'].asstr()[:]
 
         if 'vertno' in f:
@@ -530,8 +535,20 @@ def read_roi_time_courses(ltc_file):
 
         if 'W' in f:
             W = f['W'][:,:]
+
+            # Reconstruct ROI time courses, if necessary
+            if not tcs_ready:
+                if 'sensor_tcs' not in f:
+                    raise ValueError(f'File {ltc_file} is missing both label and sensor time courses.')
+
+                sensor_tcs = f['sensor_tcs'][:,:]
+                label_tcs = W.T @ sensor_tcs
+                tcs_ready = True    # Set it just in case
         else:
             W = None
+
+            if not tcs_ready:
+                raise ValueError(f'Filter weights data is missing in file {ltc_file}.')
 
         if 'pz' in f:
             pz = f['pz'][()]
@@ -550,15 +567,20 @@ def read_roi_time_courses(ltc_file):
 
     return (label_tcs, label_names, vertno, rr, W, pz, ps_events, ps_id_dict)  
  
-def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr = None, W = None,
-                           pz = None, ps_events = None, ps_id_dict = None):
-    """Save ROI (label) time courses and related data in .hdf5
+def write_roi_time_courses(ltc_file, tc_data, label_names, vertno = None, rr = None, W = None,
+                           pz = None, is_sensor_data = False, ps_events = None, ps_id_dict = None):
+    """Save reconstructed time courses and related data in .hdf5
     file.
 
-    The output file will contain at least two datasets with names 'label_tcs' and
-    'label_names'. If provided, ROI centers of mass (COMs) vertex numbers
-    on the FreeSurface's `fsaverage` cortex surface, ROI COMs in MRI coordinates,
-    ROI spatial filter weights and the EEG record overall pseudo-Z will also be saved.
+    The output file will contain several datasets, depending on situation. In the simplest
+    case it will have a datasets named 'label_tcs' for ROI time courses, and 'label_names'
+    for ROI names. It may also contain 'sensor_tcs' dataset with sensor channel time
+    courses instead of 'label_tcs' (see ``is_sensor_data`` flag below). in this case it will
+    also contain dataset named 'W' storing a matrix of the ROI spatial filter weights.
+
+    Most often some other (optional) data will be available, such as ROI centers of mass
+    (COMs) vertex numbers on the FreeSurface's `fsaverage` cortex surface; ROI COMs in MRI
+    coordinates; the current EEG record's overall pseudo-Z value.
 
     If photic stimulation (PS) segments of the EEG records are processed, 'events' array
     and 'event_id' dictionary corresponding to the PS stimulation events may be saved (if
@@ -568,7 +590,8 @@ def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr =
 
     Args:
         ltc_file (str): full pathname of the output .hdf5 file
-        label_tcs (ndarray): nlabels x ntimes ROI time courses
+        tc_data (ndarray): either ``nchans x ntimes``, or ``nlabels x ntimes`` - the sensor
+            or ROI time courses.
         label_names (list of str): names of ROIs
         vertno (ndarray or None): 1D signed integer array of vertex numbers corresponding
             to the ROI COMs. See `parse_vertex_list()` function regarding the vertex
@@ -579,6 +602,8 @@ def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr =
             Those can be used to reconstruct ROI time courses as `W.T @ sensor_data` 
         pz (float or None): data's pseudo-Z found as `pz = trace(R)/tr(N)`,
             where `N` is the noise covariance.
+        is_sensor_data(bool): (default ``False``) If set, tc_data contains sensor time courses,
+            not ROI time courses.
         ps_events(ndarray): nevents x 3; PS events array in MNE Python 'events' format
         ps_id_dict(dict): dictionary event_descr -> event_id; see `event_id` parameter
             description of the MNE `Epochs` object constructor
@@ -586,8 +611,21 @@ def write_roi_time_courses(ltc_file, label_tcs, label_names, vertno = None, rr =
     Returns:
         None
     """
+
+    # Validate and set which ds to save to
+    if is_sensor_data:
+        if W is None:
+            raise ValueError('When sensor time courses are used as input, the spatial filter weights W must be provided')
+
+        if tc_data.shape[0] != W.shape[0]:
+            raise ValueError(f'Numbers of channels for tc_data ({tc_data.shape[0]}) and for W ({W.shape[0]}) do not match')
+
+        tc_dsname = 'sensor_tcs'
+    else:
+        tc_dsname = 'label_tcs'
+
     with h5py.File(ltc_file, 'w') as f:
-        f.create_dataset('label_tcs', data=label_tcs)
+        f.create_dataset(tc_dsname, data=tc_data)
         f.create_dataset('label_names', data=label_names)
 
         if not (vertno is None):

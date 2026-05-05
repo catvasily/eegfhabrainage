@@ -1,5 +1,4 @@
 # Logs, etc
-eegLog.txt
 Pre-Processing Pipeline_Srirupa.pdf
 
 # Sphinx working files
@@ -155,3 +154,10 @@ dmypy.json
 .pyre/
 reports/docs/7-16 Preliminary Results Presentation (Chris).pdf
 reports/docs/notesCrisPresentation240716.txt
+xgboost_test
+zhenyu_scripts
+preprocessing/.github/copilot-instructions.md
+preprocessing/destrieux_atlas_ordered.csv
+perplexityEEGFeatureSelection.pdf
+preprocessing/qq.json
+preprocessing/requirements.txt

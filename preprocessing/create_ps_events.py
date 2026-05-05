@@ -1,6 +1,6 @@
 import os.path as path
 import re
-import json
+import commentjson as cjson
 import mne
 
 PREPROC_CONF_FILE = 'preproc_conf.json'
@@ -66,7 +66,7 @@ def create_ps_events(raw, verbose=None):
 
     # Load preprocessing config
     with open(_PREPROC_CONF_PATHNAME, "r") as fp:
-        conf_dict = json.loads(fp.read())
+        conf_dict = cjson.loads(fp.read())
 
     # Get the PS identification keywords
     lst_starts = [s.upper() for s in conf_dict["photic_starts"]]

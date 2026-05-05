@@ -112,14 +112,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-extract_hv_intervals">extract_hv_intervals.py</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#extract_hv_intervals.get_data_folders"><code class="docutils literal notranslate"><span class="pre">get_data_folders()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#module-extract_ps_intervals">extract_ps_intervals.py</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#extract_ps_intervals.get_data_folders"><code class="docutils literal notranslate"><span class="pre">get_data_folders()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-extract_hv_intervals">extract_hv_intervals.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-extract_ps_intervals">extract_ps_intervals.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-create_ps_events">create_ps_events.py</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#create_ps_events.PREPROC_CONF_FILE"><code class="docutils literal notranslate"><span class="pre">PREPROC_CONF_FILE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#create_ps_events.create_ps_events"><code class="docutils literal notranslate"><span class="pre">create_ps_events()</span></code></a></li>
@@ -258,6 +252,70 @@
 <li class="toctree-l3"><a class="reference internal" href="#view_hd_embedding.view_hd_embedding"><code class="docutils literal notranslate"><span class="pre">view_hd_embedding()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-analyse_cwt_data">analyse_cwt_data.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analyse_cwt_data.INPUT_JSON_FILE"><code class="docutils literal notranslate"><span class="pre">INPUT_JSON_FILE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analyse_cwt_data.check_cwt_parms"><code class="docutils literal notranslate"><span class="pre">check_cwt_parms()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analyse_cwt_data.scatter_plot"><code class="docutils literal notranslate"><span class="pre">scatter_plot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-run_classifier">run_classifier.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run_classifier.get_host"><code class="docutils literal notranslate"><span class="pre">get_host()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_classifier.init"><code class="docutils literal notranslate"><span class="pre">init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run_classifier.setup_paths"><code class="docutils literal notranslate"><span class="pre">setup_paths()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-cls_feature_importance">cls_feature_importance.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cls_feature_importance.cls_feature_importance"><code class="docutils literal notranslate"><span class="pre">cls_feature_importance()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-cls_predict">cls_predict.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cls_predict.cls_predict"><code class="docutils literal notranslate"><span class="pre">cls_predict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-compare_roi_time_courses">compare_roi_time_courses.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-consensus_cv">consensus_cv.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#consensus_cv.apply_consensus_reducer"><code class="docutils literal notranslate"><span class="pre">apply_consensus_reducer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#consensus_cv.build_and_fit_consensus_reducer"><code class="docutils literal notranslate"><span class="pre">build_and_fit_consensus_reducer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#consensus_cv.consensus_cv"><code class="docutils literal notranslate"><span class="pre">consensus_cv()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-do_cls_summarize">do_cls_summarize.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#do_cls_summarize.do_cls_summarize"><code class="docutils literal notranslate"><span class="pre">do_cls_summarize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-do_xgboost">do_xgboost.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#do_xgboost.apply_fitted_reducer"><code class="docutils literal notranslate"><span class="pre">apply_fitted_reducer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#do_xgboost.cross_validate_with_per_fold_reduction"><code class="docutils literal notranslate"><span class="pre">cross_validate_with_per_fold_reduction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#do_xgboost.do_xgboost"><code class="docutils literal notranslate"><span class="pre">do_xgboost()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#do_xgboost.list_src_ids"><code class="docutils literal notranslate"><span class="pre">list_src_ids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#do_xgboost.load_data"><code class="docutils literal notranslate"><span class="pre">load_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#do_xgboost.load_labels"><code class="docutils literal notranslate"><span class="pre">load_labels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#do_xgboost.reduce_dimensions"><code class="docutils literal notranslate"><span class="pre">reduce_dimensions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-get_scan_ids_for_job">get_scan_ids_for_job.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-migrate_xgb_pickles_format">migrate_xgb_pickles_format.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nested_cv">nested_cv.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nested_cv.nested_cv"><code class="docutils literal notranslate"><span class="pre">nested_cv()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-plot_3d_heatmap">plot_3d_heatmap.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plot_3d_heatmap.plot_3d_heatmap"><code class="docutils literal notranslate"><span class="pre">plot_3d_heatmap()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-plot_cls_summary">plot_cls_summary.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plot_cls_summary.plot_cls_summary"><code class="docutils literal notranslate"><span class="pre">plot_cls_summary()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-plot_pr_curve">plot_pr_curve.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plot_pr_curve.plot_and_save_pr_curve"><code class="docutils literal notranslate"><span class="pre">plot_and_save_pr_curve()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-build_epi_features">build_epi_features.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build_epi_features.apply_epi_features"><code class="docutils literal notranslate"><span class="pre">apply_epi_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build_epi_features.build_and_fit_epi_features"><code class="docutils literal notranslate"><span class="pre">build_and_fit_epi_features()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="README_reports.html">EEG clinical reports processing</a></li>
@@ -297,12 +355,16 @@
 from the EEG recordings.</strong></p>
 <dl class="py function">
 <dt class="sig sig-object py" id="run_filtering_segmentation.get_data_folders">
-<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#run_filtering_segmentation.get_data_folders" title="Link to this definition"></a></dt>
-<dd><p>Setup input and output data folders depending on the host machine.</p>
+<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_root_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'out_root'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_filtering_segmentation.get_data_folders" title="Link to this definition"></a></dt>
+<dd><p>Read input/output roots and cluster flag from JSON config.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data_root, out_root, cluster_job</strong> (<em>str, str, bool</em>) – paths to the root input and output
-data folders, and a flag indicating whether host is on CC cluster</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf_dict</strong> (<em>dict</em>) – configuration loaded from preproc_conf.json</p></li>
+<li><p><strong>out_root_key</strong> (<em>str</em>) – key to use for the output root inside each host
+entry (default ‘out_root’; use ‘hv_out_root’ or ‘ps_out_root’
+for the HV/PS extract scripts).</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -930,16 +992,8 @@ If <cite>False</cite> (default), an error will be raised if the file exists.</p>
 <p><strong>A top level script to perform the PyPREP and ICA artifact removal step.</strong></p>
 <dl class="py function">
 <dt class="sig sig-object py" id="run_pyprep_ica.get_data_folders">
-<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#run_pyprep_ica.get_data_folders" title="Link to this definition"></a></dt>
-<dd><p>Setup input and output data folders depending on the host machine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_root, out_root, cluster_job</strong> (<em>str, str, bool</em>) – paths to the root input and output</p></li>
-<li><p><strong>data folders, and a flag indicating whether host is on CC cluster</strong></p></li>
-</ul>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_pyprep_ica.get_data_folders" title="Link to this definition"></a></dt>
+<dd><p>Read input/output roots and cluster flag from JSON config.</p>
 </dd></dl>
 
 </section>
@@ -1151,39 +1205,11 @@ Ignored if savefile is None.</p></li>
 <span id="extract-hv-intervals-py"></span><h2>extract_hv_intervals.py<a class="headerlink" href="#module-extract_hv_intervals" title="Link to this heading"></a></h2>
 <p><strong>A top level script to perform filtering and extraction of hyperventilation (HV)
 intervals.</strong></p>
-<dl class="py function">
-<dt class="sig sig-object py" id="extract_hv_intervals.get_data_folders">
-<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#extract_hv_intervals.get_data_folders" title="Link to this definition"></a></dt>
-<dd><p>Setup input and output data folders depending on the host machine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_root, out_root, cluster_job</strong> (<em>str, str, bool</em>) – paths to the root input and output</p></li>
-<li><p><strong>data folders, and a flag indicating whether host is on CC cluster</strong></p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 <section id="module-extract_ps_intervals">
 <span id="extract-ps-intervals-py"></span><h2>extract_ps_intervals.py<a class="headerlink" href="#module-extract_ps_intervals" title="Link to this heading"></a></h2>
 <p><strong>A top level script to perform filtering and extraction of photic stimulation (PS)
 intervals.</strong></p>
-<dl class="py function">
-<dt class="sig sig-object py" id="extract_ps_intervals.get_data_folders">
-<span class="sig-name descname"><span class="pre">get_data_folders</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#extract_ps_intervals.get_data_folders" title="Link to this definition"></a></dt>
-<dd><p>Setup input and output data folders depending on the host machine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_root, out_root, cluster_job</strong> (<em>str, str, bool</em>) – paths to the root input and output</p></li>
-<li><p><strong>data folders, and a flag indicating whether host is on CC cluster</strong></p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 <section id="module-create_ps_events">
 <span id="create-ps-events-py"></span><h2>create_ps_events.py<a class="headerlink" href="#module-create_ps_events" title="Link to this heading"></a></h2>
@@ -1767,13 +1793,17 @@ description of the MNE <cite>Epochs</cite> object constructor</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="do_src_reconstr.write_roi_time_courses">
-<span class="sig-name descname"><span class="pre">write_roi_time_courses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltc_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_tcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ps_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ps_id_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.write_roi_time_courses" title="Link to this definition"></a></dt>
-<dd><p>Save ROI (label) time courses and related data in .hdf5
+<span class="sig-name descname"><span class="pre">write_roi_time_courses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltc_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tc_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertno</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">W</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sensor_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ps_events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ps_id_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_src_reconstr.write_roi_time_courses" title="Link to this definition"></a></dt>
+<dd><p>Save reconstructed time courses and related data in .hdf5
 file.</p>
-<p>The output file will contain at least two datasets with names ‘label_tcs’ and
-‘label_names’. If provided, ROI centers of mass (COMs) vertex numbers
-on the FreeSurface’s <cite>fsaverage</cite> cortex surface, ROI COMs in MRI coordinates,
-ROI spatial filter weights and the EEG record overall pseudo-Z will also be saved.</p>
+<p>The output file will contain several datasets, depending on situation. In the simplest
+case it will have a datasets named ‘label_tcs’ for ROI time courses, and ‘label_names’
+for ROI names. It may also contain ‘sensor_tcs’ dataset with sensor channel time
+courses instead of ‘label_tcs’ (see <code class="docutils literal notranslate"><span class="pre">is_sensor_data</span></code> flag below). in this case it will
+also contain dataset named ‘W’ storing a matrix of the ROI spatial filter weights.</p>
+<p>Most often some other (optional) data will be available, such as ROI centers of mass
+(COMs) vertex numbers on the FreeSurface’s <cite>fsaverage</cite> cortex surface; ROI COMs in MRI
+coordinates; the current EEG record’s overall pseudo-Z value.</p>
 <p>If photic stimulation (PS) segments of the EEG records are processed, ‘events’ array
 and ‘event_id’ dictionary corresponding to the PS stimulation events may be saved (if
 passed as the parameters) in the datasets named ‘ps_events’, ‘ps_id_dict’ respectively.
@@ -1783,7 +1813,8 @@ object.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ltc_file</strong> (<em>str</em>) – full pathname of the output .hdf5 file</p></li>
-<li><p><strong>label_tcs</strong> (<em>ndarray</em>) – nlabels x ntimes ROI time courses</p></li>
+<li><p><strong>tc_data</strong> (<em>ndarray</em>) – either <code class="docutils literal notranslate"><span class="pre">nchans</span> <span class="pre">x</span> <span class="pre">ntimes</span></code>, or <code class="docutils literal notranslate"><span class="pre">nlabels</span> <span class="pre">x</span> <span class="pre">ntimes</span></code> - the sensor
+or ROI time courses.</p></li>
 <li><p><strong>label_names</strong> (<em>list</em><em> of </em><em>str</em>) – names of ROIs</p></li>
 <li><p><strong>vertno</strong> (<em>ndarray</em><em> or </em><em>None</em>) – 1D signed integer array of vertex numbers corresponding
 to the ROI COMs. See <cite>parse_vertex_list()</cite> function regarding the vertex
@@ -1794,6 +1825,8 @@ in head coordinates</p></li>
 Those can be used to reconstruct ROI time courses as <cite>W.T &#64; sensor_data</cite></p></li>
 <li><p><strong>pz</strong> (<em>float</em><em> or </em><em>None</em>) – data’s pseudo-Z found as <cite>pz = trace(R)/tr(N)</cite>,
 where <cite>N</cite> is the noise covariance.</p></li>
+<li><p><strong>is_sensor_data</strong> (<em>bool</em>) – (default <code class="docutils literal notranslate"><span class="pre">False</span></code>) If set, tc_data contains sensor time courses,
+not ROI time courses.</p></li>
 <li><p><strong>ps_events</strong> (<em>ndarray</em>) – nevents x 3; PS events array in MNE Python ‘events’ format</p></li>
 <li><p><strong>ps_id_dict</strong> (<em>dict</em>) – dictionary event_descr -&gt; event_id; see <cite>event_id</cite> parameter
 description of the MNE <cite>Epochs</cite> object constructor</p></li>
@@ -2987,6 +3020,739 @@ low dimensional data</p></li>
 </dd></dl>
 
 </section>
+<section id="module-analyse_cwt_data">
+<span id="analyse-cwt-data-py"></span><h2>analyse_cwt_data.py<a class="headerlink" href="#module-analyse_cwt_data" title="Link to this heading"></a></h2>
+<p><strong>A script to analyse CWT results</strong></p>
+<p>For each record, do some value checks on the estimated Exponentiated Weibull
+(EW) distribution parameters. Specifically, identify ch, frq pairs where ac &lt; 1, which means
+that PSD is no longer finite at 0.</p>
+<p>Calculate parameter means and stds for all (ch, frq) pairs over all records in the hospital,
+and save them as separate TFData files.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="analyse_cwt_data.INPUT_JSON_FILE">
+<span class="sig-name descname"><span class="pre">INPUT_JSON_FILE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'analyse_cwt_input.json'</span></em><a class="headerlink" href="#analyse_cwt_data.INPUT_JSON_FILE" title="Link to this definition"></a></dt>
+<dd><p>Name (without a path) for the JSON file with input arguments
+for individual runs of the CWT step</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyse_cwt_data.check_cwt_parms">
+<span class="sig-name descname"><span class="pre">check_cwt_parms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tfd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#analyse_cwt_data.check_cwt_parms" title="Link to this definition"></a></dt>
+<dd><p>Run sanity checks on CWT amps distribution parameters for each channel
+and each frequency of given TFData. Currently only condition ac &lt; 1 is
+checked; after uncommenting parts of the code may also check for a &lt; 1
+and the location shift ew_loc &gt; 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tfd</strong> (<a class="reference internal" href="#tfdata.TFData" title="tfdata.TFData"><em>TFData</em></a>) – the CWT amps EW distribution parameters for one record</p></li>
+<li><p><strong>append_to</strong> (<em>DataFrame</em>) – a dataframe to append the results to</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>df</strong> (<em>DataFrame</em>) – a dataframe listing scan ID, channel, frequency, location,
+a, c, ac where ac&lt;1 is encountered. If <cite>append_to</cite> dataframe was provided,
+then it will be updated with the new data, if not - it will be
+returned unchanged. If append_to = None and no new data was found,
+None is returned.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyse_cwt_data.scatter_plot">
+<span class="sig-name descname"><span class="pre">scatter_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#analyse_cwt_data.scatter_plot" title="Link to this definition"></a></dt>
+<dd><p>Display a scatter plot of (ch#, f) pairs where ac&lt;1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – a dataframe returned by <cite>check_cwt_parms()</cite>
+with fields <cite>scan ID, channel, frequency, location,
+a, c, ac</cite> (where ac&lt;1)</p></li>
+<li><p><strong>outdir</strong> (<em>str</em>) – pathname of the folder to save the plot PNG</p></li>
+<li><p><strong>args</strong> (<em>dict</em>) – a dictionary of arguments for this program; should
+contain a key ‘scatter_plot’ with plotting args</p></li>
+<li><p><strong>show_plot</strong> (<em>bool</em>) – flag to display the interactive plot. If <cite>False</cite>,
+the plot won’t be shown but still saved to the file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>axs</strong> (<em>Axes</em>) – the matplotlib <cite>Axes</cite> object which carries the scatter plot</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-run_classifier">
+<span id="run-classifier-py"></span><h2>run_classifier.py<a class="headerlink" href="#module-run_classifier" title="Link to this heading"></a></h2>
+<p>Top level script for running EEG-based classification steps.</p>
+<p>To add a new step to this script:</p>
+<ol class="arabic">
+<li><p>Encapsulate the step logic in a function, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_step</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</li>
+<li><p>Add an entry to the <code class="docutils literal notranslate"><span class="pre">cases</span></code> dictionary in the EPILOGUE section:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;my_step&#39;</span><span class="p">:</span> <span class="n">my_step</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>Steps may reside in separate Python files. In that case add the corresponding
+import statements to this file.</p>
+<p>All input parameters are read from the JSON file referenced by
+<code class="docutils literal notranslate"><span class="pre">INPUT_JSON_FILE</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">INPUT_JSON_FILE</span> <span class="o">=</span> <span class="s1">&#39;&lt;my-file&gt;.json&#39;</span>
+</pre></div>
+</div>
+<p>The content of that JSON file is available as <code class="docutils literal notranslate"><span class="pre">ss.args</span></code> in each step.</p>
+<p>Variables shared between steps should be stored as attributes on <code class="docutils literal notranslate"><span class="pre">ss</span></code>, for
+example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ss</span><span class="o">.</span><span class="n">common_var</span> <span class="o">=</span> <span class="n">common_var_value</span>
+</pre></div>
+</div>
+<p>This can be done in <code class="docutils literal notranslate"><span class="pre">__init__(ss)</span></code> together with other project-specific
+initialization.</p>
+<p>The sequence of steps to execute should be set via <code class="docutils literal notranslate"><span class="pre">to_run</span></code> in the JSON,
+for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">to_run</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;init&quot;</span><span class="p">,</span> <span class="s2">&quot;step1&quot;</span><span class="p">,</span> <span class="s2">&quot;step6&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For batch mode with different parameter sets per run:</p>
+<ul class="simple">
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">batch_run</span></code> to <code class="docutils literal notranslate"><span class="pre">INPUT_JSON_FILE</span></code> and set it to <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">batch_job_parms</span></code> as a list of dictionaries such as
+<code class="docutils literal notranslate"><span class="pre">[{&quot;ijob&quot;:</span> <span class="pre">&lt;job-num&gt;,</span> <span class="pre">&lt;key&gt;:</span> <span class="pre">&lt;value&gt;,</span> <span class="pre">...}]</span></code> where each key/value pair
+overrides one JSON setting for the given <code class="docutils literal notranslate"><span class="pre">ijob</span></code>.</p></li>
+<li><p>With no CLI arguments, all configurations in <code class="docutils literal notranslate"><span class="pre">batch_job_parms</span></code> are run.</p></li>
+<li><p>With CLI arguments and batch mode enabled, the first CLI argument is treated
+as the <code class="docutils literal notranslate"><span class="pre">ijob</span></code> identifier and only that configuration is run.</p></li>
+</ul>
+<p>Available steps:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">xgboost</span></code>: classify CWT amp distributions using XGBoost.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">summarize</span></code>: collect results from available <code class="docutils literal notranslate"><span class="pre">.pkl</span></code> files and create a summary.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">summary_plots</span></code>: create summary bar plots from <code class="docutils literal notranslate"><span class="pre">.csv</span></code> output.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feature_importance</span></code>: show feature importances for a specified label.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predict</span></code>: use a trained model in prediction mode.</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="run_classifier.get_host">
+<span class="sig-name descname"><span class="pre">get_host</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_classifier.get_host" title="Link to this definition"></a></dt>
+<dd><p>Detect the host we are running at; return its name and
+the <cite>cluster_job</cite> flag.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_classifier.init">
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_classifier.init" title="Link to this definition"></a></dt>
+<dd><p>Perform project specific initializations and add global attributes
+that may be reused in different steps to the app object instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="run_classifier.setup_paths">
+<span class="sig-name descname"><span class="pre">setup_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#run_classifier.setup_paths" title="Link to this definition"></a></dt>
+<dd><p>Generate various fully qualified file and directory names.
+This function is called from the main application class constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-cls_feature_importance">
+<span id="cls-feature-importance-py"></span><h2>cls_feature_importance.py<a class="headerlink" href="#module-cls_feature_importance" title="Link to this heading"></a></h2>
+<p><strong>Show importances of features identified by the classifier.</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="cls_feature_importance.cls_feature_importance">
+<span class="sig-name descname"><span class="pre">cls_feature_importance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cls_feature_importance.cls_feature_importance" title="Link to this definition"></a></dt>
+<dd><p>For specified target label, load trained model from corresponding
+pickle file and plot feature importances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-cls_predict">
+<span id="cls-predict-py"></span><h2>cls_predict.py<a class="headerlink" href="#module-cls_predict" title="Link to this heading"></a></h2>
+<p><strong>Use trained model to classify new records.</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="cls_predict.cls_predict">
+<span class="sig-name descname"><span class="pre">cls_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cls_predict.cls_predict" title="Link to this definition"></a></dt>
+<dd><p>Load a previously saved trained model and use it to predict labels
+for a set of new CWT amp distribution records.</p>
+<p>The model pickle is identified via <code class="docutils literal notranslate"><span class="pre">predict.model</span></code> settings in the JSON:</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">predict.model.pickle</span></code> is non-null it is used as a path relative to
+<code class="docutils literal notranslate"><span class="pre">out_root</span></code>.</p></li>
+<li><p>Otherwise the pickle filename is derived from the other <code class="docutils literal notranslate"><span class="pre">predict.model</span></code>
+parameters using the same naming convention as the <code class="docutils literal notranslate"><span class="pre">xgboost</span></code> step.</p></li>
+</ul>
+<p>Records to classify are specified under <code class="docutils literal notranslate"><span class="pre">predict.input_records</span></code> and follow
+the same selection logic as the <code class="docutils literal notranslate"><span class="pre">xgboost</span></code> step (hospital list, optional
+physician filter, optional explicit scan_ids list).</p>
+<p>Outputs:</p>
+<ul class="simple">
+<li><p>Per-scan CSV with true label, predicted label and class probabilities.</p></li>
+<li><p>Console summary: accuracy, classification report, confusion matrix, PR-AUC.</p></li>
+<li><p>Precision-Recall curve PNG saved to <code class="docutils literal notranslate"><span class="pre">out_root</span></code>.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-compare_roi_time_courses">
+<span id="compare-roi-time-courses-py"></span><h2>compare_roi_time_courses.py<a class="headerlink" href="#module-compare_roi_time_courses" title="Link to this heading"></a></h2>
+<p>A test script that compares ROI time course arrays created by
+write_roi_time_courses().</p>
+</section>
+<section id="module-consensus_cv">
+<span id="consensus-cv-py"></span><h2>consensus_cv.py<a class="headerlink" href="#module-consensus_cv" title="Link to this heading"></a></h2>
+<p><strong>Consensus nested-CV utilities with reusable feature-selection reducer.</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="consensus_cv.apply_consensus_reducer">
+<span class="sig-name descname"><span class="pre">apply_consensus_reducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reducer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#consensus_cv.apply_consensus_reducer" title="Link to this definition"></a></dt>
+<dd><p>Apply a fitted consensus reducer to raw 4D features.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="consensus_cv.build_and_fit_consensus_reducer">
+<span class="sig-name descname"><span class="pre">build_and_fit_consensus_reducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consensus_cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#consensus_cv.build_and_fit_consensus_reducer" title="Link to this definition"></a></dt>
+<dd><p>Fit a consensus feature-selection reducer on raw 4D features.</p>
+<p>The reducer is produced by running feature selection on K inner folds and
+intersecting selected feature sets across all folds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_features</strong> (<em>ndarray</em>) – shape (n_samples, n_chans, n_freqs, n_parms)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>) – shape (n_samples,)</p></li>
+<li><p><strong>consensus_cfg</strong> (<em>dict</em>) – consensus_cv config block from JSON</p></li>
+<li><p><strong>standardize</strong> (<em>bool</em>) – apply StandardScaler after feature selection</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>|</em><em>None</em>) – RNG seed for splitters and MI estimator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X_reduced</strong> (<em>ndarray</em>) – Reduced matrix with shape
+<code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_selected)</span></code>.</p></li>
+<li><p><strong>reducer</strong> (<em>dict</em>) – Serializable reducer payload for later reuse with keys
+including <code class="docutils literal notranslate"><span class="pre">method</span></code>, <code class="docutils literal notranslate"><span class="pre">pipeline</span></code>, <code class="docutils literal notranslate"><span class="pre">selected_idx</span></code>,
+<code class="docutils literal notranslate"><span class="pre">n_features_in</span></code>, <code class="docutils literal notranslate"><span class="pre">selection_method</span></code>, and <code class="docutils literal notranslate"><span class="pre">inner_n_splits</span></code>.</p></li>
+<li><p><strong>selection_meta</strong> (<em>dict</em>) – Selection diagnostics with keys including
+<code class="docutils literal notranslate"><span class="pre">inner_n_splits</span></code>, <code class="docutils literal notranslate"><span class="pre">selection_method</span></code>, <code class="docutils literal notranslate"><span class="pre">fold_details</span></code>,
+<code class="docutils literal notranslate"><span class="pre">n_features_in</span></code>, and <code class="docutils literal notranslate"><span class="pre">n_features_selected</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="consensus_cv.consensus_cv">
+<span class="sig-name descname"><span class="pre">consensus_cv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_cv_splitter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consensus_cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#consensus_cv.consensus_cv" title="Link to this definition"></a></dt>
+<dd><p>Run consensus nested CV.</p>
+<p>Per outer fold this function:
+1) builds a consensus reducer on outer-train using inner selection folds,
+2) optionally tunes hyperparameters on reduced outer-train,
+3) fits the final fold model and evaluates on outer-test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>estimator</strong> – sklearn-compatible classifier. Must implement <code class="docutils literal notranslate"><span class="pre">fit</span></code> and
+<code class="docutils literal notranslate"><span class="pre">predict</span></code>. If <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code> is implemented, probability-based
+outputs are populated.</p></li>
+<li><p><strong>raw_features</strong> (<em>ndarray</em>) – Raw feature tensor with shape
+<code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_chans,</span> <span class="pre">n_freqs,</span> <span class="pre">n_parms)</span></code>.</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>) – Label vector of shape <code class="docutils literal notranslate"><span class="pre">(n_samples,)</span></code>.</p></li>
+<li><p><strong>outer_cv_splitter</strong> – Outer CV splitter (for example <code class="docutils literal notranslate"><span class="pre">StratifiedKFold</span></code>)
+that yields outer train/test indices via <code class="docutils literal notranslate"><span class="pre">split(raw_features,</span> <span class="pre">y)</span></code>.</p></li>
+<li><p><strong>consensus_cfg</strong> (<em>dict</em>) – Settings block under JSON key <code class="docutils literal notranslate"><span class="pre">consensus_cv</span></code>.
+Common keys include <code class="docutils literal notranslate"><span class="pre">inner_n_splits</span></code>, <code class="docutils literal notranslate"><span class="pre">selection_method</span></code>,
+<code class="docutils literal notranslate"><span class="pre">f_classif_top_k</span></code>, <code class="docutils literal notranslate"><span class="pre">top_k</span></code>, <code class="docutils literal notranslate"><span class="pre">min_score</span></code>, <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code>, and
+optional <code class="docutils literal notranslate"><span class="pre">grid_tuning</span></code> settings such as <code class="docutils literal notranslate"><span class="pre">enabled</span></code>, <code class="docutils literal notranslate"><span class="pre">n_splits</span></code>,
+<code class="docutils literal notranslate"><span class="pre">param_grid</span></code>, <code class="docutils literal notranslate"><span class="pre">scoring</span></code>, <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code>, and <code class="docutils literal notranslate"><span class="pre">verbose</span></code>.</p></li>
+<li><p><strong>standardize</strong> (<em>bool</em>) – If True, fit/apply <code class="docutils literal notranslate"><span class="pre">StandardScaler</span></code> on selected
+features inside each outer fold (fit on outer-train only).</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>|</em><em>None</em>) – Random seed used for inner splitters and deterministic
+behavior where applicable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>outer_scores</strong> (<em>ndarray</em>) – Per-outer-fold test accuracy, shape
+<code class="docutils literal notranslate"><span class="pre">(n_outer_folds,)</span></code>.</p></li>
+<li><p><strong>y_pred_all</strong> (<em>ndarray</em>) – Out-of-fold predicted class labels, shape
+<code class="docutils literal notranslate"><span class="pre">(n_samples,)</span></code>.</p></li>
+<li><p><strong>y_score_all</strong> (<em>ndarray</em>) – Out-of-fold positive-class score used for PR/AUC,
+shape <code class="docutils literal notranslate"><span class="pre">(n_samples,)</span></code>. When probabilities are unavailable for a fold,
+corresponding positions are zeros.</p></li>
+<li><p><strong>y_proba_all</strong> (<em>ndarray|None</em>) – Out-of-fold class probabilities, shape
+<code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_classes)</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if estimator does not provide
+probabilities.</p></li>
+<li><p><strong>fold_summaries</strong> (<em>list[dict]</em>) – Per-outer-fold metadata entries in outer
+fold order. Each dict includes at least <code class="docutils literal notranslate"><span class="pre">fold</span></code>, <code class="docutils literal notranslate"><span class="pre">n_train</span></code>,
+<code class="docutils literal notranslate"><span class="pre">n_test</span></code>, <code class="docutils literal notranslate"><span class="pre">outer_test_accuracy</span></code>, <code class="docutils literal notranslate"><span class="pre">n_features_selected</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">selection_method</span></code>. When grid tuning is enabled, it also includes
+<code class="docutils literal notranslate"><span class="pre">best_params</span></code> and <code class="docutils literal notranslate"><span class="pre">best_inner_score</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-do_cls_summarize">
+<span id="do-cls-summarize-py"></span><h2>do_cls_summarize.py<a class="headerlink" href="#module-do_cls_summarize" title="Link to this heading"></a></h2>
+<p><strong>Summarize classification results from saved data.</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="do_cls_summarize.do_cls_summarize">
+<span class="sig-name descname"><span class="pre">do_cls_summarize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_cls_summarize.do_cls_summarize" title="Link to this definition"></a></dt>
+<dd><p>Collect data from the .pkl files and summarize main results
+in a single DataFrame/.csv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-do_xgboost">
+<span id="do-xgboost-py"></span><h2>do_xgboost.py<a class="headerlink" href="#module-do_xgboost" title="Link to this heading"></a></h2>
+<p><strong>Run XGBoost classification on CWT amplitude distributions.</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="do_xgboost.apply_fitted_reducer">
+<span class="sig-name descname"><span class="pre">apply_fitted_reducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_xgboost.apply_fitted_reducer" title="Link to this definition"></a></dt>
+<dd><p>Apply a previously fitted dimensionality reduction transformer to new raw features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_features</strong> (<em>ndarray</em>) – <cite>shape (nscans, nchans, nfreqs, nparms)</cite> - raw 3D features</p></li>
+<li><p><strong>transformer</strong> (<em>dict</em>) – fitted transformer dictionary from reduce_dimensions()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>X</strong> (<em>ndarray</em>) – <cite>shape (nscans, feature_dim)</cite> - transformed features using the fitted transformer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_xgboost.cross_validate_with_per_fold_reduction">
+<span class="sig-name descname"><span class="pre">cross_validate_with_per_fold_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv_splitter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_xgboost.cross_validate_with_per_fold_reduction" title="Link to this definition"></a></dt>
+<dd><p>Perform cross-validation with dimensionality reduction applied separately for each fold.</p>
+<p>For each fold: fit dimensionality reduction on training set only, then apply the fitted
+transformer to test set. This prevents information leakage from test sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clf</strong> (<em>XGBClassifier</em>) – initialized classifier</p></li>
+<li><p><strong>raw_features</strong> (<em>ndarray</em>) – <cite>shape (nscans, nchans, nfreqs, nparms)</cite> - raw 3D features</p></li>
+<li><p><strong>Y</strong> (<em>ndarray</em>) – labels vector</p></li>
+<li><p><strong>cv_splitter</strong> (<em>StratifiedKFold</em>) – cross-validation splitter</p></li>
+<li><p><strong>config_dict</strong> (<em>dict</em>) – configuration dictionary with dimensionality reduction params</p></li>
+<li><p><strong>standardize</strong> (<em>bool</em>) – whether to standardize features before reduction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>scores</strong> (<em>ndarray</em>) – cross-validation fold scores</p></li>
+<li><p><strong>y_pred</strong> (<em>ndarray</em>) – cross-validated predictions for all samples</p></li>
+<li><p><strong>y_score</strong> (<em>ndarray</em>) – cross-validated predicted probability (score) for the
+positive class when available (same length as <cite>Y</cite>). If probabilities
+cannot be computed for any reason, contains zeros.</p></li>
+<li><p><strong>y_proba</strong> (<em>ndarray|None</em>) – cross-validated predicted probabilities for all
+classes when available, shape (n_samples, n_classes). If probabilities
+cannot be computed for any reason, returns None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_xgboost.do_xgboost">
+<span class="sig-name descname"><span class="pre">do_xgboost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_xgboost.do_xgboost" title="Link to this definition"></a></dt>
+<dd><p>Implements ‘xgboost’ step for the <cite>run_classifier.py</cite> script:
+performs XGBoost classification on CWT amplitude distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_xgboost.list_src_ids">
+<span class="sig-name descname"><span class="pre">list_src_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_xgboost.list_src_ids" title="Link to this definition"></a></dt>
+<dd><p>Return a list of tuples: (hospital #, Scan ID) corresponding to the _tfd.hdf5 files
+in the data folders for requested hospitals.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_xgboost.load_data">
+<span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_xgboost.load_data" title="Link to this definition"></a></dt>
+<dd><p>Load raw features (3D, not flattened) for specified scan IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – <cite>shape (nscans, nchans, nfreqs, nparms)</cite> - the raw feature array.
+Contains distribution parameters for each channel, frequency, and scan.
+<cite>nparms = 9</cite> (‘mean’, ‘median’, ‘std’, ‘skew’, ‘kurtosis’,
+‘ew_a’, ‘ew_c’, ‘ew_loc’, ‘ew_scale’).</p></li>
+<li><p><strong>chnames</strong> (<em>list of str</em>) – channel names</p></li>
+<li><p><strong>freqs</strong> (<em>list</em>) – frequency labels</p></li>
+<li><p><strong>parm_names</strong> (<em>list of str</em>) – distribution parameters names</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_xgboost.load_labels">
+<span class="sig-name descname"><span class="pre">load_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_xgboost.load_labels" title="Link to this definition"></a></dt>
+<dd><p>Load labels from the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ss</strong> (<em>obj</em>) – reference to this app object</p></li>
+<li><p><strong>return_df</strong> (<em>bool</em>) – flag to return full dataframe mapping the scan ID
+to all its classifications labels</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>lbs</strong> (<em>ndarray</em>) – vector of <cite>nscans</cite> labels, for requested classification
+(diagnosis), specified in JSON</p></li>
+<li><p><strong>df_scan2labels</strong> (<em>DataFrame</em>) – <cite>shape (nscans, ncls+1), ncls=5</cite> - dataframe with
+the first column with sIDs and <cite>ncls</cite> classification columns for each scan:
+‘Focal Epi’, ‘Gen Epi’, ‘Focal Non-epi’, ‘Gen Non-epi’, ‘Abnormality’
+(the names are actually set in the configuration JSON). <cite>df_scan2labels`</cite>
+is <strong>only returned when `return_df` flag is set</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>NOTE: <cite>ss.args[‘scan_ids’]</cite> is updated so that scans with no labels are no
+longer present</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="do_xgboost.reduce_dimensions">
+<span class="sig-name descname"><span class="pre">reduce_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#do_xgboost.reduce_dimensions" title="Link to this definition"></a></dt>
+<dd><p>Build and fit a dimensionality reduction transformer on raw features.</p>
+<p>This function fits the transformer on the provided data and returns both
+the transformed data and the fitted transformer object for later use on
+different data (e.g., test set).</p>
+<p>The method dispatches to specific reducer implementations based on ‘dim_reduction’
+config key. Each reducer method must:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Accept (raw_features, config_dict, standardize) as arguments</p></li>
+<li><p>Build an sklearn pipeline (possibly with StandardScaler + dimensionality reduction step)</p></li>
+<li><p>Fit the pipeline on the input data</p></li>
+<li><p>Return tuple of (transformed_features, transformer_dict)</p></li>
+<li><p>transformer_dict must contain ‘method’ (str) and ‘pipeline’ (fitted Pipeline object) keys</p></li>
+</ol>
+</div></blockquote>
+<p>Supported reducer methods:</p>
+<ul class="simple">
+<li><p>‘pca’: Principal Component Analysis via _build_and_fit_pca().</p></li>
+<li><p>‘none’: No reduction, optional standardization only via _build_and_fit_none().</p></li>
+<li><p>‘to_lobes’: Reduce channels to hemisphere/lobe groups via _build_and_fit_to_lobes().</p></li>
+<li><p>‘epi_features’: EEG-derived per-channel features via build_epi_features.py.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_features</strong> (<em>ndarray</em>) – <cite>shape (nscans, nchans, nfreqs, nparms)</cite> - raw 3D features</p></li>
+<li><p><strong>config_dict</strong> (<em>dict</em>) – configuration dictionary with ‘dim_reduction’ key specifying method,
+plus method-specific config (e.g., ‘pca’ key for PCA parameters)</p></li>
+<li><p><strong>standardize</strong> (<em>bool</em>) – whether to standardize features before reduction (prepended to pipeline)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X</strong> (<em>ndarray</em>) – <cite>shape (nscans, feature_dim)</cite> - transformed features</p></li>
+<li><p><strong>transformer</strong> (<em>dict</em>) – fitted transformer dictionary containing:</p>
+<ul>
+<li><p>‘method’: name of the method used (str)</p></li>
+<li><p>‘pipeline’: fitted sklearn Pipeline object (can apply via apply_fitted_reducer)</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-get_scan_ids_for_job">
+<span id="get-scan-ids-for-job-py"></span><h2>get_scan_ids_for_job.py<a class="headerlink" href="#module-get_scan_ids_for_job" title="Link to this heading"></a></h2>
+<p>When running an array job on cluster. get a list of records to be processed
+for specified job #</p>
+</section>
+<section id="module-migrate_xgb_pickles_format">
+<span id="migrate-xgb-pickles-format-py"></span><h2>migrate_xgb_pickles_format.py<a class="headerlink" href="#module-migrate_xgb_pickles_format" title="Link to this heading"></a></h2>
+<p>One-time migration utility for classifier pickle files.</p>
+<p>Migrates old payload format to new format by:
+1) adding top-level “xgboost_version” if missing
+2) converting full_model_data[“model”] -&gt; full_model_data[“model_ubj”]</p>
+<p>The converted model is serialized via XGBoost UBJ memory format.</p>
+</section>
+<section id="module-nested_cv">
+<span id="nested-cv-py"></span><h2>nested_cv.py<a class="headerlink" href="#module-nested_cv" title="Link to this heading"></a></h2>
+<p><strong>Nested cross-validation utilities.</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="nested_cv.nested_cv">
+<span class="sig-name descname"><span class="pre">nested_cv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_cv_splitter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_cv_splitter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nested_cv.nested_cv" title="Link to this definition"></a></dt>
+<dd><p>Run nested cross-validation with explicit train/validation/test separation.</p>
+<dl class="simple">
+<dt>Per outer fold:</dt><dd><ol class="arabic simple">
+<li><p>Split into outer-train and outer-test.</p></li>
+<li><p>Run GridSearchCV on outer-train using inner CV splits
+(inner-train/inner-validation) to select hyperparameters.</p></li>
+<li><p>Refit best model on full outer-train and predict on outer-test.</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>estimator</strong> – the classifier (AKA learner, sklearn-compatible
+estimator)e.g., XGBClassifier</p></li>
+<li><p><strong>X</strong> (<em>ndarray</em>) – feature matrix, shape (n_samples, n_features)</p></li>
+<li><p><strong>Y</strong> (<em>ndarray</em>) – label vector, shape (n_samples,)</p></li>
+<li><p><strong>outer_cv_splitter</strong> – outer CV splitter providing train/test indices</p></li>
+<li><p><strong>inner_cv_splitter</strong> – inner CV splitter used by GridSearchCV</p></li>
+<li><p><strong>param_grid</strong> (<em>dict</em><em>|</em><em>list</em>) – GridSearchCV parameter grid. Format:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">&lt;parm_name&gt;:</span> <span class="pre">&lt;list-of-vals-to-try&gt;</span>
+<span class="pre">...</span>
+<span class="pre">&lt;parm_name&gt;:</span> <span class="pre">&lt;list-of-vals-to-try&gt;</span>
+<span class="pre">`</span></code>
+Total number of fits for all inner and outer folds will be
+equal to <cite>P(l_i)*n_inner_cv*n_outer_cv</cite>, where <cite>P(l_i)`is a
+product of lengths of all lists in `param_grid</cite></p></li>
+<li><p><strong>scoring</strong> (<em>str</em><em>|</em><em>callable</em>) – GridSearchCV scoring metric</p></li>
+<li><p><strong>n_jobs</strong> (<em>int</em>) – parallel workers for GridSearchCV; set to -1 to use all
+available CPUs, set to -2 to use all but one CPU (computer
+will be more responsive)</p></li>
+<li><p><strong>verbose</strong> (<em>int</em>) – GridSearchCV verbosity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>outer_scores</strong> (<em>ndarray</em>) – per-fold outer test accuracy, shape (n_outer_folds,)</p></li>
+<li><p><strong>y_pred</strong> (<em>ndarray</em>) – out-of-fold class predictions, shape (n_samples,)</p></li>
+<li><p><strong>y_score</strong> (<em>ndarray</em>) – out-of-fold positive-class score when available,
+shape (n_samples,). If no probability/decision output is available,
+values are zeros.</p></li>
+<li><p><strong>y_proba</strong> (<em>ndarray|None</em>) – out-of-fold class probabilities when available,
+shape (n_samples, n_classes). None if estimator has no predict_proba.</p></li>
+<li><p><strong>fold_summaries</strong> (<em>list[dict]</em>) – per-fold tuning and performance metadata</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-plot_3d_heatmap">
+<span id="plot-3d-heatmap-py"></span><h2>plot_3d_heatmap.py<a class="headerlink" href="#module-plot_3d_heatmap" title="Link to this heading"></a></h2>
+<p>General-purpose 3D heatmap + median subplot plotting utilities.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="plot_3d_heatmap.plot_3d_heatmap">
+<span class="sig-name descname"><span class="pre">plot_3d_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_3d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim1_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim2_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim3_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suptitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plot_3d_heatmap.plot_3d_heatmap" title="Link to this definition"></a></dt>
+<dd><p>Plot a 3D array as a row of panels, one per fixed index of dimension 3.</p>
+<p>Each panel contains a heatmap for <code class="docutils literal notranslate"><span class="pre">data_3d[:,</span> <span class="pre">:,</span> <span class="pre">i3]</span></code> and a line plot of
+median values across the first dimension as a function of the second
+dimension.</p>
+<p><strong>NOTE</strong>. While this is a generic function, historically the following data was used
+when developing the code: the 3D array is an array of classifier feature importances;
+first dimension is ROIs (channel names), 2nd dimension is frequencies, and 3d dimension
+is stat parameter used. This may help understanding the code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_3d</strong> (<em>numpy.ndarray</em>) – Input array with shape <code class="docutils literal notranslate"><span class="pre">(dim1,</span> <span class="pre">dim2,</span> <span class="pre">dim3)</span></code>.</p></li>
+<li><p><strong>dim1_labels</strong> (<em>Sequence</em><em>[</em><em>object</em><em>] </em><em>| </em><em>None</em>) – Labels/values for dimension 1
+(heatmap y-axis). Defaults to 0-based row indices.</p></li>
+<li><p><strong>dim2_labels</strong> (<em>Sequence</em><em>[</em><em>object</em><em>] </em><em>| </em><em>None</em>) – Labels/values for dimension 2
+(heatmap/median x-axis). Defaults to 0-based column indices.</p></li>
+<li><p><strong>dim3_labels</strong> (<em>Sequence</em><em>[</em><em>object</em><em>] </em><em>| </em><em>None</em>) – Labels/values for dimension 3
+(panel titles). Defaults to 0-based parameter indices.</p></li>
+<li><p><strong>outfname</strong> (<em>str</em><em> | </em><em>pathlib.Path</em><em> | </em><em>None</em>) – Optional output file path.</p></li>
+<li><p><strong>suptitle</strong> (<em>str</em><em> | </em><em>None</em>) – Optional figure-level title.</p></li>
+<li><p><strong>cfg</strong> (<em>dict</em><em> | </em><em>None</em>) – <p>Optional plotting configuration dictionary. Supported
+keys include:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">font_scale</span></code> (float, default <code class="docutils literal notranslate"><span class="pre">1.0</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">style</span></code> (str, default <code class="docutils literal notranslate"><span class="pre">'whitegrid'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">figure_size</span></code> (list/tuple[width, height] or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">panel_height_ratios</span></code> (list/tuple[heatmap_ratio, median_ratio],
+default <code class="docutils literal notranslate"><span class="pre">[3.0,</span> <span class="pre">1.2]</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axis_scale</span></code> (str, <code class="docutils literal notranslate"><span class="pre">'linear'</span></code> or <code class="docutils literal notranslate"><span class="pre">'log'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">heatmap_limits</span></code> (list/tuple/dict or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">color_scale</span></code> (str, colormap name)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hspace</span></code> (float), <code class="docutils literal notranslate"><span class="pre">wspace</span></code> (float)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">median_row_mask</span></code> (array-like[bool] or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">median_y_limits</span></code> (list/tuple[ymin, ymax] or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">heatmap_y_axis_font_size</span></code> (float or <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x_axis_label</span></code> (str), <code class="docutils literal notranslate"><span class="pre">y_axis_label</span></code> (str), <code class="docutils literal notranslate"><span class="pre">median_y_label</span></code> (str)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">colorbar_label</span></code> (object)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x_tick_mode</span></code> (str: <code class="docutils literal notranslate"><span class="pre">'auto'</span></code>, <code class="docutils literal notranslate"><span class="pre">'round_frequency'</span></code>, <code class="docutils literal notranslate"><span class="pre">'major'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dpi</span></code> (int)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">show_plots</span></code> (bool)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">median_exclude_zeros</span></code> (bool)</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>matplotlib.figure.Figure</strong> – Created figure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-plot_cls_summary">
+<span id="plot-cls-summary-py"></span><h2>plot_cls_summary.py<a class="headerlink" href="#module-plot_cls_summary" title="Link to this heading"></a></h2>
+<p>Create classification summary plots from summary CSV files.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="plot_cls_summary.plot_cls_summary">
+<span class="sig-name descname"><span class="pre">plot_cls_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plot_cls_summary.plot_cls_summary" title="Link to this definition"></a></dt>
+<dd><p>Entry point for classifier summary plotting step.</p>
+<p>Expected JSON structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;summary_plots&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;what&quot;</span><span class="p">:</span> <span class="s2">&quot;auc4method&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;drop_rows_on_empty_col&quot;</span><span class="p">:</span> <span class="s2">&quot;AUC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;auc4method&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;input_csv&quot;</span><span class="p">:</span> <span class="s2">&quot;classification_results_summary.csv&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;auc4physician&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;input_csv&quot;</span><span class="p">:</span> <span class="s2">&quot;classification_results_summary.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dim_reduction&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;to_lobes&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ss</strong> (<em>obj</em>) – reference to run_classifier application object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Nothing</strong></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-plot_pr_curve">
+<span id="plot-pr-curve-py"></span><h2>plot_pr_curve.py<a class="headerlink" href="#module-plot_pr_curve" title="Link to this heading"></a></h2>
+<p>Precision-Recall curve plotting utilities.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="plot_pr_curve.plot_and_save_pr_curve">
+<span class="sig-name descname"><span class="pre">plot_and_save_pr_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xgboost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physician</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#plot_pr_curve.plot_and_save_pr_curve" title="Link to this definition"></a></dt>
+<dd><p>Plot and save Precision-Recall curve using seaborn.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Y</strong> (<em>ndarray</em>) – True binary labels (0, 1)</p></li>
+<li><p><strong>y_score</strong> (<em>ndarray</em>) – Target scores or probabilities for positive class</p></li>
+<li><p><strong>step_name</strong> (<em>str</em>) – Name of the step for output filename (used when outfname is None)</p></li>
+<li><p><strong>outfname</strong> (<em>str</em><em> | </em><em>Path</em><em> | </em><em>None</em>) – Full pathname for output image</p></li>
+<li><p><strong>show_plot</strong> (<em>bool</em>) – Whether to display the plot</p></li>
+<li><p><strong>target_label</strong> (<em>str</em><em> | </em><em>None</em>) – Label name to include in plot title</p></li>
+<li><p><strong>physician</strong> (<em>str</em><em> | </em><em>list</em><em> | </em><em>None</em>) – Physician name(s) to include in plot title</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>outfname</strong> (<em>Path</em>) – Path to saved figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-build_epi_features">
+<span id="build-epi-features-py"></span><h2>build_epi_features.py<a class="headerlink" href="#module-build_epi_features" title="Link to this heading"></a></h2>
+<p><strong>Build “epi_features” dimensionality reducer.</strong></p>
+<dl class="py function">
+<dt class="sig sig-object py" id="build_epi_features.apply_epi_features">
+<span class="sig-name descname"><span class="pre">apply_epi_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transformer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#build_epi_features.apply_epi_features" title="Link to this definition"></a></dt>
+<dd><p>Apply a fitted ‘epi_features’ reducer to raw features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_features</strong> (<em>ndarray</em>) – shape (nscans, nchans, nfreqs, nparms)</p></li>
+<li><p><strong>transformer</strong> (<em>dict</em>) – reducer dict returned by build_and_fit_epi_features()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>X</strong> (<em>ndarray</em>) – shape (nscans, nfeatures)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="build_epi_features.build_and_fit_epi_features">
+<span class="sig-name descname"><span class="pre">build_and_fit_epi_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#build_epi_features.build_and_fit_epi_features" title="Link to this definition"></a></dt>
+<dd><p>Build and fit the ‘epi_features’ dimensionality reducer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_features</strong> (<em>ndarray</em>) – shape (nscans, nchans, nfreqs, nparms)</p></li>
+<li><p><strong>config_dict</strong> (<em>dict</em>) – reducer config and metadata. Must include:
+- freqs: list/array of frequency values in Hz
+- parm_names: list of parameter names including ‘mean’, ‘skew’, ‘kurtosis’
+Optional:
+- epi_features.bands: dict with keys delta/theta/alpha/beta, values [low, high]
+- epi_features.ratio_eps: small epsilon for safe division</p></li>
+<li><p><strong>standardize</strong> (<em>bool</em>) – whether to standardize final flattened features</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X</strong> (<em>ndarray</em>) – shape (nscans, nfeatures)</p></li>
+<li><p><strong>transformer</strong> (<em>dict</em>) – fitted reducer payload compatible with apply_fitted_reducer()</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
 
@@ -3000,7 +3766,7 @@ low dimensional data</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, AM.</p>
+    <p>&#169; Copyright 2026, AM.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

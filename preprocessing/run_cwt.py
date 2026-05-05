@@ -46,6 +46,32 @@ for individual runs of the CWT step
 
 '''
 
+
+def _normalize_hospitals(hospital_cfg):
+    if isinstance(hospital_cfg, str):
+        hospitals = [hospital_cfg]
+    elif isinstance(hospital_cfg, list) and all(isinstance(h, str) for h in hospital_cfg):
+        hospitals = hospital_cfg
+    else:
+        raise ValueError('"hospital" must be either a string or a list of strings in cwt_input.json')
+
+    if not hospitals:
+        raise ValueError('"hospital" list in cwt_input.json should not be empty')
+
+    return hospitals
+
+
+def _validate_source_scan_ids(source_scan_ids, hospitals):
+    if source_scan_ids is None:
+        return
+
+    if not isinstance(source_scan_ids, list) or not all(isinstance(s, str) for s in source_scan_ids):
+        raise ValueError('"source_scan_ids" must be null or a list of strings in cwt_input.json')
+
+    if len(hospitals) != 1:
+        raise AssertionError('When "source_scan_ids" is provided, exactly one hospital must be specified.')
+
+
 # Complex Morlet' wavelet 'omega' parameter. This means that the oscillating
 # exponent of the wavelet for a scale "s" is given by the expression
 #   E(n) = exp(j*OMEGA0*n/s).
@@ -82,8 +108,9 @@ def main():
 
     N_ARRAY_JOBS = args['N_ARRAY_JOBS']     # Number of parallel jobs to run on cluster
     what = args['what']                     # 'sensors' or 'sources'
-    hospital = args['hospital']             # Burnaby, Abbotsford, RCH, Surrey
+    hospitals = _normalize_hospitals(args['hospital'])
     source_scan_ids = args['source_scan_ids']   # None or a list of specific scan IDs (without .edf)
+    _validate_source_scan_ids(source_scan_ids, hospitals)
     view_plots = args['view_plots']         # Flag to show interactive plots
     plot_only = args['plot_only']           # if true, plot already precalculated spectra
 
@@ -116,12 +143,6 @@ def main():
     data_root, out_root, cluster_job = get_data_folders(args)
     # ------ end of args parsing ---------------
 
-    input_dir = data_root + "/" + hospital
-    output_dir = out_root + "/" + hospital
-    
-    if not path.exists(output_dir):
-        os.makedirs(output_dir)
-
     mne.set_log_level(verbose=verbose)
 
     # When running on the CC cluster, 1st command line argument is a 0-based
@@ -130,34 +151,6 @@ def main():
         ijob = 0
     else:
         ijob = int(sys.argv[1])
-
-    if source_scan_ids is None:
-        if what == 'sensors':
-            # To get bare ID need to chop off "_raw.fif" at the end
-            source_scan_ids = [path.basename(f)[:-8] for f in glob.glob(input_dir + '/*.fif')]
-        else:
-            # To get bare ID one needs to get folders with names that are 5 HEX numbers
-            # separated by 4 dashes. Poor man's solution for it is just '*-*-*-*-*'
-            source_scan_ids = [path.basename(f) for f in glob.glob(input_dir + '/*-*-*-*-*')]
-
-    if cluster_job:
-        view_plots = False    # Disable interactive plots, just in case
-        nfiles = len(source_scan_ids)
-        files_per_job = nfiles // N_ARRAY_JOBS + 1
-        istart = ijob * files_per_job
-
-        if istart > nfiles - 1:
-            print('All done')
-            sys.exit()
-
-        iend = min(istart + files_per_job, nfiles)
-        source_scan_ids = source_scan_ids[istart:iend]
-
-    if what == 'sensors':
-        scan_files = [scan_id + '_raw.fif' for scan_id in source_scan_ids]
-    else:
-        scan_files = [scan_id + '/' + scan_id + '-ico-3-ltc.hdf5' \
-                for scan_id in source_scan_ids]
 
     # load the original preprocessing configuration, as we need some data from there
     with open(pathname(PREPROC_CONFIG_FILE), "r") as fp:
@@ -191,73 +184,110 @@ def main():
     # For scale s, we have fc(s) = fc0/s, therefore:
     scales = fc0/freqs
 
-    outname = lambda scan_id:   \
-            output_dir + '/' + scan_id + \
-            ('_tfd.hdf5' if what == 'sensors' else  '_src_tfd.hdf5')
+    for hospital in hospitals:
+        input_dir = data_root + "/" + hospital
+        output_dir = out_root + "/" + hospital
 
-    if not plot_only:
-        # --- main loop ----
-        if cluster_job:
-            ncpus=int(os.environ['SLURM_CPUS_PER_TASK'])  # get the number of cpus allocated
+        if not path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        if source_scan_ids is None:
+            if what == 'sensors':
+                # To get bare ID need to chop off "_raw.fif" at the end
+                hospital_scan_ids = [path.basename(f)[:-8] for f in glob.glob(input_dir + '/*.fif')]
+            else:
+                # To get bare ID one needs to get folders with names that are 5 HEX numbers
+                # separated by 4 dashes. Poor man's solution for it is just '*-*-*-*-*'
+                hospital_scan_ids = [path.basename(f) for f in glob.glob(input_dir + '/*-*-*-*-*')]
         else:
-            ncpus = max(int(mp.cpu_count()/2), 1)
+            hospital_scan_ids = list(source_scan_ids)
 
-        print('\nProcessing record IDs:')
-        for scan_id, f in zip(source_scan_ids, scan_files):
-            print(f'{scan_id}')
-            data, ch_names = load_data(input_dir + '/' + f)     # Data is nchans x ntimes
-            #data = data[:,:400]      # QQQ Otherwise distr fit runs forever
-            nchans = len(ch_names)
+        if cluster_job:
+            view_plots = False    # Disable interactive plots, just in case
+            nfiles = len(hospital_scan_ids)
+            files_per_job = nfiles // N_ARRAY_JOBS + 1
+            istart = ijob * files_per_job
 
-            z = stats.zscore(data, axis = 1, **conf_dict['zscore'])
+            if istart > nfiles - 1:
+                print(f'All done for {hospital}')
+                continue
 
-            for ich, ch in enumerate(data):
-                if np.allclose(ch, 0):
-                    warnings.warn(f'Flat channel "{ch_names[ich]}" was found in record "{scan_id}".')
-                    z[ich] = 0.
+            iend = min(istart + files_per_job, nfiles)
+            hospital_scan_ids = hospital_scan_ids[istart:iend]
 
-            # Create (nchans x nf x nparms) xarray to store CWT results
-            tfd = TFData(shape = (nchans, nf, nparms), scan_id = scan_id,
-                        values = None, ch_names = ch_names, freqs = freqs, parm_names = list(parm_dict.keys()))
+        if what == 'sensors':
+            scan_files = [scan_id + '_raw.fif' for scan_id in hospital_scan_ids]
+        else:
+            scan_files = [scan_id + '/' + scan_id + '-ico-3-ltc.hdf5' \
+                    for scan_id in hospital_scan_ids]
 
-            # scipy's cwt() only processes 1 channel at a time, so
-            results = list()    # multiprocessing AsyncResult objects of each channel
+        outname = lambda scan_id:   \
+                output_dir + '/' + scan_id + \
+                ('_tfd.hdf5' if what == 'sensors' else  '_src_tfd.hdf5')
 
-            with Pool(processes = ncpus) as pool:
-                for ich in range(nchans):
-                    # Calculate the wavelet transform
-                    # tfd.data[ich,:,:] = cwt_process_a_channel(z[ich], scales, parm_dict)
-                    results.append(pool.apply_async(cwt_process_a_channel, (z[ich], scales, parm_dict)))
+        if not plot_only:
+            # --- main loop ----
+            if cluster_job:
+                ncpus=int(os.environ['SLURM_CPUS_PER_TASK'])  # get the number of cpus allocated
+            else:
+                ncpus = max(int(mp.cpu_count()/2), 1)
 
-                for ich in range(nchans):
-                    tfd.data[ich,:,:] = results[ich].get()
+            print('\nProcessing record IDs:')
+            for scan_id, f in zip(hospital_scan_ids, scan_files):
+                print(f'{scan_id}')
+                data, ch_names = load_data(input_dir + '/' + f)     # Data is nchans x ntimes
+                #data = data[:,:400]      # QQQ Otherwise distr fit runs forever
+                nchans = len(ch_names)
 
-            # Save the results                    
-            tfd.write(outname(scan_id))
-            print('Done\n')
-            #break   # QQQ run one subject only
-            # ------ end of main loop ---------------
+                z = stats.zscore(data, axis = 1, **conf_dict['zscore'])
 
-        print('All records processed\n')
+                for ich, ch in enumerate(data):
+                    if np.allclose(ch, 0):
+                        warnings.warn(f'Flat channel "{ch_names[ich]}" was found in record "{scan_id}".')
+                        z[ich] = 0.
 
-    if view_plots and (plot_ids is not None):
-        for pid in plot_ids:
-            title = f'ID = {pid}.'
-            plot_distr(outname(pid), plot_chnames, freqs = plot_freqs, title = title, 
-                    xlim = plot_xlim, ylim = plot_ylim, nx = plot_nx)
+                # Create (nchans x nf x nparms) xarray to store CWT results
+                tfd = TFData(shape = (nchans, nf, nparms), scan_id = scan_id,
+                            values = None, ch_names = ch_names, freqs = freqs, parm_names = list(parm_dict.keys()))
 
-        plt.show()
+                # scipy's cwt() only processes 1 channel at a time, so
+                results = list()    # multiprocessing AsyncResult objects of each channel
 
-    if print_id is not None:
-        if print_chan is not None:
-            df = TFData.read(outname(print_id)).to_pandas(chan = print_chan)[0]    # nf x nparms
-            print(f'\nAmplitude distribution parameters for channel {print_chan}')
-            print(df)
+                with Pool(processes = ncpus) as pool:
+                    for ich in range(nchans):
+                        # Calculate the wavelet transform
+                        # tfd.data[ich,:,:] = cwt_process_a_channel(z[ich], scales, parm_dict)
+                        results.append(pool.apply_async(cwt_process_a_channel, (z[ich], scales, parm_dict)))
 
-        if print_freq is not None:
-            df, factual = TFData.read(outname(print_id)).to_pandas(freq = print_freq)    # nf x nparms
-            print(f'\nAmplitude distribution parameters for frequency {factual:.1f} Hz')
-            print(df)
+                    for ich in range(nchans):
+                        tfd.data[ich,:,:] = results[ich].get()
+
+                # Save the results                    
+                tfd.write(outname(scan_id))
+                print('Done\n')
+                #break   # QQQ run one subject only
+                # ------ end of main loop ---------------
+
+            print(f'All records processed for {hospital}\n')
+
+        if view_plots and (plot_ids is not None):
+            for pid in plot_ids:
+                title = f'ID = {pid}.'
+                plot_distr(outname(pid), plot_chnames, freqs = plot_freqs, title = title, 
+                        xlim = plot_xlim, ylim = plot_ylim, nx = plot_nx)
+
+            plt.show()
+
+        if print_id is not None:
+            if print_chan is not None:
+                df = TFData.read(outname(print_id)).to_pandas(chan = print_chan)[0]    # nf x nparms
+                print(f'\nAmplitude distribution parameters for channel {print_chan}')
+                print(df)
+
+            if print_freq is not None:
+                df, factual = TFData.read(outname(print_id)).to_pandas(freq = print_freq)    # nf x nparms
+                print(f'\nAmplitude distribution parameters for frequency {factual:.1f} Hz')
+                print(df)
 
     # ----- end main -------------------------
 

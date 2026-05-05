@@ -91,6 +91,12 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space">8. Visualizing multi-dimensional data via embedding in 2D or 3D space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-preprocessing-steps-and-other-scripts-using-prebuilt-container-apptainer-image">9. Running preprocessing steps and other scripts using prebuilt container (apptainer) image</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-information">General information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-three-steps-preprocessing">Running the “three steps” preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-notes">Other notes</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#miscellaneous-functions">Miscellaneous functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-python-virtual-environment-on-compute-canada-alliance-cluster">Setting up Python virtual environment on Compute Canada (Alliance) cluster</a></li>
 </ul>
@@ -131,20 +137,22 @@
 <p>The code is aimed to preprocess clinical EEG recordings and make them a suitable input for later analyses and ML applications.
 Code uses the original EEG records in EDF format as input. The following steps (tasks) may be performed:</p>
 <ol class="arabic simple">
-<li><p><strong>Filtering, resampling and extracting of good data segments</strong> of a target length. The output is the good segments in EDF format.</p></li>
-<li><p><strong>Performing EEG PREP procedure and artifact removal</strong>. The input is typically good segments obtained on the 1st step,
+<li><p><a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments"><strong>Filtering, resampling and extracting of good data segments</strong></a> of
+a target length. The output is the good segments in EDF format.</p></li>
+<li><p><a class="reference internal" href="#eeg-prep-procedure-and-artifact-removal"><strong>Performing EEG PREP procedure and artifact removal</strong></a>. The input is typically good segments obtained on the 1st step,
 and the output is the records in <strong>.fif</strong> format.</p></li>
-<li><p><strong>Extracting hyperventilation and photic stimulation intervals from the original records</strong>. The extracted
-intervals (segments) are saved in .EDF format.</p></li>
-<li><p><strong>Performing beamformer reconstruction of source time courses from standard atlas locations (“Regions of Interest” - ROIs)</strong>.</p></li>
-<li><p><strong>Calculating power spectral densities (PSD)s of the sensor and source-reconstructed time courses.</strong></p></li>
-<li><p><strong>Calculating Continuous Wavelet Transforms (CWTs) and estimating statistical parameters of the CWT amplitudes.</strong></p></li>
-<li><p><strong>Representing spectra as a combination of periodic oscillations and aperiodic component.</strong></p></li>
-<li><p><strong>Visualizing multi-dimensional data via embedding in 2D or 3D space</strong></p></li>
+<li><p><a class="reference internal" href="#extracting-hyperventilation-and-photic-stimulation-intervals-from-the-original-records"><strong>Extracting hyperventilation and photic stimulation intervals from the original records</strong></a>. The extracted intervals (segments) are saved in .EDF format.</p></li>
+<li><p><a class="reference internal" href="#performing-source-reconstruction"><strong>Performing beamformer reconstruction of source time courses from standard atlas locations (“Regions of Interest” - ROIs)</strong></a>.</p></li>
+<li><p><a class="reference internal" href="#calculating-power-spectra"><strong>Calculating power spectrum densities (PSD)s of the sensor and source-reconstructed time courses.</strong></a></p></li>
+<li><p><a class="reference internal" href="#calculating-continuous-wavelet-transforms-cwts"><strong>Calculating Continuous Wavelet Transforms (CWTs) and estimating statistical parameters of the CWT amplitudes.</strong></a></p></li>
+<li><p><a class="reference internal" href="#representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component"><strong>Representing spectra as a combination of periodic oscillations and aperiodic component.</strong></a></p></li>
+<li><p><a class="reference internal" href="#visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space"><strong>Visualizing multi-dimensional data via embedding in 2D or 3D space.</strong></a></p></li>
+<li><p><a class="reference internal" href="#running-preprocessing-steps-and-other-scripts-using-prebuilt-container-apptainer-image"><strong>Running preprocessing steps and other scripts using prebuilt container (apptainer) image</strong></a></p></li>
 </ol>
 <p>Either of these tasks requires specifying numerous processing parameters. To separate the code and parameter data, default values
 of parameters are stored in JSON configuration files <strong><code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code></strong> and <strong><code class="docutils literal notranslate"><span class="pre">pyprep_ica_conf.json</span></code></strong>; the latter
-is needed only for step 2. These files are expected to reside in the same folder as the top level Python script files.</p>
+is needed only for step 2. These files are expected to reside in the same folder as the top level Python script files.
+For steps 1-3, these configuration files are parsed with <code class="docutils literal notranslate"><span class="pre">commentjson</span></code>, so comments in JSON are supported.</p>
 <p>Key functions and classes by default import JSON configuration files to set most parameter values. One can always override the defaults
 a) by specifying their own versions of JSON files as arguments to a class or a function call, b) by providing an equivalent Python dictionary, or
 (in some cases) c) by specifying parameters explicitly in a function call. If for some parameter all three options are used at the same time,
@@ -168,77 +176,19 @@ of this class see source code for function <code class="docutils literal notrans
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_filtering_segmentation</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>If running as an array job on the cedar cluster, use this command in your sbatch script (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
+<p>If running as an array job on the Digital Alliance cluster, use this command in your sbatch script (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python run_filtering_segmentation.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
 </div>
-<p><strong>Before running</strong>, file <strong><code class="docutils literal notranslate"><span class="pre">run_filtering_segmentation.py</span></code></strong> may need to be <strong>modified</strong> by the user as follows.</p>
+<p>No Python source edits are required for this step. Configure everything in <strong><code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code></strong>.</p>
+<p>Set the following keys before running:</p>
 <ul class="simple">
-<li><p><strong>Function <code class="docutils literal notranslate"><span class="pre">get_data_folders()</span></code></strong> identifies the host computer where the script is executed, and returns <code class="docutils literal notranslate"><span class="pre">data_root</span></code>, <code class="docutils literal notranslate"><span class="pre">out_root</span></code> paths and
-a <code class="docutils literal notranslate"><span class="pre">cluster_job</span></code> flag. <strong><code class="docutils literal notranslate"><span class="pre">data_root</span></code></strong> points to the top folder where the input
-EDF files are located. One level down are subfolders corresponding to each hospital (like <code class="docutils literal notranslate"><span class="pre">Abbotsford</span></code>, <code class="docutils literal notranslate"><span class="pre">Burnaby</span></code>); the EDF records themselves are
-located inside the hospital subfolders. Please refer to the file structure in <code class="docutils literal notranslate"><span class="pre">/project/6019337/databases/eeg_fha/release_001/edf</span></code> on cedar as an example.
-The <strong><code class="docutils literal notranslate"><span class="pre">out_root</span></code></strong> defines location where the resulting (processed) records are put and has the same structure. <em><strong>User may need to add/edit the host definitions
-and the returned <code class="docutils literal notranslate"><span class="pre">data_root</span></code>, <code class="docutils literal notranslate"><span class="pre">out_root</span></code> paths as appropriate</strong></em>, by modifying the following code segment:</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">hosts</span></code></strong>: host-specific values for <code class="docutils literal notranslate"><span class="pre">data_root</span></code>, <code class="docutils literal notranslate"><span class="pre">out_root</span></code>, and <code class="docutils literal notranslate"><span class="pre">cluster_job</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">N_ARRAY_JOBS</span></code></strong>: number of array jobs. Keep it consistent with sbatch setting <code class="docutils literal notranslate"><span class="pre">#SBATCH</span> <span class="pre">--array=0-(N_ARRAY_JOBS-1)</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">hospital</span></code></strong>: either a single hospital string or a list of hospital names.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">source_scan_ids</span></code></strong>: <code class="docutils literal notranslate"><span class="pre">null</span></code> to process all records in each selected hospital, or a list of scan IDs.</p></li>
 </ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="k">if</span> <span class="s1">&#39;ub20-04&#39;</span> <span class="ow">in</span> <span class="n">host</span><span class="p">:</span>
-                <span class="n">data_root</span> <span class="o">=</span> <span class="s1">&#39;/data/eegfhabrainage&#39;</span>
-                <span class="n">out_root</span> <span class="o">=</span> <span class="n">data_root</span> <span class="o">+</span> <span class="s1">&#39;/processed&#39;</span>
-                <span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">elif</span> <span class="s1">&#39;cedar&#39;</span> <span class="ow">in</span> <span class="n">host</span><span class="p">:</span>
-                <span class="n">data_root</span> <span class="o">=</span> <span class="s1">&#39;/project/6019337/databases/eeg_fha/release_001/edf&#39;</span>
-                <span class="n">out_root</span> <span class="o">=</span> <span class="n">user_home</span> <span class="o">+</span> <span class="s1">&#39;/projects/rpp-doesburg/&#39;</span> <span class="o">+</span> <span class="n">user</span> <span class="o">+</span> <span class="s1">&#39;/data/eegfhabrainage/processed&#39;</span>
-                <span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-                <span class="n">home_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-                <span class="n">data_root</span> <span class="o">=</span> <span class="n">home_dir</span>
-                <span class="n">out_root</span> <span class="o">=</span> <span class="n">home_dir</span> <span class="o">+</span> <span class="s1">&#39;/processed&#39;</span>
-                <span class="n">cluster_job</span> <span class="o">=</span> <span class="kc">False</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p><strong>User needs to specify which hospital is being processed</strong>, by setting the <strong><code class="docutils literal notranslate"><span class="pre">hospital</span></code></strong> variable in the main function of the script:</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="c1"># Inputs</span>
-        <span class="o">...</span>
-        <span class="n">hospital</span> <span class="o">=</span> <span class="s1">&#39;Abbotsford&#39;</span>
-        <span class="o">...</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p><strong>When running as an array job on the cluster</strong>, the variable <strong><code class="docutils literal notranslate"><span class="pre">N_ARRAY_JOBS</span></code></strong> should be consistent with the<br />
-<strong><code class="docutils literal notranslate"><span class="pre">&quot;--array&quot;</span></code></strong> parameter value in the sbatch script:</p></li>
-</ul>
-<blockquote>
-<div><p>File <strong><code class="docutils literal notranslate"><span class="pre">run_filtering_segmentation.py</span></code></strong>:</p>
-</div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="c1"># Inputs</span>
-        <span class="o">...</span>
-        <span class="n">N_ARRAY_JOBS</span> <span class="o">=</span> <span class="mi">100</span>      <span class="c1"># Number of parallel jobs to run on cluster</span>
-        <span class="o">...</span>
-</pre></div>
-</div>
-<blockquote>
-<div><blockquote>
-<div><p>The <strong>sbatch script</strong> (see <strong><code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code></strong> as an example):</p>
-</div></blockquote>
-</div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="o">...</span>
-        <span class="c1">#SBATCH --array=0-99    # the last job index should be equal to N_ARRAY_JOBS - 1 </span>
-        <span class="o">...</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p><strong>When only some records for the hospital need to be processed</strong>, provide a list of record IDs in the variable
-<strong><code class="docutils literal notranslate"><span class="pre">source_scan_ids</span></code></strong>:</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>        <span class="c1"># Inputs</span>
-        <span class="o">...</span>
-        <span class="c1"># Use source_scan_ids = None to process all records</span>
-        <span class="n">source_scan_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5&quot;</span><span class="p">,</span> <span class="s2">&quot;fffaab93-e908-4b93-a021-ab580e573585&quot;</span><span class="p">]</span>
-        <span class="o">...</span>
-</pre></div>
-</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">source_scan_ids</span></code> is not <code class="docutils literal notranslate"><span class="pre">null</span></code>, exactly one hospital must be specified.</p>
 </section>
 <section id="performed-operations">
 <h3>Performed operations<a class="headerlink" href="#performed-operations" title="Link to this heading"></a></h3>
@@ -282,9 +232,8 @@ for example, <code class="docutils literal notranslate"><span class="pre">target
 <p>Note that explicitly supplied parameter values take precedence over those provided in <code class="docutils literal notranslate"><span class="pre">conf_dict</span></code>; the latter take precedence
 over values found in <code class="docutils literal notranslate"><span class="pre">conf_json</span></code> file.</p>
 <p>Detailed description of all arguments of each function or method are available in the <a class="reference download internal" download="" href="_downloads/a0f78390b83d56af3958387635feaa09/index.html"><span class="xref download myst">auto-generated documentation</span></a>.</p>
-<p>The meaning of parameters in the JSON configuration file is explained in the comments in the code below. Comment lines start
-with the <code class="docutils literal notranslate"><span class="pre">#</span></code> character. IMPORTANTLY, please mind that <strong>comments are NOT allowed in real JSON files</strong>. Please remove them if
-using this example JSON snippet in practice.</p>
+<p>The meaning of parameters in the JSON configuration file is explained in the comments in the code below.
+In this project, these configuration files are processed with <code class="docutils literal notranslate"><span class="pre">commentjson</span></code>, so comments are allowed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
         <span class="c1"># A list of mandatory EEG channels. An input recording is discarded if any of those is missing</span>
         <span class="c1"># (case-insensitive)</span>
@@ -376,14 +325,21 @@ See more details in the <a class="reference download internal" download="" href=
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_pyprep_ica</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>If running as an array job on the cedar cluster, use this command in your sbatch script (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
+<p>If running as an array job on the Digital Alliance cluster, use this command in your sbatch script (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python run_pyprep_ica.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
 </div>
-<p>The main script <strong><code class="docutils literal notranslate"><span class="pre">run_pyprep_ica.py</span></code></strong> may need to be <strong>modified</strong> by the user, to set the root input and output folders, hospital name, etc.
-Please refer to section <a class="reference internal" href="#running-the-code">“Running the code”</a> under the segmentation task
-<a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments">“1. Filtering, resampling and extracting of good data segments”</a>, because the
-procedure is identical. Note that typically the PREP step is applied to extracted good segments rather than to the original data.</p>
+<p>No Python source edits are required for this step. Configure everything in <strong><code class="docutils literal notranslate"><span class="pre">pyprep_ica_conf.json</span></code></strong>.</p>
+<p>Set these keys:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">hosts</span></code></strong>: host-specific <code class="docutils literal notranslate"><span class="pre">data_root</span></code>, <code class="docutils literal notranslate"><span class="pre">out_root</span></code>, and <code class="docutils literal notranslate"><span class="pre">cluster_job</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">N_ARRAY_JOBS</span></code></strong>: number of array jobs (should match sbatch <code class="docutils literal notranslate"><span class="pre">--array</span></code>).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">hospital</span></code></strong>: string or list of hospitals.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">source_scan_ids</span></code></strong>: <code class="docutils literal notranslate"><span class="pre">null</span></code> for all records, or a list of scan IDs.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">view_plots</span></code></strong>, <strong><code class="docutils literal notranslate"><span class="pre">verbose</span></code></strong>: runtime behavior for plotting/logging.</p></li>
+</ul>
+<p>If <code class="docutils literal notranslate"><span class="pre">source_scan_ids</span></code> is not <code class="docutils literal notranslate"><span class="pre">null</span></code>, exactly one hospital must be specified.
+Typically, this step is applied to the good segments produced by step 1.</p>
 </section>
 <section id="id2">
 <h3>Performed operations<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
@@ -410,8 +366,7 @@ However, <strong>no additional filtering of the EEG sensor channels is done</str
 <section id="id3">
 <h3>JSON configuration file<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>Parameter values specific to the PREP/ICA operations are defined in a JSON configuration file
-<code class="docutils literal notranslate"><span class="pre">pyprep_ica_conf.json</span></code>, which is described below. Note again that JSON files can not contain comments;
-therefore comments in the code below should be removed if one wants to use it in practice.</p>
+<code class="docutils literal notranslate"><span class="pre">pyprep_ica_conf.json</span></code>, which is described below. This file is processed with <code class="docutils literal notranslate"><span class="pre">commentjson</span></code>, so comments are allowed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
         <span class="s2">&quot;montage&quot;</span><span class="p">:</span> <span class="s2">&quot;standard_1020&quot;</span><span class="p">,</span>     <span class="c1"># As is</span>
         <span class="s2">&quot;powerline_frq&quot;</span><span class="p">:</span> <span class="mf">60.0</span><span class="p">,</span>          <span class="c1"># Powerline frq, Hz</span>
@@ -577,17 +532,22 @@ respectively. Internally both scripts call the same function <code class="docuti
 <span class="n">python</span> <span class="n">extract_ps_intervals</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>If running as an array job on the cedar cluster, use these commands in your sbatch script
+<p>If running as an array job on the Digital Alliance cluster, use these commands in your sbatch script
 (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python extract_hv_intervals.py ${SLURM_ARRAY_TASK_ID}
 python extract_ps_intervals.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
 </div>
-<p>As usual, the main scripts <strong><code class="docutils literal notranslate"><span class="pre">extract_XX_intervals.py</span></code></strong> may need to be <strong>modified</strong> to set
-the root input and output folders, etc. Please refer to section <a class="reference internal" href="#running-the-code">“Running the code”</a>
-under the segmentation task
-<a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments">“1. Filtering, resampling and extracting of good data segments”</a>,
-for details. Note that these steps should only be applied to the original EDF records.</p>
+<p>No Python source edits are required for this step. Both scripts reuse the same top-level runtime keys
+from <strong><code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code></strong>:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">N_ARRAY_JOBS</span></code></strong></p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">hospital</span></code></strong> (string or list)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">source_scan_ids</span></code></strong> (<code class="docutils literal notranslate"><span class="pre">null</span></code> or list of scan IDs)</p></li>
+</ul>
+<p>Input/output roots are resolved from <code class="docutils literal notranslate"><span class="pre">hosts</span></code>: <code class="docutils literal notranslate"><span class="pre">data_root</span></code> for input, and either <code class="docutils literal notranslate"><span class="pre">hv_out_root</span></code> or <code class="docutils literal notranslate"><span class="pre">ps_out_root</span></code>
+for outputs depending on the script. If <code class="docutils literal notranslate"><span class="pre">source_scan_ids</span></code> is not <code class="docutils literal notranslate"><span class="pre">null</span></code>, exactly one hospital must be specified.
+Note that these steps should only be applied to the original EDF records.</p>
 </section>
 <section id="id5">
 <h3>Performed operations<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
@@ -611,7 +571,8 @@ No padding is applied to the extracted HV and PS segments.</p></li>
 </section>
 <section id="id6">
 <h3>JSON configuration file<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
-<p>All HV and PS-related configuration parameters are stored in the JSON file <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code>.</p>
+<p>All HV and PS-related configuration parameters are stored in the JSON file <code class="docutils literal notranslate"><span class="pre">preproc_conf.json</span></code>.
+This file is processed with <code class="docutils literal notranslate"><span class="pre">commentjson</span></code>, so comments are allowed.</p>
 </section>
 </section>
 <section id="performing-source-reconstruction">
@@ -629,7 +590,7 @@ folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_src_reconstr</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>If running as an array job on the cedar cluster, use this command in your sbatch script
+<p>If running as an array job on the Digital Alliance cluster, use this command in your sbatch script
 (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python run_src_reconstr.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
@@ -810,7 +771,7 @@ folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_welch</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>If running as an array job on the cedar cluster, use this command in your sbatch script
+<p>If running as an array job on the Digital Alliance cluster, use this command in your sbatch script
 (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python run_welch.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
@@ -865,7 +826,7 @@ Here is an example of such file:</p>
                 <span class="s2">&quot;out_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/eegfhabrainage/src-welch&quot;</span>
             <span class="p">}</span>
         <span class="p">},</span>
-        <span class="s2">&quot;cedar&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;fir&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;cluster_job&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
 
             <span class="s2">&quot;sensors&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -933,7 +894,7 @@ folder:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_cwt</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>When running as an array job on the cedar cluster, use this command in your sbatch script
+<p>When running as an array job on the Digital Alliance cluster, use this command in your sbatch script
 (see <code class="docutils literal notranslate"><span class="pre">eeg_array_job.sbatch</span></code> for an example):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>python run_cwt.py ${SLURM_ARRAY_TASK_ID}
 </pre></div>
@@ -1001,7 +962,7 @@ folder:</p>
                 <span class="s2">&quot;out_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/eegfhabrainage/src-cwt&quot;</span>
             <span class="p">}</span>
         <span class="p">},</span>
-        <span class="s2">&quot;cedar&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;fir&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;cluster_job&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
 
             <span class="s2">&quot;sensors&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -1124,6 +1085,85 @@ The fitting results are saved as HDF5 files in the folders specified in <code cl
 <p>The script itself just sets a framework for calling a function <code class="docutils literal notranslate"><span class="pre">view_hd_embedding()</span></code> which is the actual work horse that is doing the job - see <a class="reference internal" href="#miscellaneous-functions"><span class="std std-ref">Miscellaneous functions</span></a> section below.</p>
 <p>Currently the script contains a single visualization step, where every data point is a vector representing distribution of spectral power in a certain frequency band over the atlas ROIs for corresponding EEG record. Other steps can be added in a similar way.</p>
 <p>All input parameters for the <code class="docutils literal notranslate"><span class="pre">run_view_hd_embedding.py</span></code> script including input and output folders are defined in a dedicated JSON file <code class="docutils literal notranslate"><span class="pre">view_hd_input.json</span></code>. Thus changing parameters does not require modification of the Python source code. This is a JSON file with comments, similar to ones described for other steps. Meaning of the keys and values should be clear from related comments.</p>
+</section>
+<section id="running-preprocessing-steps-and-other-scripts-using-prebuilt-container-apptainer-image">
+<h2>9. Running preprocessing steps and other scripts using prebuilt container (apptainer) image<a class="headerlink" href="#running-preprocessing-steps-and-other-scripts-using-prebuilt-container-apptainer-image" title="Link to this heading"></a></h2>
+<section id="general-information">
+<h3>General information<a class="headerlink" href="#general-information" title="Link to this heading"></a></h3>
+<p>The “apptainer” containers supported on Digital Allience (DA) clusters are “frozen” software environments similar
+to docker containers. When using them, software is running exactly as on the machine where the container was created.
+It is completely insulated from various settings, conventions and modules that currently exist on the cluster.
+For example, Python versions and packages not supported by DA software stack can still be used. This is the main
+advantage of using containers.</p>
+<p>At the same time, with container being a read-only version of the software, changes to the files inside
+the container are impossible. Yet such changes may be needed. For example, all preprocessing steps are
+controlled via JSON configuration files, but those files within the container cannot be adjusted. This problem is resolved
+by mapping editable versions of required files onto those within the container. This is done via
+“<code class="docutils literal notranslate"><span class="pre">--bind</span></code>” option of the apptainer. Additionally, all the host file system folders that should be accessible by
+the contained software, should also be “bound” to the container.</p>
+<p>Importantly, <strong>the home folder from which the container is started is automatically bound to the container
+and is always accessible</strong>. This provides a simple way to change runtime settings or even to make modifications to the software
+without rebuilding the image. Required editable copies of the files (i.e. <code class="docutils literal notranslate"><span class="pre">cfg1.json</span></code>, <code class="docutils literal notranslate"><span class="pre">myscript.py</span></code>) are placed into
+the home folder, and are bound to the container using constructions like
+<code class="docutils literal notranslate"><span class="pre">--bind</span> <span class="pre">cfg1.json:/app/cfg1.json,myscript.py:/app/myscript.py</span></code> when starting the container. Please refer to <code class="docutils literal notranslate"><span class="pre">run_apptainer.sh</span></code>
+bash script for a detailed example.</p>
+</section>
+<section id="running-the-three-steps-preprocessing">
+<h3>Running the “three steps” preprocessing<a class="headerlink" href="#running-the-three-steps-preprocessing" title="Link to this heading"></a></h3>
+<p>The preprocessing steps in question are:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#filtering-resampling-and-extracting-of-good-data-segments">filtering/resampling EDFs and extracting good segments</a>,</p></li>
+<li><p><a class="reference internal" href="#eeg-prep-procedure-and-artifact-removal">PyPREP and ICA</a>, and</p></li>
+<li><p><a class="reference internal" href="#performing-source-reconstruction">beamformer source reconstruction</a>.</p></li>
+</ol>
+<p>Each step is controlled by its own JSON configuration file. While many settings rarely need modifications, some
+of them may be changed frequently and even for every run - for example, the EEG record ID and corresponding hospital. Input and
+output folders may also vary. Importantly, these changes should be done synchronously in all JSON files.</p>
+<p>To simplify this process, all three steps are packed into a single bash script <strong><code class="docutils literal notranslate"><span class="pre">run_three_stage_pipeline.sh</span></code></strong>. In its turn
+this script is started from the main script <strong><code class="docutils literal notranslate"><span class="pre">run_apptainer.sh</span></code></strong>. The latter performs binding of necessary folders
+of the host file system and then running the container. Both scripts include extensive comments. The intended procedure is as follows.</p>
+<ul class="simple">
+<li><p>Copies of <code class="docutils literal notranslate"><span class="pre">run_three_stage_pipeline.sh</span></code> and JSON files <code class="docutils literal notranslate"><span class="pre">preproc_conf.json,</span> <span class="pre">pyprep_ica_conf.json,</span> <span class="pre">src_reconstr_conf.json</span></code>
+should be placed into the folder from which the container will be started.</p></li>
+<li><p>In the <strong><code class="docutils literal notranslate"><span class="pre">run_three_stage_pipeline.sh</span></code></strong>, the following variables should be set: <code class="docutils literal notranslate"><span class="pre">SOURCE_SCAN_IDS</span></code>, <code class="docutils literal notranslate"><span class="pre">HOSPITAL</span></code>, <code class="docutils literal notranslate"><span class="pre">HOST</span></code>.
+Please pay attention to how <code class="docutils literal notranslate"><span class="pre">SOURCE_SCAN_IDS</span></code>, <code class="docutils literal notranslate"><span class="pre">HOSPITAL</span></code> are specified (i.e. single quotes), especially when a list of
+values is provided - the bash script is very picky about the syntax used. <strong>IMPORTANTLY, if a command line argument is
+provided, its value will replace the <code class="docutils literal notranslate"><span class="pre">SOURCE_SCAN_IDS</span></code> value set inside the script</strong>.</p></li>
+<li><p>In the <strong><code class="docutils literal notranslate"><span class="pre">run_apptainer.sh</span></code></strong>, one needs to set values for variables in the “User-configurable variables”
+section. Meaning of most of them is self-explanatory. In particular,</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">WORKDIR</span></code> should point to the folder from which the apptainer will be started;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ORG_EDF_ROOT</span></code>, <code class="docutils literal notranslate"><span class="pre">SEGMENTED_EDF_ROOT</span></code>, <code class="docutils literal notranslate"><span class="pre">PYPREPED_FIF_ROOT</span></code>, <code class="docutils literal notranslate"><span class="pre">BEAMFORMED_ROOT</span></code> should contain paths to
+raw EDFs folder, “filtered good segments” EDF folder, folder for PyPREP’d .fif files, folder for source reconstructed
+.hdf5 files and .fif forward solutions, respectively. Note that each “root” folder will contain subfolders
+for corresponding hospitals.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FREESURFER_DIR</span></code> should contain a path to the folder which has a standard <code class="docutils literal notranslate"><span class="pre">fsaverage</span></code> subfolder with all the usual
+FreeSurfer stuff.</p></li>
+</ul>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">run_apptainer.sh</span></code> can be run with a command line argument. In this case, it is interpreted as a list of EEG
+scan IDs to process and will be passed directly to the <code class="docutils literal notranslate"><span class="pre">run_three_stage_pipeline.sh</span></code> command. The list should be
+specified in the following format: <code class="docutils literal notranslate"><span class="pre">'[&quot;id1&quot;,...,&quot;idN&quot;]'</span></code>.</p></li>
+</ul>
+</section>
+<section id="other-notes">
+<h3>Other notes<a class="headerlink" href="#other-notes" title="Link to this heading"></a></h3>
+<p>When running the <code class="docutils literal notranslate"><span class="pre">run_three_stage_pipeline.sh</span></code> script, the JSON files in the working folder will usually
+be modified to set scan IDs, hospital and various data paths for the processing steps. Also, the comments
+(if any) will be removed.</p>
+<p>No other parts of the JSONs will be changed. However, user can modify them manually if needed, and these
+changes will not be affected by invoking the <code class="docutils literal notranslate"><span class="pre">run_three_stage_pipeline.sh</span></code>.</p>
+<p>Currently the apptainer image holds many other processing routines. They can be run the same way as it is done
+for the three preprocessing steps above - namely, by binding proper JSON files and paths, and invoking corresponding
+command with the apptainer. For example, a command to calculate Welch power spectra will look like</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>apptainer exec \
+    --bind ${BIND} \
+    &quot;${IMAGE}&quot;  python3 run_welch.py
+</pre></div>
+</div>
+<p>assuming that <code class="docutils literal notranslate"><span class="pre">BIND</span></code> and <code class="docutils literal notranslate"><span class="pre">IMAGE</span></code> variables are properly set, <code class="docutils literal notranslate"><span class="pre">welch_input.json</span></code> contains desired hospital and scan IDs
+and resides in the current working directory. Please refer to the apptainer official documentation for details.</p>
+</section>
 </section>
 <section id="miscellaneous-functions">
 <h2>Miscellaneous functions<a class="headerlink" href="#miscellaneous-functions" title="Link to this heading"></a></h2>
@@ -1250,7 +1290,7 @@ For example to install <code class="docutils literal notranslate"><span class="p
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, AM.</p>
+    <p>&#169; Copyright 2026, AM.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -73,12 +73,12 @@ import h5py         # Needed to save/load files in .hdf5 format
 import matplotlib.pyplot as plt
 
 from run_welch import read_welch_psd
-from view_hd_embedding import view_hd_embedding
 
 __file__ = path.realpath(__file__)    # expand potentially relative path to a full one
 pathname = lambda fname: path.join(path.dirname(__file__), fname)
 
 sys.path.append(pathname('../misc'))
+from view_hd_embedding import view_hd_embedding
 
 INPUT_JSON_FILE = "view_hd_input.json"      # This script's input parameters
 
@@ -196,6 +196,21 @@ def band_power(ss, fname):
     
     return spect
 
+def _get_host(conf_dict):
+    """Return host key listed in config, or "other" fallback if present."""
+    host = socket.getfqdn()
+
+    for key in conf_dict['hosts']:
+        if key == 'other':
+            continue
+        if key in host:
+            return key
+
+    if 'other' in conf_dict['hosts']:
+        return 'other'
+
+    raise ValueError(f'Host is not listed in the {INPUT_JSON_FILE}.')
+
 def get_data_folders(args):
     '''Setup input and output data folders depending on the host machine.
 
@@ -220,7 +235,7 @@ def get_data_folders(args):
 
     # Choose appropriate host name from those listed in the json:
     host_found = False
-    host = socket.gethostname()
+    host = _get_host(args)
 
     for key in args['hosts']:
         if key in host:

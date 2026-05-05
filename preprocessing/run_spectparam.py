@@ -78,6 +78,7 @@ import numpy as np
 import h5py
 import specparam
 from specparam import SpectralModel, SpectralGroupModel
+from importlib.metadata import version
 from run_welch import read_welch_psd
 
 __file__ = path.realpath(__file__)    # expand potentially relative path to a full one
@@ -91,48 +92,95 @@ from utils import timeit
 INPUT_JSON_FILE = "spectparam_input.json"      # This script's input parameters
 #-------------------------------------
 
+
+def _normalize_hospitals(hospital_cfg):
+    if isinstance(hospital_cfg, str):
+        hospitals = [hospital_cfg]
+    elif isinstance(hospital_cfg, list) and all(isinstance(h, str) for h in hospital_cfg):
+        hospitals = hospital_cfg
+    else:
+        raise ValueError('"hospital" must be either a string or a list of strings in spectparam_input.json')
+
+    if not hospitals:
+        raise ValueError('"hospital" list in spectparam_input.json should not be empty')
+
+    return hospitals
+
+
+def _validate_source_scan_ids(source_scan_ids, hospitals):
+    if source_scan_ids is None:
+        return
+
+    if not isinstance(source_scan_ids, list) or not all(isinstance(s, str) for s in source_scan_ids):
+        raise ValueError('"source_scan_ids" must be null or a list of strings in spectparam_input.json')
+
+    if len(hospitals) != 1:
+        raise AssertionError('When "source_scan_ids" is provided, exactly one hospital must be specified.')
+
 def input(ss):
     '''
     Read and process common input parameters from JSON file.
     '''
+    SPECPARAM_VERSION = '2.0.0rc1'
+
+    if version('specparam') != SPECPARAM_VERSION:
+        raise ValueError(f'This code **only** runs with specparam version {SPECPARAM_VERSION}')
+
     args = ss.args
-    hospital = args['hospital']            # A list of hospitals to process
+    hospitals = _normalize_hospitals(args['hospital'])
     lst_ids = args['source_scan_ids']   # None or a list of specific scan IDs (without .edf, .fif, etc)
+    _validate_source_scan_ids(lst_ids, hospitals)
     what = args['what']                     # 'sensors' or 'sources'
 
     data_root, out_root, cluster_job = get_data_folders(args)
     # ------ end of args parsing ---------------
 
-    ss.input_dir = data_root + '/' + hospital
-
-    if lst_ids is None:
-        if what == 'sensors':
-            # To get bare ID need to chop off "_psd.hdf5" at the end
-            lst_ids = [path.basename(f)[:-9] for f in glob.glob(ss.input_dir + '/*.hdf5')]
-        else:
-            # To get bare ID need to chop off "_src_psd.hdf5" at the end
-            lst_ids = [path.basename(f)[:-13] for f in glob.glob(ss.input_dir + '/*.hdf5')]
-
-    ss.out_dir = out_root + '/' + hospital
-    os.makedirs(ss.out_dir, mode = 0o775, exist_ok = True)
+    ss.hospital_runs = []
 
     # When running on the CC cluster, 1st command line argument is a 0-based
-    # array job index. lst_ids will be different for each job
+    # array job index. lst_ids will be different for each job.
     if cluster_job:
-        nfiles = len(lst_ids)
-        files_per_job = nfiles // args['N_ARRAY_JOBS'] + 1
         ijob = int(sys.argv[1])         # Job number is passed as 1st cmd line arg
-        istart = ijob * files_per_job
 
-        if istart > nfiles - 1:
-            print('All done')
-            sys.exit()
+    for hospital in hospitals:
+        input_dir = data_root + '/' + hospital
+        out_dir = out_root + '/' + hospital
 
-        iend = min(istart + files_per_job, nfiles)
-        lst_ids = lst_ids[istart:iend]
+        if lst_ids is None:
+            if what == 'sensors':
+                # To get bare ID need to chop off "_psd.hdf5" at the end
+                hospital_ids = [path.basename(f)[:-9] for f in glob.glob(input_dir + '/*.hdf5')]
+            else:
+                # To get bare ID need to chop off "_src_psd.hdf5" at the end
+                hospital_ids = [path.basename(f)[:-13] for f in glob.glob(input_dir + '/*.hdf5')]
+        else:
+            hospital_ids = list(lst_ids)
 
-    # Pass common data to other steps
-    ss.lst_ids = lst_ids
+        os.makedirs(out_dir, mode = 0o775, exist_ok = True)
+
+        if cluster_job:
+            nfiles = len(hospital_ids)
+            files_per_job = nfiles // args['N_ARRAY_JOBS'] + 1
+            istart = ijob * files_per_job
+
+            if istart > nfiles - 1:
+                print(f'All done for {hospital}')
+                continue
+
+            iend = min(istart + files_per_job, nfiles)
+            hospital_ids = hospital_ids[istart:iend]
+
+        ss.hospital_runs.append({
+            'hospital': hospital,
+            'input_dir': input_dir,
+            'out_dir': out_dir,
+            'lst_ids': hospital_ids,
+        })
+
+    # Backward-compatible aliases expected in helper functions and steps.
+    ss.input_dir = None
+    ss.out_dir = None
+    ss.lst_ids = []
 
 def _input_fname(ss, sid):
     '''
@@ -154,26 +202,39 @@ def do_fit(ss):
     Perform model fits for specified scans.
     '''
 
-    print('Processing scan IDs:')
-    for sid in ss.lst_ids:
-        print(sid)
-        fname = _input_fname(ss, sid);
-        ch_names, freqs, psd = read_welch_psd(fname)   # psd = nchan x nf 
+    total_processed = 0
 
-        # Check for possible zeros in PSDs to avoid log10(0) exception
-        psd[psd < 0.5e-100] = 1e-100
+    for run in ss.hospital_runs:
+        ss.input_dir = run['input_dir']
+        ss.out_dir = run['out_dir']
+        ss.lst_ids = run['lst_ids']
 
-        # Initialize a SpectralGroupModel object, specifying some parameters
-        fg = SpectralGroupModel(**ss.args['model'])
+        if not ss.lst_ids:
+            print(f'No scan IDs to process for {run["hospital"]}; skipping.')
+            continue
 
-        # Fit models across the matrix of power spectra
-        fg.fit(freqs, psd, n_jobs = -1)
+        print(f'Processing scan IDs for {run["hospital"]}:')
+        for sid in ss.lst_ids:
+            print(sid)
+            fname = _input_fname(ss, sid);
+            ch_names, freqs, psd = read_welch_psd(fname)   # psd = nchan x nf 
 
-        # Save results to HDF file
-        outname = _output_fname(ss, sid)
-        write_model(outname, ch_names, fg);
+            # Check for possible zeros in PSDs to avoid log10(0) exception
+            psd[psd < 0.5e-100] = 1e-100
 
-    print(f'\nSuccessfully processed {len(ss.lst_ids)} records.')
+            # Initialize a SpectralGroupModel object, specifying some parameters
+            fg = SpectralGroupModel(**ss.args['model'])
+
+            # Fit models across the matrix of power spectra
+            fg.fit(freqs, psd, n_jobs = -1)
+
+            # Save results to HDF file
+            outname = _output_fname(ss, sid)
+            write_model(outname, ch_names, fg);
+
+        total_processed += len(ss.lst_ids)
+
+    print(f'\nSuccessfully processed {total_processed} records.')
 
 def cumulative_report(ss):
     '''
@@ -191,34 +252,43 @@ def cumulative_report(ss):
         return [list(ch_names).index(ch) for ch in lst]
     # -----------------------------
 
-    lst_idx = None      # Indecies of channels to be included into report
-    lst_ids = _pick_SIDs_for_report(ss)
+    for run in ss.hospital_runs:
+        ss.input_dir = run['input_dir']
+        ss.out_dir = run['out_dir']
+        ss.lst_ids = run['lst_ids']
 
-    for sid in lst_ids:
-        fname = _output_fname(ss, sid)
+        if not ss.lst_ids:
+            print(f'No scan IDs available for report in {run["hospital"]}; skipping.')
+            continue
 
-        if lst_idx is None:
-            ch_names, freqs, model_settings, lst_results = read_model(fname)
-            lst_idx = get_channel_nums(ss.args['report']['report_channels'])
-            fg = SpectralGroupModel(*model_settings)
+        lst_idx = None      # Indecies of channels to be included into report
+        lst_ids = _pick_SIDs_for_report(ss)
 
-            freq_range = [freqs[0], freqs[-1]]
-            freq_res = freqs[1] - freqs[0]
-            meta_data = specparam.data.SpectrumMetaData(freq_range, freq_res)
-            fg.add_meta_data(meta_data)
+        for sid in lst_ids:
+            fname = _output_fname(ss, sid)
 
-        else:
-            lst_results = read_model(fname)[3]  # Get a list of nchan FitResults objects
+            if lst_idx is None:
+                ch_names, freqs, model_settings, lst_results = read_model(fname)
+                lst_idx = get_channel_nums(ss.args['report']['report_channels'])
+                fg = SpectralGroupModel(*model_settings)
 
-        for ich in lst_idx:
-            fit = SpectralModel(*model_settings)
-            fit.add_meta_data(meta_data)
-            fit.add_results(lst_results[ich])
-            fg = specparam.objs.combine_model_objs([fg, fit])
+                freq_range = [freqs[0], freqs[-1]]
+                freq_res = freqs[1] - freqs[0]
+                meta_data = specparam.data.SpectrumMetaData(freq_range, freq_res)
+                fg.add_meta_data(meta_data)
 
-    file_name = ss.out_dir + '/' + ss.args['report']['file_png']
-    fg.save_report(file_name)
-    print(f'\nFinished creating cumulative report. Report saved to file {file_name}')
+            else:
+                lst_results = read_model(fname)[3]  # Get a list of nchan FitResults objects
+
+            for ich in lst_idx:
+                fit = SpectralModel(*model_settings)
+                fit.add_meta_data(meta_data)
+                fit.add_results(lst_results[ich])
+                fg = specparam.objs.combine_model_objs([fg, fit])
+
+        file_name = ss.out_dir + '/' + ss.args['report']['file_png']
+        fg.save_report(file_name)
+        print(f'\nFinished creating cumulative report for {run["hospital"]}. Report saved to file {file_name}')
 
 def _pick_SIDs_for_report(ss):
     '''
@@ -361,6 +431,21 @@ def _array2fitres(data, nchans):
 
     return lst
 
+def _get_host(conf_dict):
+    """Return host key listed in config, or "other" fallback if present."""
+    host = socket.getfqdn()
+
+    for key in conf_dict['hosts']:
+        if key == 'other':
+            continue
+        if key in host:
+            return key
+
+    if 'other' in conf_dict['hosts']:
+        return 'other'
+
+    raise ValueError(f'Host is not listed in the JSON config file.')
+
 def get_data_folders(args):
     '''Setup input and output data folders depending on the host machine.
 
@@ -385,7 +470,7 @@ def get_data_folders(args):
 
     # Choose appropriate host name from those listed in the json:
     host_found = False
-    host = socket.gethostname()
+    host = _get_host(args)
 
     for key in args['hosts']:
         if key in host:

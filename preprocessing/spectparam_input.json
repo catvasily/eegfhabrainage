@@ -8,17 +8,15 @@
     # Step(s) to run:
     #----------------------------
     "to_run": ["input", "do_fit"],
-    #"to_run": ["input", "cumulative_report"],
-    #"to_run": ["input", "do_fit", "cumulative_report"],
     #----------------------------
 
     # !!! IMPORTANT!!! When running "cumulative_report" step on the cluster,
     # only job #0 should be run, and N_ARRAY_JOBS below should be set to 1 !!!
     "N_ARRAY_JOBS": 100,        # Number of parralel jobs when running on CC cluster
 
-    "hospital": "Burnaby",      # hospital to process
+	"hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+                                            # "Burnaby", "RCH", "Surrey" 
     "source_scan_ids": null,    # null or a list of record IDs
-    #"source_scan_ids": ["2f8ab0f5-08c4-4677-96bc-6d4b48735da2"],    # Burnaby
     "what": "sources",          # 'sensors' or 'sources' - which data to use
 
     # Input and output root folders depending on the host computer
@@ -34,7 +32,7 @@
                 "out_root": "/data/eegfhabrainage/src-specparam"
             }
         },
-        "cedar": {
+        "fir": {
             "cluster_job": true,
 
             "sensors": {
@@ -42,7 +40,6 @@
                 "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/specparam"
             },
             "sources": {
-                #"data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux/spectra",
                 "data_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-welch",
                 "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-specparam"
             }
@@ -75,8 +72,6 @@
     # Settings for a cumulative report
     "report" : {
         "report_channels": null,            # A list of channels to include; if null - all channesl are included
-        #"report_channels": ["G_occipital_middle-lh", "G_occipital_middle-rh", "G_occipital_sup-lh",
-        #            "G_occipital_sup-rh", "Pole_occipital-lh", "Pole_occipital-rh"],
         "seed": 12345,                      # Random generator seed (for replicability)
         "max_num_scan_ids": 500,            # number of scan IDs to be randomly picked from all scan IDs
         "file_png": "report_5peaks.png"     # Short (unqualified) file name for report .PNG

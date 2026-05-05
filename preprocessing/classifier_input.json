@@ -1,0 +1,431 @@
+# ----------------------------------------------------------------------
+# NOTE: this is a JSON file with comments. It requires using commentjson
+# module to process, instead of a standard python json library
+# ----------------------------------------------------------------------
+# Input parameters for run_classifier.py                  
+# ----------------------------------------------------------------------
+{
+    #-----------------
+    "batch_run": false,     # if true: run one job per dictionary in "batch_job_parms"
+    #-----------------
+
+    # ------------------------------------------
+    # This is an example batch job configuration
+    # ------------------------------------------
+    # Each dictionary below defines one job override set.
+    # - "ijob" is required (can match index or any identifier)
+    # - Other keys must already exist in this JSON
+    # - Nested dictionaries are supported for multi-level keys
+    # ------------------------------------------
+    "batch_job_parms": [
+        {
+            "ijob": 0
+        },
+        {
+            "ijob": 1
+        },
+        {
+            "ijob": 2
+        },
+        {
+            "ijob": 3
+        },
+        {
+            "ijob": 4
+        }
+    ],
+
+    #"to_run": ["xgboost"],      # Step(s) to execute
+    #"to_run": ["summarize"],   
+    #"to_run": ["summary_plots"],
+    "to_run": ["feature_importance"],
+    #"to_run": ["predict"],      
+
+    "what": "sources",          # sensors' or 'sources' - which CWT to calculate
+	"hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+                                            # "Burnaby", "RCH", "Surrey" 
+
+    "physician": [],            # Empty list, null, or list of physician names for the EEG scans.
+                                # If specified, others physicians' records will be dropped.
+
+    # A list of "Others" physicians with lower record counts:
+    # "physician": ["Ioanna","Anastasia","Despina","Katerina","Elektra","Calliope","Daphne",
+    #    "Penelope","Thalia","Chloe","Nefeli","Elara","Theodora"],
+
+    "force_recalc": true,      # Flag to run classifications even if results already exist
+
+    "scan_ids": null,           # null or a list of specific record IDs
+                                # If not null, the hospital list should contain just
+                                # one hospital
+
+    "target_label": "Abnormality",    # One of labels listed in "classifications_cols"
+                                    # below (except report URN, of course)
+    "use_moments_only": true,      # Flag to use only moments and drop Weibull dist parms
+    "ignore_confidence": false,      # Flag to collaps high and low confident
+    "standardize_features": false,   # Flag to standardize features using StandardScaler (true or false)
+                                    # labels together
+    
+    # Dimensionality reduction
+    "dim_reduction": "to_lobes",    # Method: 'pca', 'to_lobes', 'epi_features', or 'none'
+                                    # NOTE: this setting is ignored if "use_consensus_cv" is true.
+
+    # This file specifies mapping 'ch<N>' - channel name, N = 0,...146
+    # for the channel names/ordering in the src-cwt scans
+    # The path is relative to the CWT scans folder
+    "cwt_channels_order": "destrieux_channels_cwt.csv",
+
+    "balanced_training": false,     # Apply negative downsampling for training (only when force_recalc=true)
+    "balance_ratio": 1.0,          # Target negative:positive ratio after downsampling
+
+    "per_fold_dim_reduction": false, # Apply dimensionality reduction separately for each CV fold (true/false).
+                                    # When true, dim reduction is fit on training set only for each fold.
+                                    # This is more computationally expensive but prevents information leakage.
+
+    "use_consensus_cv": false,      # If true: run consensus nested CV via consensus_cv.py
+                                    # "use_nested_grid_search" should be set to FALSE
+                                    # Inner folds are used for feature selection only.
+                                    # Optional tuning is configured under consensus_cv.grid_tuning.
+                                    # Also, this should be set to "true" for feature importance plotting
+                                    # of CCV results
+
+    "consensus_cv": {
+        "outer_n_splits": 5,        # Outer CV folds (test folds)
+
+        # ----------------------------------------------------------------------
+        # !!! Mind that number of threads equal to the number of inner_n_splits
+        # !!! will be automatically used to parallelize inner CCV cycle
+        # (but not grid search cycle - that one is controlled by its own n_jobs)
+        # ----------------------------------------------------------------------
+        "inner_n_splits": 4,        # Inner folds for consensus feature selection
+
+        #"selection_method": "mutual_info", # mutual_info|mutual_entropy|multisurf|none
+        "selection_method": "none",
+        "f_classif_top_k": 12000,   # Preselect top-k features in each inner fold using f_classif
+                                    # fitted on the fold's train complement (_complement_idx).
+                                    # Set to null to disable this preselection stage.
+        "top_k": 400,               # Keep up to top-k features per inner selection fold
+                                    # (ignored when selection method is none)
+        "min_score": null,          # Optional score threshold (null disables)
+        "n_jobs": 1,                # n_jobs for feature scores computation. Might not be actually
+                                    # used depending on the scoring method. Specifically:
+                                    # !!! mutual_info ignores n_jobs and is single threaded.
+                                    # Also, mind that this n_jobs is used in parallel in
+                                    # every inner fold.
+
+        # -----------------------------------------------------------------------------
+        # !!! Mind that all n_jobs settings that are in use should be taken into account
+        # !!! to avoid CPU oversubscription. 
+        # -----------------------------------------------------------------------------
+
+        "grid_tuning": {            # The tuning jobs are run AFTER CCV jobs - not in parallel
+            "enabled": false,        # If true: run GridSearchCV on reduced outer-train data
+            "n_splits": 5,          # CV folds for tuning within each outer fold
+            "scoring": "average_precision",
+            "n_jobs": 5,            # n_jobs for GridSearchCV parameter tuning. Those are NOT
+                                    # run at the same time as feature scores computations
+            "verbose": 1,
+            "param_grid": {
+                "min_child_weight": [10, 20, 40]
+            }
+        }
+    },
+
+    "use_nested_grid_search": false, # If true: run nested CV with GridSearchCV tuning via nested_cv.py
+
+    "nested_cv": {
+        "outer_n_splits": 5,        # Outer CV folds (test folds)
+        "inner_n_splits": 5,        # Inner CV folds (train/validation folds for tuning)
+
+        "scoring": "average_precision",   # GridSearchCV scoring; possible values are, among others:
+                                    # "accuracy", "balanced_accuracy","f1", "precision", "recall"...
+                                    # see https://scikit-learn.org/stable/modules/model_evaluation.html#scoring-string-names
+                                    # for more 
+
+        "n_jobs": 4,                # GridSearchCV workers (resource envelope: <=4); set to -1
+                                    # to use all available CPUs, set to -2 to use all but one CPU
+        "verbose": 1,
+
+        "param_grid": {
+            "min_child_weight": [10, 20, 40]
+        }
+    },
+
+    # Number of CV folds to use for evaluation
+    "cv_n_splits": 5,               # number of splits for cross-validation
+
+    "plot_pr_curve": true,
+
+    # Method-specific settings for feature-importance plotting/export.
+    # Use "to_lobes" for dim_reduction="to_lobes" and "ccv" for
+    # dim_reduction="consensus_cv".
+    "feature_importance": {
+        "to_lobes": {
+            "use_lobes_heatmap": true,
+            "ranking": "gain",          # Importance type: gain|weight|cover
+            "gain_axis_scale": "log",   # For gain ranking: log|linear
+            "font_scale": 0.75,          # 25% smaller text than seaborn default
+            "figure_size": [12,8],         # null or [width, height] in inches
+            "y_limits": [1e1, null],       # null or [ymin, ymax]; each can be null (auto)
+            "lobe_summary_y_limits": null,     # null or [ymin, ymax] for group summary bar plot
+            "frequency_summary_y_limits": null, # null or [ymin, ymax] for frequency summary bar plot
+            "parameter_summary_y_limits": null, # null or [ymin, ymax] for parameter summary bar plot
+            "lobe_summary_figure_size": null,      # null or [width, height] in inches
+            "frequency_summary_figure_size": null,   # null or [width, height] in inches
+            "parameter_summary_figure_size": null,    # null or [width, height] in inches
+            "summary_csv_name": "feature_importance_summary.csv", # summary CSV file name (in out_root unless absolute path)
+            "n_top_lobes": 5,            # number of top lobe groups to save in summary CSV
+            "n_top_freqs": 5,            # number of top frequencies to save in summary CSV
+            "n_top_parms": 3             # number of top parameters to save in summary CSV
+        },
+
+        # Settings when using heatmap plots for "to_lobes" dim reduction
+        "lobes_heatmap": {
+            "style": "whitegrid",              # Seaborn theme style
+            "font_scale": 0.65,                 # Text scale (same default as to_lobes.font_scale)
+            "gain_axis_scale": "linear",        # Heatmap and median axis scale: log|linear
+            "figure_size": null,                # null or [width, height] in inches
+            "panel_height_ratios": [3.0, 1.2],  # [heatmap_height, median_height]
+            "hspace": 0.15,                     # Vertical spacing between panel rows
+            "wspace": 0.35,                     # Horizontal spacing between parameter panels
+            "dpi": 300,                         # Output figure DPI
+            "color_scale": "gray",
+            "heatmap_limits": [0, 60],             # null | [vmin, vmax] | {"parm": [vmin, vmax], ...}
+            "median_y_limits": [5, 20],         # null or [ymin, ymax] for median panels
+            "heatmap_y_axis_font_size": 6,      # null or positive number
+            "median_exclude_zeros": true        # Exclude 0.0 values from median calculation
+        },
+
+        "ccv": {
+            "ranking": "gain",              # Importance type: gain|weight|cover
+            "gain_axis_scale": "linear",       # Heatmap and median axis scale: log|linear
+            "font_scale": 0.65,              # Text scaling for CCV figure
+            "figure_size": null,             # null or [width, height] in inches
+            "dpi": 300,                      # Output image DPI
+            "color_scale": "turbo",         # uniform perception map
+            "heatmap_limits": [10, 4e1],     # null | [vmin, vmax] shared for all parms |
+                                               # {"mean": [vmin, vmax], "std": [vmin, vmax], ...}
+                                               # Alias: "limits" or "color_limits".
+            "heatmap_y_axis_font_size": 2, # null or positive number; controls heatmap
+                                               # y-axis label/tick font size independent of font_scale.
+            "median_y_limits": [5, 50],       # null or [ymin, ymax] for the median panels;
+                                               # each entry may be null to keep that bound automatic.
+
+            # This is the list of frequencies for which the CWT amplitudes data was calculated.
+            # It can be read from any scan's .hdf5 file. Only used here if the consensus
+            # (that is - reduced) feature set completely lacks some of the frequencies in the full set; only
+            # needed for properly labeling frequency axes.
+            "all_freqs": [
+                1.0, 1.085219542566151, 1.177701455567486, 1.2780646348904374, 1.3869807184457754,
+                1.5051785808197957, 1.6334492109576273, 1.7726510055204765, 1.9237155133403592, 2.087653669414633,
+                2.2655625601586946, 2.4586327651904165, 2.668156324778095, 2.8955353862706668, 3.1422915873727564,
+                3.410076239058127, 3.7006813762663615, 4.016051750334855, 4.358297843420382, 4.729709992003709,
+                5.132773713992818, 5.570186341994851, 6.044875074067874, 6.560016562749466, 7.119058173453351,
+                7.725741054496863, 8.384125173145618, 9.09861648521844, 9.873996420073597, 10.715453878292083,
+                11.628619956188823, 12.619605629530849, 13.69504264864469, 14.862127918586118, 16.128671661367648,
+                17.50314968254904, 18.99476009196275, 20.613484858153594, 22.370156608459723, 24.276531121765817,
+                26.345365999055627, 28.590506038232974, 31.02697588454598, 33.67108057663798, 36.54051466108709,
+                39.65448060563666, 43.033817303547316, 46.70113952903093, 50.68098927701296, 55.00000000000001
+            ] 
+        }
+    },
+
+    "seed": 54321,                  # Random seed for reproducibility (integer or null)
+
+    "pca": {
+        "n_components": 0.95        # Number of PCA components: fixed if integer is given,
+                                    # or % variance if float in interval [0.0,1.0]
+    },
+
+    # XGBoost model parameters - passed directly to XGBClassifier
+    "xgb_params": {
+        "n_estimators": 100,
+        "max_depth": 12,
+        "learning_rate": 0.1,
+        "gamma": 0,
+        "scale_pos_weight": 1.4,
+    
+        "eval_metric": "logloss",
+        "n_jobs": 1,                # -1 = Use all available cores
+        "verbosity": 0,
+        "use_label_encoder": false  # NOTE: this is actully deprecated; string labels are
+                                    # mapped to integers automatically without setting this 
+                                    # flag to True
+    },
+
+    # Settings for to_lobes dimensionality reducer
+    "to_lobes": {
+        "limit_band": false,        # Flag to discard all freqs except in spike band
+        "spike_band": [15.0, 52.0]  # The band for skew, kurt stat estimates
+    },
+
+    # Settings for epi_features dimensionality reducer
+    "epi_features": {
+        "bands": {
+            "delta": [0.5, 4.0],
+            "theta": [4.0, 7.0],
+            "alpha": [7.0, 14.0],
+            "beta": [14.0, 30.0],
+            "gamma": [30.0,54.0]
+        }
+    },
+
+    "predict": {
+        "model": {      # Specifies which model to use: either pickle file or a set of parms that uniquely
+                        # identify this pickle
+            "pickle": null,       # null or path of a pickle file with a pre-trained model to use for prediction;
+                                  # the path is relative to the out_root folder for the current host
+                                  # If null, the set of params below will be used to locate the pickle
+
+	        "hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+                                                    # "Burnaby", "RCH", "Surrey" 
+            "target_label": "Abnormality",    # One of labels listed in "classifications_cols"
+            "dim_reduction": "to_lobes",    # Method: 'pca', 'to_lobes', 'epi_features', or 'none'
+            "use_moments_only": true,      # Flag to use only moments and drop Weibull dist parms
+            "standardize_features": false,   # Flag to standardize features 
+            "ignore_confidence": false       # Flag to collaps high and low confident labels
+            },
+
+            "input_records": {    
+                "hospital": ["Burnaby"],   # A list with one of: Burnaby, Abbotsford, RCH, Surrey
+                "physician": [],                        # Empty list, null, or list of physician names for the EEG scans.
+                                                        # If specified, others physicians' records will be dropped.
+                "scan_ids": null,                       # null or a list of specific record IDs
+                }
+        },
+
+    "summary_plots": {
+        "what": "auc4method",                  # which plot to generate: auc4method|auc4physician
+        "drop_rows_on_empty_col": "AUC",          # drop rows where this column is empty/null
+
+        "auc4method": {
+            "input_csv": "auc4method260329.csv",  # absolute path or relative to out_root
+            "output_png": "auc4method260329.png",           # absolute path or relative to out_root
+            "title": "AUC by label and dim reduction",
+            "legend_title": "dim_reduction | ignore_confidence",
+            "figure_size": [19, 9],
+            "y_limits": [0.0, 1.0],
+            "bar_width": 0.08,
+            "pair_gap": 0.02,                   # Gap between bar pairs
+            "legend_font_size": 9,
+            "legend_title_font_size": 10,
+            "legend_max_rows": 3,               # Maximum number of legend rows
+            "legend_loc": "upper center",      # Matplotlib legend location
+            "legend_bbox_to_anchor": [0.55, 1.0],# Optional anchor [x, y]; null for default
+            "dpi": 300
+        },
+
+        "auc4physician": {
+            "input_csv": "auc4physician260331.csv",  # absolute path or relative to out_root
+            "output_png": "auc4physician260331.png",         # absolute path or relative to out_root
+            "dim_reduction": ["to_lobes","ccv-fcls"],        # one or more methods; one subplot per item
+            "title": "AUC by label and physician (fixed dim reduction)",
+            "legend_title": "Physician",
+            "figure_size": [19, 10],
+            "y_limits": [0.0, 1.0],
+            "bar_width": 0.055,
+            "pair_gap": 0.01,                       # Gap between bar pairs
+            "group_gap": 0.01,                      # gap between adjacent physician bars in each label group
+            "legend_font_size": 9,
+            "legend_title_font_size": 10,
+            "legend_max_rows": 3,                   # Maximum number of legend rows
+            "legend_loc": "upper center",          # Matplotlib legend location
+            "legend_bbox_to_anchor": [0.59, 1.01],    # Optional anchor [x, y]; null for default
+            "dpi": 300
+        }
+    },
+
+    "hosts": {
+        "ub2": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "/data/eegfhabrainage/cwt",           # output CWT results here
+                "out_root": "/data/eegfhabrainage/cls"             # output classification results here
+                },
+
+            "sources": {
+                "data_root": "/data/eegfhabrainage/src-cwt",
+                "out_root": "/data/eegfhabrainage/src-cls"             # output classification results here
+                },
+
+            "destrieux_order": "~/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_atlas_ordered.csv",
+            "destrieux_lobes_order": "~/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_lobes_ordered.csv",
+            "db_root": "/data/eegfhabrainage/clean_eeg_reps" 
+        },
+
+        "fir": {
+            "cluster_job": true,
+
+            "sensors": {
+                "data_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/cwt",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/cls"
+                },
+
+            "sources": {
+                #"data_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-cwt"
+                "data_root": "/project/6019337/databases/eeg_fha/beamformed/001_a01_01/destrieux/weibull",
+                "out_root": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/eegfhabrainage/src-cls"
+                },
+
+            "destrieux_order": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_atlas_ordered.csv", 
+            "destrieux_lobes_order": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_lobes_ordered.csv", 
+            "db_root": "/project/6019337/databases/eeg_fha/release_001"   
+        },
+
+        "other": {
+            "cluster_job": false,   # this is not an array job on the CC cluster
+            "sensors": {
+                "data_root": "cwt",           # output PSDs here
+                "out_root": "cls"             # output classification results here
+            },
+
+            "sources": {
+                "data_root": "src-cwt",
+                "out_root": "src-cls"             # output classification results here
+            },
+
+            "destrieux_order": "~/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_atlas_ordered.csv", 
+            "destrieux_lobes_order": "~/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_lobes_ordered.csv",
+            "db_root": "clean_eeg_reps" 
+        }
+    },   # end of "hosts"
+
+    # sqlite DB name with EEG scans info
+    "eeg_info_db":  "eeg_release_001_main_public_250819.db",
+
+    # sqlite DB name with labeled reports
+    "classifications_db":  "eeg_reports_release_001_mistral_public_250825.db",
+
+    # sqlite DB with reports ID, neurologist and hospital
+    # (no need to have the reports themselves)
+    "reports_db": "eeg_reports_release_001_aux_public_240325.db",
+
+    "classifications_cols": [
+                      "Hashed_ReportURN",
+                      "Focal Epi",
+                      "Gen Epi",
+                      "Focal Non-epi",
+                      "Gen Non-epi",
+                      "Abnormality"],
+
+    "summary_csv_name": "classification_results_summary.csv",
+    "summary_columns": [
+        "Hospital",
+        "Physician",
+        "Label",
+        "dim_reduction",
+        "nparms",
+        "ignore_confidence",
+        "standardize",
+        "CV folds",
+        "seed",
+        "Accuracy",
+        "Precision N",
+        "Recall N",
+        "f1-N",
+        "Precision P",
+        "Recall P",
+        "f1-P",
+        "AUC"
+    ]
+}
+

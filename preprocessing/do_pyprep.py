@@ -5,7 +5,7 @@ import mne
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-import json
+import commentjson as cjson
 from mne import viz
 from pyprep.prep_pipeline import PrepPipeline
 from mne.preprocessing import (ICA, create_eog_epochs, create_ecg_epochs,
@@ -85,7 +85,7 @@ class Pipeline:
         if conf_dict is None:
             # Read configuraion from a json file
             with open(conf_json, "r") as fp:
-                conf_dict = json.loads(fp.read())
+                conf_dict = cjson.loads(fp.read())
 
         self.conf_dict = conf_dict
 

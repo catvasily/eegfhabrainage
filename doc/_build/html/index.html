@@ -92,6 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="README.html#calculating-continuous-wavelet-transforms-cwts">6. Calculating Continuous Wavelet Transforms (CWTs)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="README.html#representing-spectra-as-a-combination-of-periodic-oscillations-and-aperiodic-component">7. Representing spectra as a combination of periodic oscillations and aperiodic component</a></li>
 <li class="toctree-l2"><a class="reference internal" href="README.html#visualizing-multi-dimensional-data-via-embedding-in-2d-or-3d-space">8. Visualizing multi-dimensional data via embedding in 2D or 3D space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#running-preprocessing-steps-and-other-scripts-using-prebuilt-container-apptainer-image">9. Running preprocessing steps and other scripts using prebuilt container (apptainer) image</a></li>
 <li class="toctree-l2"><a class="reference internal" href="README.html#miscellaneous-functions">Miscellaneous functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="README.html#setting-up-python-virtual-environment-on-compute-canada-alliance-cluster">Setting up Python virtual environment on Compute Canada (Alliance) cluster</a></li>
 </ul>
@@ -120,6 +121,21 @@
 <li class="toctree-l2"><a class="reference internal" href="code.html#module-plot_alpha_power">plot_alpha_power.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="code.html#module-running_mean_std">running_mean_std.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="code.html#module-view_hd_embedding">view_hd_embedding.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-analyse_cwt_data">analyse_cwt_data.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-run_classifier">run_classifier.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-cls_feature_importance">cls_feature_importance.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-cls_predict">cls_predict.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-compare_roi_time_courses">compare_roi_time_courses.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-consensus_cv">consensus_cv.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-do_cls_summarize">do_cls_summarize.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-do_xgboost">do_xgboost.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-get_scan_ids_for_job">get_scan_ids_for_job.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-migrate_xgb_pickles_format">migrate_xgb_pickles_format.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-nested_cv">nested_cv.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-plot_3d_heatmap">plot_3d_heatmap.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-plot_cls_summary">plot_cls_summary.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-plot_pr_curve">plot_pr_curve.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code.html#module-build_epi_features">build_epi_features.py</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="README_reports.html">EEG clinical reports processing</a><ul>
@@ -160,7 +176,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, AM.</p>
+    <p>&#169; Copyright 2026, AM.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

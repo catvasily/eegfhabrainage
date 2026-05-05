@@ -7,80 +7,101 @@ import os
 import os.path as path
 import socket
 import mne
+import commentjson as cjson
 
-from individual_func import write_mne_edf
 from  do_pyprep import Pipeline
 
-def get_data_folders():
-    '''Setup input and output data folders depending on the host machine.
+__file__ = path.realpath(__file__)    # expand potentially relative path to a full one
+_pathname = lambda fname: path.join(path.dirname(__file__), fname)
 
-    Returns:
-        data_root, out_root, cluster_job (str, str, bool): paths to the root input and output
-        data folders, and a flag indicating whether host is on CC cluster
-        
-    '''
-    host = socket.gethostname()
+JSON_CONFIG_FILE = "pyprep_ica_conf.json"
 
-    # path.expanduser("~") results in /home/<username>
-    user_home = path.expanduser("~")
-    user = path.basename(user_home) # Yields just <username>
 
-    if 'ub2' in host:   # 'ub20-04', 'ub24.04'
-        mne.viz.set_browser_backend('matplotlib')
-        data_root = '/data/eegfhabrainage/processed'
-        out_root = '/data/eegfhabrainage/after-prep-ica'
-        cluster_job = False
-    elif 'cedar' in host:
-        mne.viz.set_browser_backend('matplotlib')
-        data_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/processed'
-        out_root = user_home + '/projects/rpp-doesburg/' + user + '/data/eegfhabrainage/after-prep-ica'
-        cluster_job = True
-    else:
-        mne.viz.set_browser_backend('matplotlib')
-        home_dir = os.getcwd()
-        data_root = home_dir + '/processed'
-        out_root = home_dir + '/after-prep-ica'
-        cluster_job = False
+def _expand_cfg_path(path_value):
+    """Expand env vars and ~ in path strings from config."""
+    return path.expandvars(path.expanduser(path_value))
+
+
+def _get_host(conf_dict):
+    """Return host key listed in config, or "other" fallback if present."""
+    host = socket.getfqdn()
+
+    for key in conf_dict['hosts']:
+        if key == 'other':
+            continue
+        if key in host:
+            return key
+
+    if 'other' in conf_dict['hosts']:
+        return 'other'
+
+    raise ValueError(f'Host is not listed in the {JSON_CONFIG_FILE}.')
+
+
+def get_data_folders(conf_dict):
+    """Read input/output roots and cluster flag from JSON config."""
+    host = _get_host(conf_dict)
+    host_cfg = conf_dict['hosts'][host]
+
+    data_root = _expand_cfg_path(host_cfg['data_root'])
+    out_root = _expand_cfg_path(host_cfg['out_root'])
+    cluster_job = bool(host_cfg['cluster_job'])
+
+    if host == 'other':
+        if not path.isabs(data_root):
+            data_root = path.join(os.getcwd(), data_root)
+        if not path.isabs(out_root):
+            out_root = path.join(os.getcwd(), out_root)
 
     return data_root, out_root, cluster_job
 
+
+def _read_script_config():
+    with open(_pathname(JSON_CONFIG_FILE), 'r') as fp:
+        return cjson.loads(fp.read())
+
+
+def _normalize_hospitals(hospital_cfg):
+    if isinstance(hospital_cfg, str):
+        hospitals = [hospital_cfg]
+    elif isinstance(hospital_cfg, list) and all(isinstance(h, str) for h in hospital_cfg):
+        hospitals = hospital_cfg
+    else:
+        raise ValueError('"hospital" must be either a string or a list of strings in pyprep_ica_conf.json')
+
+    if not hospitals:
+        raise ValueError('"hospital" list in pyprep_ica_conf.json should not be empty')
+
+    return hospitals
+
+
+def _validate_source_scan_ids(source_scan_ids, hospitals):
+    if source_scan_ids is None:
+        return
+
+    if not isinstance(source_scan_ids, list) or not all(isinstance(s, str) for s in source_scan_ids):
+        raise ValueError('"source_scan_ids" must be null or a list of strings in pyprep_ica_conf.json')
+
+    if len(hospitals) != 1:
+        raise AssertionError('When "source_scan_ids" is provided, exactly one hospital must be specified.')
+
 if __name__ == '__main__': 
-    # ---------- Inputs ------------------
-    N_ARRAY_JOBS = 100       # Number of parallel jobs to run on cluster
+    conf_dict = _read_script_config()
 
-    hospital = 'Burnaby'   # Burnaby, Abbotsford, RCH, etc.
-    #hospital = 'Abbotsford'
-    #hospital = 'RCH'
+    N_ARRAY_JOBS = int(conf_dict['N_ARRAY_JOBS'])
+    if N_ARRAY_JOBS < 1:
+        raise ValueError('"N_ARRAY_JOBS" should be >= 1 in pyprep_ica_conf.json')
 
-    # Abbotsford
-    #source_scan_ids = ['1a02dfbb-2d24-411c-ab05-1a0a6fafd1e5']
+    hospitals = _normalize_hospitals(conf_dict['hospital'])
+    source_scan_ids = conf_dict.get('source_scan_ids')
+    _validate_source_scan_ids(source_scan_ids, hospitals)
 
-    #"""
-    # This is a Burnaby subset:
-    source_scan_ids = ['2f8ab0f5-08c4-4677-96bc-6d4b48735da2',		# Interesting spectrum
-                       #'57ea2fa1-66f1-43f9-aa17-981909e3dc96',
-                       #'81be60fc-ed17-4f91-a265-c8a9f1770517',
-                       #'81c0c60a-8fcc-4aae-beed-87931e582c45',
-                       #'ae9ffd8c-4b10-4dd4-a8db-14c88194f689',
-                       #'fff0b7a0-85d6-4c7e-97be-8ae5b2d589c2',
-                       #'ffff1021-f5ba-49a9-a588-1c4778fb38d3',		# FPZ not flat
-                    ]
-    #"""
+    view_plots = bool(conf_dict.get('view_plots', False))
+    verbose = conf_dict.get('verbose', 'WARNING')
 
-    #source_scan_ids = None   # None or a list of specific scan IDs (without .edf)
+    data_root, out_root, cluster_job = get_data_folders(conf_dict)
 
-    view_plots = True       # Flag to show interactive plots (lots of those)
-    verbose = 'ERROR'     # Can be 'ERROR', 'CRITICAL', or 'WARNING' (default)
-    # ------ end of inputs ---------------
-
-    data_root, out_root, cluster_job = get_data_folders()
-    input_dir = data_root + "/" + hospital
-    output_dir = out_root + "/" + hospital
-    png_path = output_dir + "/"
-
-    if not path.exists(output_dir):
-        os.makedirs(output_dir)
-
+    mne.viz.set_browser_backend('matplotlib')
     mne.set_log_level(verbose=verbose)
 
     # When running on the CC cluster, 1st command line argument is a 0-based
@@ -90,68 +111,69 @@ if __name__ == '__main__':
     else:
         ijob = int(sys.argv[1])
 
-    if source_scan_ids is None:
-        source_scan_ids = [path.basename(f)[:-4] for f in glob.glob(input_dir + '/*.edf')]
+    for hospital in hospitals:
+        input_dir = path.join(data_root, hospital)
+        output_dir = path.join(out_root, hospital)
+        png_path = output_dir + '/'
 
-    if cluster_job:
-        view_plots = False    # Disable interactive plots, just in case
-        nfiles = len(source_scan_ids)
-        files_per_job = nfiles // N_ARRAY_JOBS + 1
-        istart = ijob * files_per_job
+        if not path.exists(output_dir):
+            os.makedirs(output_dir)
 
-        if istart > nfiles - 1:
-            print('All done')
-            sys.exit()
+        if source_scan_ids is None:
+            hospital_scan_ids = [path.basename(f)[:-4] for f in glob.glob(input_dir + '/*.edf')]
+        else:
+            hospital_scan_ids = list(source_scan_ids)
 
-        iend = min(istart + files_per_job, nfiles)
-        source_scan_ids = source_scan_ids[istart:iend]
+        if cluster_job:
+            view_plots = False    # Disable interactive plots, just in case
+            nfiles = len(hospital_scan_ids)
+            files_per_job = nfiles // N_ARRAY_JOBS + 1
+            istart = ijob * files_per_job
 
-    if source_scan_ids is None:
-        scan_files = [path.basename(f) for f in glob.glob(input_dir + '/*.edf')]
-    else:
-        scan_files = [scan_id + '.edf' for scan_id in source_scan_ids]
+            if istart > nfiles - 1:
+                print(f'All done for {hospital}')
+                continue
 
-    success = True
-    for i, f in enumerate(scan_files):
-        filepath = input_dir + '/' + f
-        scan_id = source_scan_ids[i]
-        png_prefix = png_path + scan_id
+            iend = min(istart + files_per_job, nfiles)
+            hospital_scan_ids = hospital_scan_ids[istart:iend]
 
-        ts_org_png = png_prefix + "_ts_org.png"
-        psd_org_png = png_prefix + "_psd_org.png"
-        ts_postprep_png = png_prefix + "_ts_postprep.png"
-        psd_postprep_png = png_prefix + "_psd_postprep.png"
-        psd_postica_png = png_prefix + "_psd_postica.png"
+        scan_files = [scan_id + '.edf' for scan_id in hospital_scan_ids]
 
-        try:
-            # Initiate the preprocessing object
-            p = Pipeline(filepath, view_plots = view_plots, ts_plot_file = ts_org_png,
-                            psd_plot_file = psd_org_png)
-     
-            # Apply PREP and ICA
-            p.applyPipeline(applyICA = True, view_plots = view_plots, 
-                ts_postprep_png = ts_postprep_png, psd_postprep_png = psd_postprep_png,
-                psd_postica_png = psd_postica_png)
-     
-            # Get the resulting mne.Raw object
-            raw = p.getRaw()
+        success = True
+        for i, f in enumerate(scan_files):
+            filepath = input_dir + '/' + f
+            scan_id = hospital_scan_ids[i]
+            png_prefix = png_path + scan_id
 
-            # Old version: drop bad channels and save results in 
-            # EDF format
-            # raw.drop_channels(raw.info['bads'])
-            # output_path = output_dir + '/' + f
-            # write_mne_edf(raw, fname=output_path, overwrite=True)
+            ts_org_png = png_prefix + "_ts_org.png"
+            psd_org_png = png_prefix + "_psd_org.png"
+            ts_postprep_png = png_prefix + "_ts_postprep.png"
+            psd_postprep_png = png_prefix + "_psd_postprep.png"
+            psd_postica_png = png_prefix + "_psd_postica.png"
 
-            # Keep the bad channels just in case, and save data in .fif file
-            output_path = output_dir + '/' + f[:-4] + '_raw.fif'
-            raw.save(fname = output_path, proj = False, fmt = 'single', overwrite = True)
-            print('\n***** Processing of {} completed\n'.format(f), flush = True)
-        except Exception as e:
-            success = False
-            print('\n***** Record {} !!! FAILED !!!'.format(f))
-            print(e, flush = True)
-            print('\n')
- 
-    print("\n{} files processed {}.".format(len(scan_files), \
-          'successfully' if success else 'with errors'))
+            try:
+                # Initiate the preprocessing object
+                p = Pipeline(filepath, conf_dict=conf_dict, view_plots = view_plots,
+                             ts_plot_file = ts_org_png, psd_plot_file = psd_org_png)
+
+                # Apply PREP and ICA
+                p.applyPipeline(applyICA = True, view_plots = view_plots,
+                    ts_postprep_png = ts_postprep_png, psd_postprep_png = psd_postprep_png,
+                    psd_postica_png = psd_postica_png)
+
+                # Get the resulting mne.Raw object
+                raw = p.getRaw()
+
+                # Keep the bad channels just in case, and save data in .fif file
+                output_path = output_dir + '/' + f[:-4] + '_raw.fif'
+                raw.save(fname = output_path, proj = False, fmt = 'single', overwrite = True)
+                print('\n***** Processing of {} completed\n'.format(f), flush = True)
+            except Exception as e:
+                success = False
+                print('\n***** Record {} !!! FAILED !!!'.format(f))
+                print(e, flush = True)
+                print('\n')
+
+        print("\n{} files processed for {} {}.".format(len(scan_files), hospital,
+              'successfully' if success else 'with errors'))
 

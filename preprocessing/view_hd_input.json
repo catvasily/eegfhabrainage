@@ -11,10 +11,10 @@
     #----------------------------
 
     "what": "sources",          # 'sensors' or 'sources' - which data to use
-    "hospitals": ["Abbotsford", "Burnaby", "RCH", "Surrey"],  # List of hospitals to process
+	"hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+                                            # "Burnaby", "RCH", "Surrey" 
     "source_scan_ids": null,    # null or a list of lists of record IDs for each hospital
-    #"source_scan_ids": [["a1ffd117-b263-480d-b18e-6f12820c3fec"]],    # Burnaby
-    "view_plots": true,         # Flag to show interactive plots
+    "view_plots": false,         # Flag to show interactive plots
     "plot_only": false,         # Flag to only plot already precalculated spectra",
     "rand_seed": 12345,         # Integer or null: seed value for random generator
 
@@ -31,7 +31,7 @@
                 "out_root": "/data/eegfhabrainage/view_hd"
             }
         },
-        "cedar": {
+        "fir": {
             "cluster_job": true,
 
             "sensors": {
