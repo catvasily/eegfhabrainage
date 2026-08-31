@@ -19,30 +19,37 @@
     # ------------------------------------------
     "batch_job_parms": [
         {
-            "ijob": 0
+            "ijob": 0,
+            "pickle": "xgb_ABRS_Abnormality_ccv_nparms5_stdFalse_ignoreConfFalse_Sophia.pkl"
         },
         {
-            "ijob": 1
+            "ijob": 1,
+            "pickle": "xgb_ABRS_Abnormality_ccv_nparms5_stdFalse_ignoreConfFalse_Maria.pkl"
         },
         {
-            "ijob": 2
+            "ijob": 2,
+            "pickle": "xgb_ABRS_Abnormality_ccv_nparms5_stdFalse_ignoreConfFalse_Eleni.pkl"
         },
         {
-            "ijob": 3
+            "ijob": 3,
+            "pickle": "xgb_ABRS_Abnormality_ccv_nparms5_stdFalse_ignoreConfFalse_Zoe.pkl"
         },
         {
-            "ijob": 4
+            "ijob": 4,
+            "pickle": "xgb_ABRS_Abnormality_ccv_nparms5_stdFalse_ignoreConfFalse_Athina.pkl"
         }
     ],
 
     #"to_run": ["xgboost"],      # Step(s) to execute
     #"to_run": ["summarize"],   
     #"to_run": ["summary_plots"],
-    "to_run": ["feature_importance"],
-    #"to_run": ["predict"],      
+    #"to_run": ["feature_importance"],
+    "to_run": ["predict"],      
+    #"to_run": ["calibrate"],      
 
     "what": "sources",          # sensors' or 'sources' - which CWT to calculate
-	"hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+	# "hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+    "hospital": ["Burnaby","Abbotsford","RCH","Surrey"],
                                             # "Burnaby", "RCH", "Surrey" 
 
     "physician": [],            # Empty list, null, or list of physician names for the EEG scans.
@@ -52,7 +59,7 @@
     # "physician": ["Ioanna","Anastasia","Despina","Katerina","Elektra","Calliope","Daphne",
     #    "Penelope","Thalia","Chloe","Nefeli","Elara","Theodora"],
 
-    "force_recalc": true,      # Flag to run classifications even if results already exist
+    "force_recalc": false,      # Flag to run classifications even if results already exist
 
     "scan_ids": null,           # null or a list of specific record IDs
                                 # If not null, the hospital list should contain just
@@ -68,6 +75,18 @@
     # Dimensionality reduction
     "dim_reduction": "to_lobes",    # Method: 'pca', 'to_lobes', 'epi_features', or 'none'
                                     # NOTE: this setting is ignored if "use_consensus_cv" is true.
+
+    # -------------------------
+    # The key "pickle", if not null, specifies the pkl file pathname to save the model or to read the model
+    # from for plotting, feature importance step and predict step. It's path is relative to the out_root folder
+    # for the current host. If null, the pickle name will be formed automatically using hospital list, target
+    # label, nparms (5 or 9), standardize_features, ignore_confidence, dim_reduction and job number (if in batch mode).
+    # IMPORTANTLY, when loading model from explicitly given pickel, the above listed parameters
+    # will be loaded from pickle and will overwrite the values set in this file.
+
+    "pickle": "xgb_ABRS_Abnormality_ccv_nparms5_stdFalse_ignoreConfFalse_Athina.pkl",
+    #"pickle": "xgb_ABRS_Focal Epi_ccv_nparms5_stdFalse_ignoreConfFalse_Athina.pkl",
+    # -------------------------
 
     # This file specifies mapping 'ch<N>' - channel name, N = 0,...146
     # for the channel names/ordering in the src-cwt scans
@@ -269,29 +288,535 @@
         }
     },
 
-    "predict": {
-        "model": {      # Specifies which model to use: either pickle file or a set of parms that uniquely
-                        # identify this pickle
-            "pickle": null,       # null or path of a pickle file with a pre-trained model to use for prediction;
-                                  # the path is relative to the out_root folder for the current host
-                                  # If null, the set of params below will be used to locate the pickle
+    # Setting for the model calibration step
+    "calibrate": {
+        "force_recalibrate": true,  # Flag to recalibrate, even when calibrator is already available in pickle
+        "method": "betacal",    # Calibration method. Supported: "platt" | "betacal" | "isotonic" | "best"
+                                # When "best" - all are tried and the one with best brier score is used.
+                                # NOTE: best BS may not necessarily mean the best classifier performance
 
+        "model": {
+            # Specifies which model to use: WHEN TOP LEVEL PICKLE FILE IS NULL, a set of parms that uniquely
+            # identify this pickle:
 	        "hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+            "physician": null,      # When null or empty list, model based on all physician's records
+                                    # will be used
                                                     # "Burnaby", "RCH", "Surrey" 
             "target_label": "Abnormality",    # One of labels listed in "classifications_cols"
             "dim_reduction": "to_lobes",    # Method: 'pca', 'to_lobes', 'epi_features', or 'none'
             "use_moments_only": true,      # Flag to use only moments and drop Weibull dist parms
             "standardize_features": false,   # Flag to standardize features 
+            "ignore_confidence": false,       # Flag to collaps high and low confident labels
+
+            "threshold_selection": "f1"     # Method for setting the threshold for choosing class label
+                                            # Possible values are: F1
+                                            # null means that a default 0.5 threshold will be used
+            },
+
+        "platt": {
+            "penalty": "l2",          # Regularization type
+            "dual": false,             # Use dual optimization formulation
+            "tol": 0.0001,             # Optimization stopping tolerance
+            "C": 1e0,                  # Inverse regularization strength
+            "fit_intercept": true,     # Fit intercept term
+            "intercept_scaling": 1.0,  # Intercept scaling (liblinear only)
+            "class_weight": null,      # Optional class reweighting
+            "random_state": null,      # RNG seed for stochastic solvers
+            "solver": "lbfgs",        # Optimization solver
+            "max_iter": 100,           # Maximum solver iterations
+            "multi_class": "auto",    # Multiclass handling strategy
+            "verbose": 0,              # Solver verbosity level
+            "warm_start": false,       # Reuse previous fit parameters
+            "n_jobs": null,            # Parallel workers (solver-dependent)
+            "l1_ratio": null           # Elastic-net mix (penalty=elasticnet)
+        },
+
+        "betacal": {
+            "parameters": "abm"       # BetaCalibration parameterization: "abm" | "am" | "ab"
+        },
+
+        "isotonic": {
+            "y_min": 0.0,              # Lower bound for calibrated probabilities
+            "y_max": 1.0,              # Upper bound for calibrated probabilities
+            "increasing": true,        # Fit monotone increasing calibration mapping
+            "out_of_bounds": "clip"   # Handling outside fit range: "nan" | "clip" | "raise"
+        }
+    },
+
+    "predict": {
+        "use_calibrated_p": true,   # Flag to use calibrated p-values for predictions. Should normally
+                                    # be set to true. If calibrated results are not available, calibration
+                                    # will be run as per "calibrate" settings. Look at the calibrate.method -
+                                    # it should be typically set to "best".
+
+        "calibration": "betacal",   # Calibration method; if saved calibration does not exist or is different 
+                                    # from this one - recaclibrate
+                                    
+        # ----------------------------------------------------------------------------------------------
+        # NOTE: summarize_only and plot_only can be: a) both false b) one of them true, the other -false
+        # ----------------------------------------------------------------------------------------------
+        "summarize_only": true,    # When true, existing .csv files with prediction results
+                                    # are used to run stat analyses across physicians, in accordance.
+                                    # with settings under the "summarize" subkey.
+                                    # No new predictions are made in this case.
+        "plot_only": false,          # When true, no predictions are run. Only plots of results
+                                    # collected in predict_summary...csv files are generated
+        "results_subfolder": "predict_F1", # If not null, put output .csv files into this subfolder relative
+                                        # to the hosts.<host>...."out_root"
+
+        "model": {
+            "n_jobs": 4,        # Use multithreading when running prediction step, if supported
+                                # (does not seem to have any effect)
+            
+            # Specifies which model to use: WHEN TOP LEVEL PICKLE FILE IS NULL, a set of parms that uniquely
+            # identify this pickle:
+	        "hospital": ["Abbotsford"],             # One hospital or a list of any of "Abbotsford",
+            "physician": null,      # When null or empty list, model based on all physician's records
+                                    # will be used
+                                                    # "Burnaby", "RCH", "Surrey" 
+            "target_label": "Abnormality",    # One of labels listed in "classifications_cols"
+            "dim_reduction": "to_lobes",    # Method: 'pca', 'to_lobes', 'epi_features', or 'none'
+            "use_moments_only": true,      # Flag to use only moments and drop Weibull dist parms
+            "standardize_features": false,   # Flag to standardize features 
+            "ignore_confidence": false,       # Flag to collaps high and low confident labels
+
+            "threshold_selection": "f1"     # Method for setting the threshold for choosing class label
+                                            # Possible values are: F1
+                                            # null means that a default 0.5 threshold will be used
+            },
+
+        "input_records": {    
+            "hospital": ["Burnaby","Abbotsford","RCH","Surrey"],    # A list with one of: Burnaby, Abbotsford, RCH, Surrey
+            "physician": ["Others"],   # Empty list, null, or list of physician names for the EEG scans.
+                                       # If specified, others physicians' records will be dropped.
+            #"physician": ["Ioanna","Anastasia","Despina","Katerina","Elektra","Calliope","Daphne",
+            #              "Penelope","Thalia","Chloe","Nefeli","Elara","Theodora"],
+            "scan_ids": null,                       # null or a list of specific record IDs
             "ignore_confidence": false       # Flag to collaps high and low confident labels
             },
 
-            "input_records": {    
-                "hospital": ["Burnaby"],   # A list with one of: Burnaby, Abbotsford, RCH, Surrey
-                "physician": [],                        # Empty list, null, or list of physician names for the EEG scans.
-                                                        # If specified, others physicians' records will be dropped.
-                "scan_ids": null,                       # null or a list of specific record IDs
-                }
+        # Settings for summarizing results of different physicians on the same set of input records
+        "summarize": {
+            "hospital": ["Abbotsford","Burnaby","RCH","Surrey"],    # A list with one of: Burnaby, Abbotsford, RCH, Surrey
+            "target_label": "Abnormality",    # One of labels listed in "classifications_cols"
+            #"target_label": "Focal Epi",
+            #"target_label": "Gen Epi",
+            #"target_label": "Focal Non-epi",
+            #"target_label": "Gen Non-epi",
+            "dim_reduction": "ccv",         # Method: 'pca', 'to_lobes', 'epi_features', or 'none'
+            "use_moments_only": true,       # Flag to use only moments and drop Weibull dist parms
+            "standardize_features": false,  # Flag to standardize features 
+            "ignore_confidence": false,     # Flag to collaps high and low confident labels in the models used
+            "model_physicians":             # List of physicians whose models were used
+                ["Sophia","Maria","Eleni","Zoe","Athina"],
+            "target_physicians": ["Others"],
+            
+            # Bootstrap settings for AUC, F1 conf intervals estimates
+            "n_bootstraps": 2000,               # Number of bootstrap resamplingsp use at least 1000
+            "ci_level": 0.95,                   # Confidence interval size 
+
+            "joint_prediction": {
+                "method": "joint_LR",              # Ensemble learning method. "bayes" - use naive Bayes approach
+                                                # "joint_LR" - use logistic regression
+                "n_splits": 5,                  # Number of splits for stratified K-fold to split target physician's
+                                                # data into outer train/test parts (K)
+                "n_inner_splits": 4,            # Number of inner splits (M) on each outer-train fold for
+                                                # constructing OOF train scores used for calibration/thresholding
+                "threshold_selection": "f1",    # Method for setting the threshold for joint class label
+                                                # Possible values are: F1. null means that a default 0.5 is used
+                "calibrate_scores": true,      # Flag to calibrate the joint model prediction scores
+                                                # Typically, should be set to FALSE, because additional calibration
+                                                # usually makes BS worse
+                "show_pr_curve": true,
+                "bayes": {},                    # Additional parms for "bayes method"
+                "joint_LR": {                   # Additional parms for the Logistic Regression method
+                    #"n_splits": 2,             # No longer used: inner split count is now
+                                                # predict.summarize.joint_prediction.n_inner_splits
+                    "penalty": "l2",
+                    "dual": false,              # Keep false when n_samples >> n_physicians
+                    "tol": 0.0001,              # tolerance for stopping iterations
+                    "C": 1,                   # SMALLER C -> STRONGER regularization!
+                    "fit_intercept": true,
+                    "intercept_scaling": 1,     # only matters if liblinear solver is used
+                    "class_weight": "balanced",
+                    "random_state": null,       # If null, the global seed value will be used
+                    #"solver": "lbfgs",          # lbfgs, saga, liblinear
+                    "solver": "saga",
+                    "max_iter": 500,
+                    "multi_class": "auto",
+                    "verbose": 0,
+                    "warm_start": false,
+                    "n_jobs": null,
+                    "l1_ratio": null            # If not null, combines L1 and L2 penalties with specifed ratio L1/L2
+                    }
+                }   # end of "joint_prediction"
+            },  # end of summarize
+
+        # Settings for visualizing confidences plot from summary CSV data
+        "ridge_plots": {
+            # --------------------------------------------------------------------------------------------------
+            # !!! NOTE: the "ignore_confidence" setting for the models used is taken from the "summarize" key !!! 
+            # --------------------------------------------------------------------------------------------------
+
+            "enabled": false,
+            "show_plot": true,
+            "dpi": 300,
+
+            "style": "white",
+            "context": "paper",
+
+            # Number of physician columns in the outer grid
+            "n_cols": 7,
+
+            # If null, figure size is derived from width/height per physician panel
+            "figure_size": [12,8],
+            "width_per_physician": 4.8,
+            "height_per_physician": 5.0,
+
+            # X-axis limits for PredConfidence density plots (predicted-label probability)
+            "x_limits": [0.0, 1.0],
+
+            # X-axis limits for STDConfidence/STD aggregate density plots.
+            # STD values cannot be negative, so the default is [0, 1].
+            "std_x_limits": [0.0, 0.4],
+
+            # Shared Y-axis limits for all ridge distributions.
+            # null -> auto (same min/max applied to every ridge axis),
+            # [ymin, ymax] -> fixed bounds, [null, ymax] or [ymin, null] -> mixed.
+            "y_limits": [-5,15],
+            #"y_limits": [-20,30],       # Focal Epi
+            #"y_limits": [-20,30],       # Gen Epi
+
+            # Top-to-bottom fill colors for the four ridge rows:
+            # healthy green -> light green -> orange -> dangerous red
+            # (TrueLabel,Confident) = (0,1), (0,0), (1,0), (1,1)
+            "colors": ["#1a9850", "#91cf60", "#fc8d59", "#d73027"],
+
+            # Optional labels for the 4 confidence/label subsets
+            "subset_labels": {
+                "0_1": "Conf/N",
+                "0_0": "Non-conf/N",
+                "1_0": "Non-conf/A",
+                "1_1": "Conf/A",
+                "overall": "Overall"
+                },
+
+            # Colors for the overall row (used for correct/mismatch KDEs).
+            "overall_match_color": "#4c78a8",
+            "overall_mismatch_color": "#9ecae9",
+
+            "kde_bw_adjust": 0.2,   # Relative kernel with compared to default one
+            "kde_n_points": 256,    # Number of points used to evaluate KDE curves
+            "fill_alpha": 0.8,
+            "line_width": 1.2,
+            "single_value_height": 1.0,  # Vertical marker height when subset has one value only
+
+            "mismatch_density_scale": "auto",  # "auto": scale + and - by subset fractions; numbers
+                                               # If an FP number - then this is scaling of mismatched KDE; the matched
+                                               # KDE will use scale 1 (that is - not scaled).
+            "symmetric_signed_y": true,          # Force signed ridges to use symmetric y-limits around 0
+
+            # Spacing controls
+            "grid_hspace": 0.28,
+            "grid_wspace": 0.18,
+            "ridge_hspace": -0.35,
+
+            "title": null,
+            "title_font_size": 12,
+            "title_y": 0.995,
+
+            "physician_title_prefix": "", # prefix in front of physician name, i.e."Model physician: ",
+            "mean_title_prefix": "",      # prefix for aggregate plots, i.e. "Aggregate: ",
+            "joint_confidence_panel_label": "Joint",    # The full label will be this + (joint method)
+            "std_confidence_panel_label": "Confidence STD",
+            "physician_title_font_size": 10,
+
+            # When true, show x-axis ticks/labels on every ridge panel instead of only the bottom row.
+            "show_x_axis_on_all_ridges": true,
+            # When true, show y-axis spines and tick labels for every ridge row
+            # in the left-most column of ridge panels.
+            "show_y_axis_on_leftmost_ridges": true,
+            # Inner spacing used (at minimum) when all ridge rows must show x-axes.
+            # This avoids overlap that can hide axis lines.
+            "ridge_hspace_with_all_x_axes": 0.08,
+            "pane_x_label": "Confidence",       # Label for horizontal axis in the bottom ridge row
+            "std_x_label": "STD (Confidence)",  # Need a different x-label for the STD KDE plot
+            "show_pane_y_label": true,          # Show vertical axis label on each ridge pane
+            "pane_y_label": "KDE",              # Vertical axis label text for ridge panes
+            "subset_font_size": 8
+            },  # end of ridge_plots
+
+        # Settings for visualizing correct/incorrect predicted labels counts from summary CSV data
+        "counts_bar_plot": {
+            # -----------------------------------------------------------------------------
+            # Creates 10 panels arranged in 5 rows x 2 columns:
+            # Left column: per-physician + joint percentages (correct up, incorrect down).
+            #              Within each group, positive and negative parts sum to 100%.
+            # Right column: STD of physician correct-percentage values across physicians only
+            #               (joint excluded). Incorrect-percentage STD is not plotted separately,
+            #               since it is identical to correct-percentage STD.
+            # Rows 1-4 follow the standard confident/non-confident x normal/abnormal subsets.
+            # Row 5 is the overall subset, ignoring both true-label class and confidence.
+            # -----------------------------------------------------------------------------
+
+            "enabled": false,
+            "show_plot": true,
+            "dpi": 300,
+
+            "style": "whitegrid",
+            "context": "paper",
+
+            # If null, width/height below are used.
+            "figure_size": null,
+            "width": 12.0,
+            "height": 11.0,
+
+            # Relative panel widths [left_column, right_column].
+            # Left column should be much wider due to more bar groups.
+            "column_width_ratio": [6.0, 1.8],
+
+            # Colors for rows in this order:
+            # (TrueLabel,Confident) = (0,1), (0,0), (1,0), (1,1)
+            # If omitted, falls back to ridge_plots.colors.
+            "colors": ["#1a9850", "#91cf60", "#fc8d59", "#d73027"],
+
+            # Optional labels for the 4 confidence/label subsets
+            "subset_labels": {
+                "0_1": "Conf/N",
+                "0_0": "Non-conf/N",
+                "1_0": "Non-conf/A",
+                "1_1": "Conf/A",
+                "overall": "Overall"
+                },
+
+            # Colors for the overall row, which does not map to a single true-label subset.
+            "overall_match_color": "#4c78a8",
+            "overall_mismatch_color": "#9ecae9",
+
+            # Group label used for the joint-model group in left panels.
+            # If empty/null, defaults to "Joint (LR)" or "Joint (Bayes)".
+            "joint_group_label": "Joint",
+
+            # Width of crossing bars in each group.
+            "bar_width": 0.36,
+
+            # Optional separate width for the right-column STD bars.
+            # If omitted, bar_width is used.
+            "std_bar_width": 0.22,
+
+            # Fixed x-axis span for right-column STD panels.
+            # This prevents Matplotlib autoscaling from hiding changes in std_bar_width.
+            "std_panel_x_limits": [-0.75, 0.75],
+
+            # When true, the y=0 baseline in right-column STD panels is vertically aligned
+            # with the left-column baseline in the same row. In this mode, right_y_limits/std_y_limits
+            # control the STD scale, but the negative bound may be expanded to preserve alignment.
+            "align_std_zero_with_left": true,
+
+            # Shared y-limits across all left-column panels (percentages).
+            # null -> auto symmetric range computed from all left panels.
+            #"left_y_limits": [-50, 100],
+            #"left_y_limits": [-90, 100],        # Focal Epi
+            "left_y_limits": [-90, 100],        # Gen Epi
+
+            # Shared y-limits across all right-column STD panels.
+            # null -> auto range computed from all right panels.
+            # Backward-compatible alias: std_y_limits.
+            # When align_std_zero_with_left=true, the positive limit is preserved as scale guidance,
+            # and the negative limit may be adjusted so the y=0 baseline aligns with the left column.
+            "right_y_limits": [0,15],
+            #"std_y_limits": null,
+
+            "left_y_label": "Percentage",
+            "std_y_label": "Percentage STD",
+            "left_x_label": "Physician / Joint",
+            "std_x_label": "STD across physicians",
+
+            "panel_title_font_size": 10,
+            "title": null,
+            "title_font_size": 12,
+            "title_y": 0.995,
+
+            "grid_hspace": 0.35,
+            "grid_wspace": 0.25
+            },  # end of counts_bar_plot
+
+        "grid_pr_plot": {
+            # PR-curve grid from predict_summary...csv records (scan-level rows only).
+            # Rows are plotted top-to-bottom as subsets:
+            # 1) Confident true labels (Confident=1)
+            # 2) Non-confident true labels (Confident=0)
+            # 3) All eligible records
+            #
+            # Each panel overlays 2 curves:
+            # - Physician model curve for that subset
+            # - Joint model curve for that subset
+            #
+            # Eligibility rules:
+            # - Physician curves use all rows in subset
+            # - Joint curves use only rows with held_out_set=0 in subset
+            # - Rows with ScanID starting with "brier_scores_" are dropped
+            # - TrueLabel/Confident must be binary (0/1)
+            "enabled": true,
+            "show_plot": true,
+            "dpi": 300,
+
+            "style": "whitegrid",
+            "context": "paper",
+
+            # If null/empty, output file is written next to summary CSV as
+            # <summary_csv_stem>_grid_pr_plot.png
+            "output_png": null,
+
+            # Physician panel geometry within each subset row block.
+            # For 5 physicians, keep this as 1 x 5.
+            "n_panel_rows": 1,
+            "n_panel_cols": 5,
+
+            # If null, figure size is inferred from width_per_col and
+            # height_per_subset_row.
+            "figure_size": null,
+            "width_per_col": 3.8,
+            "height_per_subset_row": 2.8,
+
+            "x_limits": [0.0, 1.0],
+            "y_limits": [0.3, 1.0],
+
+            "x_label": "Recall",
+            "y_label": "Precision",
+            "confident_label": "Confident",
+            "nonconfident_label": "Non-confident",
+            "all_label": "All",
+
+            "title": null,
+            "title_font_size": 12,
+            "title_y": 0.995,
+            "panel_title_font_size": 10,
+
+            "physician_curve_color": "#4c78a8",
+            "joint_curve_color": "#f58518",
+            "joint_line_style": "--",
+            #"line_width": 1.8,
+            "line_width": 3,
+
+            "show_legend": true,
+            "legend_loc": "lower left",
+            "legend_font_size": 7,
+            "legend_frame": false,
+
+            "physician_label_template": "{physician} (AP={ap:.3f}, n={n})",
+            "joint_label_template": "Joint (AP={ap:.3f}, n={n})",
+            "no_curve_text": "insufficient class variation",
+            "note_font_size": 7,
+
+            "grid_alpha": 0.3,
+            "hspace": 0.35,
+            "wspace": 0.2
         },
+
+        "aucs_bar_plot": {
+            # PR AUC bars from summarize-only CSV summary rows.
+            # Rows are plotted top-to-bottom as:
+            # 1) PR_AUC_confident
+            # 2) PR_AUC_nonconfident
+            # 3) PR_AUC
+            "enabled": false,
+            "show_plot": true,
+            "dpi": 300,
+
+            "style": "whitegrid",
+            "context": "paper",
+
+            # If null/empty, output file is written next to summary CSV as
+            # <summary_csv_stem>_pr_auc_bar_plot.png
+            "output_png": null,
+
+            "figure_size": [10.0, 11.0],
+            "bar_width": 0.72,
+            "y_limits": [0.0, 1.0],
+
+            # Optional CI whiskers parsed from text values like
+            # "0.812 (0.754, 0.864)" in summary rows.
+            "show_ci": true,
+            "ci_capsize": 4.0,
+            "ci_line_width": 1.1,
+
+            # If provided, must contain >= number_of_physicians + 1 entries.
+            # Otherwise physician_color/joint_color are used.
+            "colors": null,
+            "physician_color": "#4c78a8",
+            "joint_color": "#f58518",
+            "missing_color": "#c7c7c7",
+            "joint_group_label": "Joint",
+
+            # Summary rows and joint column names as produced by summarize-only mode.
+            "subset_rows": {
+                "confident": "PR_AUC_confident",
+                "nonconfident": "PR_AUC_nonconfident",
+                "overall": "PR_AUC"
+                },
+
+            "joint_auc_column": "JointConfidence",
+
+            "confident_label": "Confident labels",
+            "nonconfident_label": "Non-confident labels",
+            "overall_label": "Overall",
+
+            "title": null,
+            "title_font_size": 12,
+            "title_y": 0.995,
+            "pane_title_font_size": 10,
+
+            "x_label": "Physicians and Joint model",
+            "y_label": "PR AUC",
+
+            "show_value_labels": true,
+            "value_label_format": "{:.3f}",
+            "value_label_font_size": 8,
+
+            "grid_alpha": 0.25,
+            "grid_hspace": 0.28
+            },  # end of aucs_bar_plot
+
+        "mcc_error_plot": {
+            # Pairwise physician error-correlation matrix (MCC over error vectors).
+            # Uses summary CSV rows where TrueLabel and physician predicted labels are binary.
+            "enabled": false,
+            "show_plot": true,
+            "dpi": 300,
+
+            "style": "white",
+            "context": "paper",
+
+            # If null/empty, output file is written next to summary CSV as
+            # <summary_csv_stem>_mcc_error_heatmap.png
+            "output_png": null,
+
+            "figure_size": [8.0, 6.8],
+            "title": null,
+            "title_font_size": 12,
+            "title_y": 0.995,
+
+            "x_label": "Physician model",
+            "y_label": "Physician model",
+            "label_font_size": 10,
+            "tick_font_size": 9,
+
+            "cmap": "RdBu_r",
+            "vmin": -1.0,
+            "vmax": 1.0,
+            "center": 0.0,
+            "square": true,
+
+            "annot": true,
+            "fmt": ".2f",
+            "linewidths": 0.5,
+            "linecolor": "white",
+
+            "cbar": true,
+            "cbar_label": "MCC of error vectors"
+            }   # end of mcc_error_plot
+        },  # end of "predict" key
 
     "summary_plots": {
         "what": "auc4method",                  # which plot to generate: auc4method|auc4physician
@@ -312,7 +837,7 @@
             "legend_loc": "upper center",      # Matplotlib legend location
             "legend_bbox_to_anchor": [0.55, 1.0],# Optional anchor [x, y]; null for default
             "dpi": 300
-        },
+            },
 
         "auc4physician": {
             "input_csv": "auc4physician260331.csv",  # absolute path or relative to out_root
@@ -331,8 +856,8 @@
             "legend_loc": "upper center",          # Matplotlib legend location
             "legend_bbox_to_anchor": [0.59, 1.01],    # Optional anchor [x, y]; null for default
             "dpi": 300
-        }
-    },
+            }
+        },  # end of summary_plots key
 
     "hosts": {
         "ub2": {
@@ -344,7 +869,9 @@
 
             "sources": {
                 "data_root": "/data/eegfhabrainage/src-cwt",
-                "out_root": "/data/eegfhabrainage/src-cls"             # output classification results here
+                #"out_root": "/data/eegfhabrainage/src-cls"             # output classification results here
+                #"out_root": "/data/eegfhabrainage/src-cls/physicians/ccv-260329/as-names"            # output classification results here
+                "out_root": "/data/eegfhabrainage/src-cls/physicians/ccv-260329"             # output classification results here
                 },
 
             "destrieux_order": "~/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_atlas_ordered.csv",
@@ -368,7 +895,8 @@
 
             "destrieux_order": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_atlas_ordered.csv", 
             "destrieux_lobes_order": "/home/amoiseev/projects/rpp-doesburg/amoiseev/data/mne_data/MNE-fsaverage-data/fsaverage/label/destrieux_lobes_ordered.csv", 
-            "db_root": "/project/6019337/databases/eeg_fha/release_001"   
+            #"db_root": "/project/6019337/databases/eeg_fha/release_001"   
+            "db_root": "/project/6019337/amoiseev/data/eegfhabrainage/reports"   
         },
 
         "other": {
@@ -389,15 +917,16 @@
         }
     },   # end of "hosts"
 
-    # sqlite DB name with EEG scans info
+    # sqlite DB name with EEG scans info - connects EEG scan ID with report ID
     "eeg_info_db":  "eeg_release_001_main_public_250819.db",
 
-    # sqlite DB name with labeled reports
+    # sqlite DB name with labeled reports - maps report ID to true labels
     "classifications_db":  "eeg_reports_release_001_mistral_public_250825.db",
 
-    # sqlite DB with reports ID, neurologist and hospital
+    # sqlite DB that maps reports ID to neurologist and hospital
     # (no need to have the reports themselves)
-    "reports_db": "eeg_reports_release_001_aux_public_240325.db",
+    #"reports_db": "eeg_reports_release_001_aux_public_240325.db",
+    "reports_db": "eeg_reports_release_001_aux_public_240325_Others.db",    # Here low cnt physicians grouped to 'Others'
 
     "classifications_cols": [
                       "Hashed_ReportURN",

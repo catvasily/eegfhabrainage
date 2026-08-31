@@ -25,6 +25,19 @@ from build_epi_features import build_and_fit_epi_features, apply_epi_features
 
 STEP = 'xgboost'
 
+_PICKLE_ARG_OVERRIDE_KEYS = (
+    'hospital',
+    'physician',
+    'target_label',
+    'seed',
+    'cv_n_splits',
+    'use_moments_only',
+    'dim_reduction',
+    'standardize',
+    'ignore_confidence',
+)
+
+
 def do_xgboost(ss):
     """
     Implements 'xgboost' step for the `run_classifier.py` script:
@@ -44,22 +57,10 @@ def do_xgboost(ss):
     hlist = ss.hlist(ss.args['hospital'])
     label = ss.args['target_label']
     nparms = 5 if ss.args.get('use_moments_only', False) else 9
-
-    print(
-        'Running XGBOOST step for: '
-        f'hospital_list={hlist}, '
-        f'label={label}, '
-        f'nparms={nparms}, '
-        f'standardize={standardize}, '
-        f'ignore_confidence={ignore_confidence}'
-    )
-
-    pkl_pname = None
-    if not force_recalc:
-        pkl_pname = _find_existing_results_pickle(ss, standardize, ignore_confidence)
+    pkl_pname = _resolve_results_pickle_path(ss, standardize, ignore_confidence, nparms)
 
     # Note: using_precalc will always be false when force_recalc = True
-    using_precalc = pkl_pname is not None and pkl_pname.exists()
+    using_precalc = (not force_recalc) and pkl_pname.exists()
     results_ready = False
 
     if using_precalc:
@@ -69,6 +70,19 @@ def do_xgboost(ss):
             results_payload = pickle.load(fp)
 
         verify_pickle_xgboost_version(results_payload, pkl_pname)
+        _overwrite_args_from_pickle(ss, results_payload)
+
+        # Refresh derived values so plotting and file naming match pickle metadata.
+        hlist = ss.hlist(ss.args['hospital'])
+        label = ss.args['target_label']
+        nparms = 5 if ss.args.get('use_moments_only', False) else 9
+        standardize = bool(
+            ss.args.get(
+                'standardize_features',
+                ss.args.get('standardize', results_payload.get('standardize', standardize)),
+            )
+        )
+        ignore_confidence = bool(ss.args.get('ignore_confidence', results_payload.get('ignore_confidence', ignore_confidence)))
         cv_n_splits = int(results_payload.get('cv_n_splits', cv_n_splits))
         Y = results_payload.get('Y')
         y_proba = results_payload.get('y_proba')
@@ -77,8 +91,17 @@ def do_xgboost(ss):
         results_ready = True
     else:
         Y, y_proba, y_score, y_pred, results_ready, cv_n_splits = _compute_classification_results(
-            ss, standardize, cv_n_splits
+            ss, standardize, cv_n_splits, pkl_pname
         )
+
+    print(
+        'Running XGBOOST step for: '
+        f'hospital_list={hlist}, '
+        f'label={label}, '
+        f'nparms={nparms}, '
+        f'standardize={standardize}, '
+        f'ignore_confidence={ignore_confidence}'
+    )
 
     if results_ready:
         # Calculate overall accuracy from predictions
@@ -97,13 +120,7 @@ def do_xgboost(ss):
         plot_pr = ss.args.get('plot_pr_curve', False)
         if plot_pr and y_score is not None and np.unique(Y).size == 2:
             show_plot = ss.args.get('show_plots', True)
-            outfname = ss.prcrv_png_pname(
-                hlist,
-                ss.args['target_label'],
-                nparms,
-                standardize,
-                ignore_confidence,
-            )
+            outfname = _pr_curve_png_from_pickle_path(pkl_pname)
             outfname = plot_and_save_pr_curve(
                 Y,
                 y_score,
@@ -116,6 +133,44 @@ def do_xgboost(ss):
 
     print(f'\n Step *{STEP}* completed successfully')
 
+def _resolve_results_pickle_path(ss, standardize, ignore_confidence, nparms):
+    """Resolve classification pickle path from args['pickle'] or auto naming."""
+    explicit_top_level = ss.resolve_top_level_pickle_override()
+
+    if explicit_top_level is not None:
+        return explicit_top_level
+
+    hlist = ss.hlist(ss.args['hospital'])
+    label = ss.args['target_label']
+
+    return ss.cls_pkl_pname(hlist, label, nparms, standardize, ignore_confidence)
+
+def _pr_curve_png_from_pickle_path(pkl_pname):
+    """Derive PR-curve PNG name from a classification pickle file path."""
+    stem = Path(pkl_pname).stem
+
+    if stem.startswith('xgb_'):
+        stem = f'prcrv_{stem[4:]}'
+    else:
+        stem = f'prcrv_{stem}'
+
+    return Path(pkl_pname).with_name(f'{stem}.png')
+
+def _overwrite_args_from_pickle(ss, results_payload):
+    """Update selected ss.args values from a loaded results pickle payload."""
+    for key in _PICKLE_ARG_OVERRIDE_KEYS:
+        if key in results_payload:
+            ss.args[key] = results_payload[key]
+
+    if 'dim_reduction' not in results_payload:
+        full_model_data = results_payload.get('full_model_data', {})
+
+        if isinstance(full_model_data, dict) and 'dim_reduction' in full_model_data:
+            ss.args['dim_reduction'] = full_model_data['dim_reduction']
+
+    # Keep both naming variants in sync for compatibility across configs.
+    if 'standardize' in results_payload:
+        ss.args['standardize_features'] = bool(results_payload['standardize'])
 
 def _get_balanced_training_settings(config_dict):
     """
@@ -272,7 +327,7 @@ def _merge_balanced_and_discarded_outputs(
 
     return y_pred_all, y_score_all, y_proba_all
 
-def _compute_classification_results(ss, standardize, cv_n_splits):
+def _compute_classification_results(ss, standardize, cv_n_splits, pkl_pname):
     """
     Compute classification results by loading data, training model, and running cross-validation.
     Depending on JSON settings, this may be a standard cross-validation or nested
@@ -699,6 +754,7 @@ def _compute_classification_results(ss, standardize, cv_n_splits):
         cv_n_splits,
         standardize,
         full_model_data,
+        pkl_pname,
         nested_cv_info=nested_cv_info,
         consensus_cv_info=consensus_cv_info,
     )
@@ -706,16 +762,6 @@ def _compute_classification_results(ss, standardize, cv_n_splits):
     results_ready = True
 
     return Y, y_proba, y_score, y_pred, results_ready, cv_n_splits
-
-def _find_existing_results_pickle(ss, standardize, ignore_confidence):
-    hlist = ss.hlist(ss.args['hospital'])
-    label = ss.args['target_label']
-    nparms = 5 if ss.args.get('use_moments_only', False) else 9
-    exact = ss.cls_pkl_pname(hlist, label, nparms, standardize, ignore_confidence)
-    if exact.exists():
-        return exact
-
-    return None
 
 def _select_best_nested_params(fold_summaries):
     """
@@ -759,13 +805,12 @@ def _save_classification_results(
     cv_n_splits,
     standardize,
     full_model_data,
+    pkl_pname,
     nested_cv_info=None,
     consensus_cv_info=None,
 ):
     use_moments_only = ss.args.get('use_moments_only', False)
     ignore_confidence = ss.args.get('ignore_confidence', False)
-    hlist = ss.hlist(ss.args['hospital'])
-    pkl_pname = ss.cls_pkl_pname(hlist,ss.args['target_label'], nparms, standardize, ignore_confidence)
     pkl_pname.parent.mkdir(parents=True, exist_ok=True)
 
     results_payload = {
@@ -780,6 +825,7 @@ def _save_classification_results(
         'seed': seed,
         'cv_n_splits': cv_n_splits,
         'use_moments_only': use_moments_only,
+        'dim_reduction': ss.args.get('dim_reduction'),
         'standardize': standardize,
         'ignore_confidence': ignore_confidence,
         'full_model_data': full_model_data,
@@ -1523,6 +1569,13 @@ def load_data(ss):
     """
     lst_IDs = ss.args['scan_ids']
     nscans = len(lst_IDs)
+
+    if nscans == 0:
+        raise ValueError(
+            'No scans to load: ss.args["scan_ids"] is empty after filtering. '
+            'Check hospital/physician/label filters and confidence settings.'
+        )
+
     data = None
     expand_sid = lambda sid: (ss.args['hospital'][sid[0]], sid[1])
 

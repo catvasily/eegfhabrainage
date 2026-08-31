@@ -647,7 +647,12 @@ def plot_reports(ss):
     # Save the plot
     save_file = plot_title(ndims).replace(',', '')
     save_file = save_file.replace(' ','_')
-    save_file = save_file.replace('\'','') + f'_{ss.n_clusters}clusters'
+
+    if getattr(ss,'n_clusters',0):
+        save_file = save_file.replace('\'','') + f'_{ss.n_clusters}clusters'
+    else:
+        save_file = save_file.replace('\'','')
+
     fpath = path.join(ss.args["reports_db_dir"], save_file + '.png')
     plt.savefig(fpath, dpi=ss.args['plot_reports']['dpi'])
     plt.show()

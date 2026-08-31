@@ -40,13 +40,18 @@ For batch mode with different parameter sets per run:
 * Add ``batch_run`` to ``INPUT_JSON_FILE`` and set it to ``true``.
 
 * Add ``batch_job_parms`` as a list of dictionaries such as
-  ``[{"ijob": <job-num>, <key>: <value>, ...}]`` where each key/value pair
+    ``[{"ijob": <job-num>, "tag": <optional-tag>, <key>: <value>, ...}]`` where each key/value pair
   overrides one JSON setting for the given ``ijob``.
 
 * With no CLI arguments, all configurations in ``batch_job_parms`` are run.
 
 * With CLI arguments and batch mode enabled, the first CLI argument is treated
   as the ``ijob`` identifier and only that configuration is run.
+
+NOTE that a **batch suffix** (a string) is generated for each batch job so that it
+could be used, for example, in output file names. If corresponding batch run dictionary
+has the 'tag' key, this suffix will be '_<tag-value>'; otherwise the suffix will be
+'_ijob<k>' where ``k`` is the 'ijob' key value for the job being run.
 
 Available steps:
 
@@ -55,6 +60,7 @@ Available steps:
 * ``summary_plots``: create summary bar plots from ``.csv`` output.
 * ``feature_importance``: show feature importances for a specified label.
 * ``predict``: use a trained model in prediction mode.
+* ``calibrate``: evaluate saved out-of-fold probabilities for calibration.
 """
 
 import sys
@@ -69,6 +75,7 @@ from do_xgboost import do_xgboost
 from do_cls_summarize import do_cls_summarize
 from cls_feature_importance import cls_feature_importance
 from cls_predict import cls_predict
+from cls_calibrate import cls_calibrate
 from plot_cls_summary import plot_cls_summary
 
 __file__ = path.realpath(__file__)    # expand potentially relative path to a full one
@@ -131,6 +138,9 @@ def setup_paths(ss):
 
     ss.out_root = Path(ss.args['hosts'][ss.host][ss.args['what']]['out_root'])
 
+    # Shared helper used by xgboost/predict/feature_importance steps.
+    ss.resolve_top_level_pickle_override = lambda: resolve_top_level_pickle_override(ss)
+
     # Utility to create a string from the hosptialt list like this:
     # ['Burnaby', 'Abbotsford'] -> 'BA'
     ss.hlist = lambda hospital_list: ''.join(sorted(s[0] for s in hospital_list))  
@@ -147,7 +157,13 @@ def setup_paths(ss):
         return ''  # e.g. to_lobes -> no reducer tag
 
     def _batch_suffix():
-        return f'_ijob{ss.ijob}' if ss.batch_run else ''
+        if not ss.batch_run:
+            return ''
+
+        if ss.batch_tag:
+            return f'_{ss.batch_tag}'
+
+        return f'_ijob{ss.ijob}'
 
     ss.cls_pkl_pname = lambda hlist, label, nparms, standardize, ignore_confidence: \
             ss.out_root / (
@@ -186,6 +202,26 @@ def get_host(ss):
 
     return host, ss.args['hosts'][host]['cluster_job']
 
+
+def resolve_top_level_pickle_override(ss):
+    """Resolve top-level args['pickle'] as a relative path under out_root."""
+    pickle_arg = ss.args.get('pickle', None)
+
+    if pickle_arg is None:
+        return None
+
+    pickle_rel = str(pickle_arg).strip()
+
+    if not pickle_rel:
+        raise ValueError('args["pickle"] must be null or a non-empty relative file name')
+
+    pickle_path = Path(pickle_rel)
+
+    if pickle_path.is_absolute():
+        raise ValueError('args["pickle"] must be a path relative to out_root, not an absolute path')
+
+    return ss.out_root / pickle_path
+
 # --------------------------------------------------------
 #                    EPILOGUE                             
 # --------------------------------------------------------
@@ -200,6 +236,7 @@ class _app:
         'summary_plots': plot_cls_summary,
         'feature_importance': cls_feature_importance,
         'predict': cls_predict,
+        'calibrate': cls_calibrate,
     }
 
     def __init__(ss):
@@ -231,6 +268,7 @@ class _app:
 
         ss.ijob = ss.cli_ijob       # Save the batch job number. It will be 0
                                     # if not running in batch mode
+        ss.batch_tag = None
 
     def __call__(ss, name, *args, **kwargs):
         """
@@ -311,7 +349,7 @@ class _app:
             Nothing
         """
         for key, value in job_args.items():
-            if key == 'ijob':
+            if key in ('ijob', 'tag'):
                 continue
 
             if key not in ss.args:
@@ -331,8 +369,21 @@ class _app:
         """Run the script once using base parameters and optional CLI ijob."""
         ss.args = copy.deepcopy(ss.base_args)
         ss.ijob = ss.cli_ijob
+        ss.batch_tag = None
         init(ss)
         ss.run_steps()
+
+    def _resolve_batch_tag(ss, job_args):
+        """Resolve optional batch job suffix tag."""
+        if 'tag' not in job_args:
+            return None
+
+        tag = str(job_args.get('tag', '')).strip()
+
+        if not tag:
+            raise ValueError('Batch job key "tag" must be a non-empty string when provided.')
+
+        return tag
 
     def run_batch_jobs(ss):
         """
@@ -382,6 +433,7 @@ class _app:
 
             ss.args = copy.deepcopy(ss.base_args)
             ss.ijob = job_args['ijob']
+            ss.batch_tag = ss._resolve_batch_tag(job_args)
             ss.apply_batch_job_args(job_args)
             init(ss)
             ss.run_steps()

@@ -15,6 +15,7 @@ def plot_and_save_pr_curve(
     show_plot=True,
     target_label=None,
     physician=None,
+    brier_score=None,
 ):
     """
     Plot and save Precision-Recall curve using seaborn.
@@ -27,6 +28,7 @@ def plot_and_save_pr_curve(
         show_plot(bool): Whether to display the plot
         target_label(str | None): Label name to include in plot title
         physician(str | list | None): Physician name(s) to include in plot title
+        brier_score(float | None): Optional Brier score shown in plot title
 
     Returns:
         outfname(Path): Path to saved figure
@@ -45,7 +47,12 @@ def plot_and_save_pr_curve(
     label_text = f' - {target_label}' if target_label else ''
     physician_text = _physician_label(physician)
     physician_suffix = f' [{physician_text}]' if physician_text else ''
-    ax.set_title(f'Precision-Recall Curve{label_text} (AP={ap:.3f}){physician_suffix}', fontsize=14)
+    metrics_text = f'AUC={ap:.3f}'
+
+    if brier_score is not None:
+        metrics_text += f', BS={float(brier_score):.3f}'
+
+    ax.set_title(f'PR Curve{label_text} ({metrics_text}){physician_suffix}', fontsize=14)
     ax.legend(loc='best')
     ax.set_xlim([0, 1])
     ax.set_ylim([0, 1])

@@ -83,7 +83,7 @@ def cls_feature_importance(ss):
         raise KeyError('Missing or empty full_model_data["feature_names"]')
 
     method = reducer.get('method', '')
-    input_stem_suffix = _extract_ijob_suffix(pkl_pname) # Return string '_ijob<N>' if present
+    input_stem_suffix = _extract_batch_suffix(pkl_pname) # Return string '_ijob<N>' or '_<tag>' if present
 
     if method == 'to_lobes':
         to_lobes_cfg = fi_cfg.get('to_lobes', {})
@@ -156,8 +156,8 @@ def _run_feature_importance_to_lobes(
             ``feature_importance.lobes_heatmap`` used when
             ``feature_importance.to_lobes.use_lobes_heatmap`` is true.
         input_stem_suffix (str): Optional stem suffix propagated from the input
-            classifier pickle name (for example ``_ijob7``), appended to output
-            plot file stems.
+            classifier pickle name (for example ``_ijob7`` or ``_Sophia``),
+            appended to output plot file stems.
 
     Returns:
         None
@@ -217,25 +217,28 @@ def _run_feature_importance_to_lobes(
     }
 
     label = str(payload.get('target_label', ss.args.get('target_label', 'label')))
-    ignore_confidence = bool(ss.args.get('ignore_confidence', False))
+    model_hospital = payload.get('hospital', ss.args.get('hospital', []))
+    model_use_moments_only = bool(payload.get('use_moments_only', ss.args.get('use_moments_only', False)))
+    model_ignore_confidence = bool(payload.get('ignore_confidence', ss.args.get('ignore_confidence', False)))
+    model_standardize = bool(payload.get('standardize', ss.args.get('standardize_features', False)))
     outfname = Path(ss.out_root) / (
-        f'feature_importance_{label}_{importance_type}_ignoreConf{ignore_confidence}'
+        f'feature_importance_{label}_{importance_type}_ignoreConf{model_ignore_confidence}'
         f'{input_stem_suffix}.png'
     )
     outfname_group = Path(ss.out_root) / (
-        f'feature_importance_group_summary_{label}_{importance_type}_ignoreConf{ignore_confidence}'
+        f'feature_importance_group_summary_{label}_{importance_type}_ignoreConf{model_ignore_confidence}'
         f'{input_stem_suffix}.png'
     )
     outfname_freq = Path(ss.out_root) / (
-        f'feature_importance_frequency_summary_{label}_{importance_type}_ignoreConf{ignore_confidence}'
+        f'feature_importance_frequency_summary_{label}_{importance_type}_ignoreConf{model_ignore_confidence}'
         f'{input_stem_suffix}.png'
     )
     outfname_parm = Path(ss.out_root) / (
-        f'feature_importance_parameter_summary_{label}_{importance_type}_ignoreConf{ignore_confidence}'
+        f'feature_importance_parameter_summary_{label}_{importance_type}_ignoreConf{model_ignore_confidence}'
         f'{input_stem_suffix}.png'
     )
     outfname_lobes_heatmap = Path(ss.out_root) / (
-        f'feature_importance_lobes_heatmap_{label}_{importance_type}_ignoreConf{ignore_confidence}'
+        f'feature_importance_lobes_heatmap_{label}_{importance_type}_ignoreConf{model_ignore_confidence}'
         f'{input_stem_suffix}.png'
     )
 
@@ -250,7 +253,7 @@ def _run_feature_importance_to_lobes(
             lobes_heatmap_cfg=lobes_heatmap_cfg,
             outfname_lobes_heatmap=outfname_lobes_heatmap,
             label=label,
-            ignore_confidence=ignore_confidence,
+            ignore_confidence=model_ignore_confidence,
             importance_type=importance_type,
             gain_axis_scale=gain_axis_scale,
             font_scale=font_scale,
@@ -265,7 +268,7 @@ def _run_feature_importance_to_lobes(
             freq_labels=freq_labels,
             parm_labels=parm_labels,
             target_label=label,
-            ignore_confidence=ignore_confidence,
+            ignore_confidence=model_ignore_confidence,
             importance_type=importance_type,
             gain_axis_scale=gain_axis_scale,
             font_scale=font_scale,
@@ -279,7 +282,7 @@ def _run_feature_importance_to_lobes(
             feature_importance_3d=feature_importance_3d,
             group_labels=group_labels,
             target_label=label,
-            ignore_confidence=ignore_confidence,
+            ignore_confidence=model_ignore_confidence,
             importance_type=importance_type,
             gain_axis_scale=gain_axis_scale,
             font_scale=font_scale,
@@ -293,7 +296,7 @@ def _run_feature_importance_to_lobes(
             feature_importance_3d=feature_importance_3d,
             freq_labels=freq_labels,
             target_label=label,
-            ignore_confidence=ignore_confidence,
+            ignore_confidence=model_ignore_confidence,
             importance_type=importance_type,
             gain_axis_scale=gain_axis_scale,
             font_scale=font_scale,
@@ -307,7 +310,7 @@ def _run_feature_importance_to_lobes(
             feature_importance_3d=feature_importance_3d,
             parm_labels=parm_labels,
             target_label=label,
-            ignore_confidence=ignore_confidence,
+            ignore_confidence=model_ignore_confidence,
             importance_type=importance_type,
             gain_axis_scale=gain_axis_scale,
             font_scale=font_scale,
@@ -321,6 +324,10 @@ def _run_feature_importance_to_lobes(
         fi_cfg=to_lobes_cfg,
         target_label=label,
         importance_type=importance_type,
+        model_hospital=model_hospital,
+        model_use_moments_only=model_use_moments_only,
+        model_ignore_confidence=model_ignore_confidence,
+        model_standardize=model_standardize,
         group_labels=ss.feature_importance_meta.get('group_labels', group_labels),
         freq_labels=freq_labels,
         parm_labels=parm_labels,
@@ -498,8 +505,8 @@ def _run_feature_importance_ccv(
         model (xgboost.XGBModel): Trained model reconstructed from payload.
         ccv_cfg (dict): Method-specific config under ``feature_importance.ccv``.
         input_stem_suffix (str): Optional stem suffix propagated from the input
-            classifier pickle name (for example ``_ijob7``), appended to output
-            plot file stems.
+            classifier pickle name (for example ``_ijob7`` or ``_Sophia``),
+            appended to output plot file stems.
 
     Returns:
         None
@@ -745,7 +752,7 @@ def _run_feature_importance_ccv(
         )
 
     label = str(payload.get('target_label', ss.args.get('target_label', 'label')))
-    ignore_confidence = bool(ss.args.get('ignore_confidence', False))
+    ignore_confidence = bool(payload.get('ignore_confidence', ss.args.get('ignore_confidence', False)))
     outfname = Path(ss.out_root) / (
         f'feature_importance_ccv_{label}_{importance_type}_ignoreConf{ignore_confidence}'
         f'{input_stem_suffix}.png'
@@ -1024,6 +1031,10 @@ def _append_feature_importance_summary_csv(
     fi_cfg,
     target_label,
     importance_type,
+    model_hospital,
+    model_use_moments_only,
+    model_ignore_confidence,
+    model_standardize,
     group_labels,
     freq_labels,
     parm_labels,
@@ -1064,7 +1075,7 @@ def _append_feature_importance_summary_csv(
     top_freqs = _top_labels_by_values(formatted_freq_labels, freq_vals, n_top_freqs)
     top_parms = _top_labels_by_values(parm_labels, parm_vals, n_top_parms)
 
-    hospitals = ss.args.get('hospital', [])
+    hospitals = model_hospital
 
     if isinstance(hospitals, list):
         hospital_val = ss.hlist(hospitals)
@@ -1079,9 +1090,9 @@ def _append_feature_importance_summary_csv(
     row = {
         'hospital': hospital_val,
         'target_label': str(target_label),
-        'use_moments_only': bool(ss.args.get('use_moments_only', False)),
-        'ignore_confidence': bool(ss.args.get('ignore_confidence', False)),
-        'standardize_features': bool(ss.args.get('standardize_features', False)),
+        'use_moments_only': bool(model_use_moments_only),
+        'ignore_confidence': bool(model_ignore_confidence),
+        'standardize_features': bool(model_standardize),
         'ranking': str(importance_type),
         'lobes': '|'.join(top_lobes),
         'freqs': '|'.join(top_freqs),
@@ -1126,6 +1137,14 @@ def _find_results_pickle(ss):
         pathlib.Path: Path to the expected or best-matching classifier pickle.
 
     """
+    explicit = ss.resolve_top_level_pickle_override()
+
+    if explicit is not None:
+        if not explicit.exists():
+            raise FileNotFoundError(f'Configured args["pickle"] file not found: {explicit}')
+
+        return explicit
+
     label = ss.args['target_label']
     standardize = ss.args.get('standardize_features', False)
     ignore_confidence = ss.args.get('ignore_confidence', False)
@@ -1161,9 +1180,16 @@ def _find_results_pickle(ss):
     return candidates[0]
 
 
-def _extract_ijob_suffix(pkl_pname):
-    """Return trailing batch-job suffix from pickle stem, e.g. ``_ijob7``."""
-    match = re.search(r'(_ijob\d+)$', Path(pkl_pname).stem)
+def _extract_batch_suffix(pkl_pname):
+    """Return trailing batch suffix from pickle stem, e.g. ``_ijob7`` or ``_Sophia``."""
+    stem = Path(pkl_pname).stem
+
+    match = re.search(r'(_ijob\d+)$', stem)
+
+    if match:
+        return match.group(1)
+
+    match = re.search(r'_ignoreConf(?:True|False)(_[^_]+)$', stem)
     return match.group(1) if match else ''
 
 

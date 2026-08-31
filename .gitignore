@@ -161,3 +161,7 @@ preprocessing/destrieux_atlas_ordered.csv
 perplexityEEGFeatureSelection.pdf
 preprocessing/qq.json
 preprocessing/requirements.txt
+preprocessing/ridge_plot_example.py
+preprocessing/.vscode/settings.json
+ai_comments/
+lazygit

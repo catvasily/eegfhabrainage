@@ -13,8 +13,8 @@
     #"to_run": ["inputs", "show_similar_reports"],
     #"to_run": ["inputs", "cluster_reports", "plot_reports"],
     #"to_run": ["inputs", "doc2vec", "cluster_reports", "plot_reports"],
-    #"to_run": ["inputs", "plot_reports"],
-    "to_run": ["inputs", "clustering_info_to_reports_db"],
+    "to_run": ["inputs", "plot_reports"],
+    #"to_run": ["inputs", "clustering_info_to_reports_db"],
     #-----------------------------------------------------
 
     "reports_db_dir": "/user/alexm/tmp/clean_eeg_reps",
@@ -23,8 +23,9 @@
 
     #"select_physicians": [],    # If not empty, process only listed physicians 
     #"select_physicians": ["Sophia"], 
-    "select_physicians": ["Zoe"], 
-    #"select_physicians": ["Sophia", "Zoe"], 
+    #"select_physicians": ["Zoe"], 
+    #"select_physicians": ["Sophia","Maria","Eleni","Zoe","Athina"],     # 1st five with most records 
+    "select_physicians": ["Zoe","Athina"], 
     "select_hospitals": [],     # If not empty and "select_physicians" = [],
                                 # process only listed hospitals
 
@@ -153,8 +154,9 @@
     "plot_reports": {
         "d2v_model_file_name": "all_doc2vec.model", # Saved doc2vec model file in "reports_db_dir" folder
         "low_dim_embedding": "tSNE",                # either "MDS" or "tSNE"
-        "colors_for": "clusters",                   # Colors depict: either "physicians" or "clusters"
-        #"colors_for": "physicians",
+        #"colors_for": "clusters",                  # Colors depict: either "physicians" or "clusters"
+                                                    # Set "clusters" for cluster_reports step  
+        "colors_for": "physicians",
         "dpi": 300,                         # DPI for savec PNG file
 
         # Mapping physician -> color
@@ -204,7 +206,8 @@
             "early_exaggeration": 12.0,     #default
             #"early_exaggeration": 30.0,
             "learning_rate": "auto",
-            "n_iter": 1000,
+            #"n_iter": 1000,                # In older versions
+            "max_iter": 1000,
             "n_iter_without_progress": 300,
             "min_grad_norm": 1e-07,
             "metric": "euclidean",
@@ -212,7 +215,7 @@
             "init": "pca", "verbose": 1,
             "method": "barnes_hut",
             "angle": 0.5,
-            "n_jobs": null
+            "n_jobs": 6
         }
     }
 }
